@@ -26,6 +26,7 @@ export class GetUserEndpoint extends GetEndpoint {
             settings: true,
             artists: true,
             emails: true,
+            permissions: true,
         });
         return res.send(user);
     }

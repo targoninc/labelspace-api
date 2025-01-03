@@ -5,6 +5,7 @@ import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {CLI} from "../../utility/CLI.ts";
+import {UserEnricher} from "../../models/enrichers/UserEnricher.ts";
 
 export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
     private readonly db: TriDB;
@@ -20,6 +21,13 @@ export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
 
         if (await Authenticator.userHasPermission(user, Permissions.userManagement, this.db)) {
             const users = await this.db.getUsers();
+
+            for (let user of users) {
+                user = await UserEnricher.enrichAsync(this.db, user, {
+                    artists: true
+                });
+            }
+
             return res.send(users);
         }
 

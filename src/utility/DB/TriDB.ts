@@ -184,15 +184,17 @@ export class TriDB extends MariaDB {
             [userId, limit]);
     }
 
-    async getRoyaltiesByMonth(userId: number, limit: number): Promise<Statistic[]> {
-        return await this.query(`SELECT ar.month as id,
-                                        ar.month as label,
-                                        SUM(amount) as value
-                                 FROM finance.artist_royalties ar
-                                 WHERE ar.user_id = ?
-                                 ORDER BY ar.month DESC
+    async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const artistNamesLike = "%";
+
+        return await this.query(`SELECT ar.period1 as id,
+                                        ar.period1 as label,
+                                        SUM(royalty) as value
+                                 FROM finance.royalties ar
+                                 WHERE ar.trackartists LIKE ?
+                                 ORDER BY ar.period1 DESC
                                      LIMIT ?`,
-            [userId, limit]);
+            [artistNamesLike, limit]);
     }
 
     async getTrackPlayCountSumWithExcludedIds(userId: number, ids: number[]): Promise<number> {
