@@ -20,14 +20,6 @@ export class RoyaltiesByMonthEndpoint extends AuthenticatedGetEndpoint {
         if (tracks[0].id === null) {
             tracks.shift();
         }
-        const othersSum = await this.db.getTrackPlayCountSumWithExcludedIds(user.id, tracks.map(track => track.id));
-        if (othersSum > 0) {
-            tracks.push(<Statistic>{
-                id: 0,
-                label: "Others",
-                value: othersSum
-            });
-        }
 
         return res.send(tracks);
     }

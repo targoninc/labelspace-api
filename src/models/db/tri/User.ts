@@ -1,7 +1,9 @@
 import {Usersetting} from "./Usersetting.js";
 import {UserEmail} from "./UserEmail.js";
+import type {Artist} from "./Artist.ts";
 
 export interface User extends Express.User {
+    artists?: Artist[];
     settings?: Usersetting[];
     id: number;
     username: string;

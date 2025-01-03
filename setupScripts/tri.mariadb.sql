@@ -32,26 +32,43 @@ create table if not exists tri.possible_usersettings
     type        varchar(32) default 'string' not null
 );
 
+create table if not exists tri.artists
+(
+    id         bigint auto_increment
+        primary key,
+    user_id    bigint     null,
+    name       mediumtext not null,
+    legal_name text       not null,
+    country    text       null,
+    state      text       null,
+    constraint artists_users_id_fk
+        foreign key (user_id) references tri.users (id)
+            on delete set null
+);
+
+create index if not exists artists_name_index
+    on tri.artists (name(768));
+
 create table if not exists tri.users
 (
     id                  bigint auto_increment
         primary key,
-    username            varchar(32)                              not null,
-    mfa_enabled         tinyint(1)   default 0                   not null,
-    password_hash       varchar(256)                             not null,
-    displayname         varchar(64)                              not null,
-    description         varchar(4096)                            null,
-    created_at          timestamp    default current_timestamp() not null,
-    updated_at          timestamp    default current_timestamp() not null,
-    deleted_at          timestamp                                null,
-    lastlogin           timestamp                                null,
-    secondlastlogin     timestamp                                null,
-    password_updated_at timestamp    default current_timestamp() null,
-    tos_agreed_at       timestamp    default current_timestamp() null,
-    ip                  varchar(128)                             null,
-    password_token      varchar(64)                              null,
-    has_avatar          tinyint(1)   default 0                   not null,
-    has_banner          tinyint(1)   default 0                   not null,
+    username            varchar(32)                            not null,
+    mfa_enabled         tinyint(1) default 0                   not null,
+    password_hash       varchar(256)                           not null,
+    displayname         varchar(64)                            not null,
+    description         varchar(4096)                          null,
+    created_at          timestamp  default current_timestamp() not null,
+    updated_at          timestamp  default current_timestamp() not null,
+    deleted_at          timestamp                              null,
+    lastlogin           timestamp                              null,
+    secondlastlogin     timestamp                              null,
+    password_updated_at timestamp  default current_timestamp() null,
+    tos_agreed_at       timestamp  default current_timestamp() null,
+    ip                  varchar(128)                           null,
+    password_token      varchar(64)                            null,
+    has_avatar          tinyint(1) default 0                   not null,
+    has_banner          tinyint(1) default 0                   not null,
     constraint users_id_uindex
         unique (id),
     constraint users_pk

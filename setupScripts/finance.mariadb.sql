@@ -1,15 +1,5 @@
 create schema if not exists finance;
 
-create table if not exists finance.artist_metadata
-(
-    artist     varchar(256) not null
-        primary key,
-    legal_name text         not null,
-    country    text         null,
-    state      text         null
-)
-    engine = InnoDB;
-
 create table if not exists finance.bandcamp_sync
 (
     id               varchar(32)                             not null
@@ -87,7 +77,6 @@ create table if not exists finance.royalties
     id             int auto_increment
         primary key
 )
-    engine = InnoDB
     collate = utf8mb3_general_ci;
 
 create index if not exists artistindex
@@ -95,6 +84,12 @@ create index if not exists artistindex
 
 create index if not exists periodindex
     on finance.royalties (period1);
+
+create index if not exists royalties_isrc_index
+    on finance.royalties (isrc);
+
+create index if not exists royalties_royalty_index
+    on finance.royalties (royalty);
 
 create table if not exists finance.splits
 (

@@ -26,12 +26,11 @@ export class UpdateUserEndpoint extends AuthenticatedPostEndpoint {
         }
 
         if (Object.values(user).some(v => v.length === 0)) {
-            return res.status(400).send({error: "User must have a username, displayname, email, or description"});
+            return res.status(400).send({error: "User must have a username, description or emails"});
         }
 
         const updatedUser: Partial<User> = {
             username: user.username ?? req.user.username,
-            displayname: user.displayname ?? req.user.displayname,
             description: user.description ?? req.user.description,
         };
 
