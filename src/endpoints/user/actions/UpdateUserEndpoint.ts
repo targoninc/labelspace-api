@@ -26,24 +26,15 @@ export class UpdateUserEndpoint extends AuthenticatedPostEndpoint {
         }
 
         if (Object.values(user).some(v => v.length === 0)) {
-            return res.status(400).send({error: "User must have a username, description or emails"});
+            return res.status(400).send({error: "User must have a legal name, country, state, description or emails"});
         }
 
         const updatedUser: Partial<User> = {
-            username: user.username ?? req.user.username,
             description: user.description ?? req.user.description,
+            legal_name: user.legal_name ?? req.user.legal_name,
+            country: user.country ?? req.user.country,
+            state: user.state ?? req.user.state,
         };
-
-        if (!updatedUser.username || updatedUser.username.trim().length === 0) {
-            return res.status(400).send({error: "User must have a username"});
-        }
-
-        if (updatedUser.username !== req.user.username) {
-            const existing = await this.db.getUserByUsername(updatedUser.username);
-            if (existing && existing.id !== req.user.id) {
-                return res.status(400).send({error: "Username already in use"});
-            }
-        }
 
         CLI.debug(`Updating user ${req.user.id} with ${JSON.stringify(user)}`);
         await this.db.updateUser(req.user.id, updatedUser);

@@ -9,6 +9,9 @@ export interface User extends Express.User {
     settings?: Usersetting[];
     id: number;
     username: string;
+    legal_name: string;
+    country: string;
+    state: string;
     mfa_enabled: boolean;
     emails: UserEmail[];
     password_hash: string;

@@ -38,9 +38,6 @@ create table if not exists tri.artists
         primary key,
     user_id    bigint     null,
     name       mediumtext not null,
-    legal_name text       not null,
-    country    text       null,
-    state      text       null,
     constraint artists_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete set null
@@ -54,6 +51,9 @@ create table if not exists tri.users
     id                  bigint auto_increment
         primary key,
     username            varchar(32)                            not null,
+    legal_name          varchar(128)                           null,
+    country             varchar(128)                           null,
+    state               varchar(128)                           null,
     mfa_enabled         tinyint(1) default 0                   not null,
     password_hash       varchar(256)                           not null,
     displayname         varchar(64)                            not null,
