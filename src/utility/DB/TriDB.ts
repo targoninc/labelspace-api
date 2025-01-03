@@ -357,4 +357,8 @@ export class TriDB extends MariaDB {
     async deleteUserEmail(user_id: number, email: string) {
         await this.query("DELETE FROM tri.user_emails WHERE user_id = ? AND email = ?", [user_id, email]);
     }
+
+    async getUsers(): Promise<User[]> {
+        return await this.query("SELECT * FROM tri.users");
+    }
 }

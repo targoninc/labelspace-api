@@ -1,17 +1,8 @@
-import {Follow} from "./Follow.js";
-import {UserBadge} from "./UserBadge.js";
 import {Usersetting} from "./Usersetting.js";
-import {Badge} from "./Badge.js";
-import {Subscription} from "../finance/Subscription.js";
 import {UserEmail} from "./UserEmail.js";
 
 export interface User extends Express.User {
-    subscription?: Subscription;
     settings?: Usersetting[];
-    badges?: Badge[];
-    userBadges?: UserBadge[];
-    follows?: Follow[];
-    following?: Follow[];
     id: number;
     username: string;
     mfa_enabled: boolean;
