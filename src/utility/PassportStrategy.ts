@@ -8,13 +8,13 @@ const LocalStrategy = passportLocal.Strategy;
 export function PassportStrategy(db: TriDB) {
     return new LocalStrategy(
         {
-            usernameField: "email",
+            usernameField: "username",
             passwordField: "password"
         },
-        async (email: string, password: string, done: (err: Error | null, user?: any, info?: any) => void) => {
-            const user = await db.getUserByEmail(email);
+        async (username: string, password: string, done: (err: Error | null, user?: any, info?: any) => void) => {
+            const user = await db.getUserByUsername(username);
             if (!user) {
-                return done(null, false, {message: "Incorrect email."});
+                return done(null, false, {message: "Incorrect username."});
             }
             if (!bcrypt.compareSync(password, user.password_hash)) {
                 return done(null, false, {message: "Incorrect password."});

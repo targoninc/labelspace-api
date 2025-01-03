@@ -15,11 +15,11 @@ export class LoginEndpoint extends PostEndpoint {
     }
 
     async run(req: Request, res: Response, next: NextFunction) {
-        const cleanEmail = req.body.email.trim().toLowerCase();
-        const existing = await this.db.getUserByEmail(cleanEmail);
+        const cleanUsername = req.body.username.trim().toLowerCase();
+        const existing = await this.db.getUserByUsername(cleanUsername);
 
         if (!existing) {
-            return res.status(401).send({error: "Invalid email or password"});
+            return res.status(401).send({error: "Invalid username or password"});
         }
 
         if (!existing.ip) {
@@ -37,7 +37,7 @@ export class LoginEndpoint extends PostEndpoint {
 
             if (!user) {
                 CLI.warning(`No user, status: ${status}, info: ${JSON.stringify(info)}`);
-                return res.status(401).send({error: "Invalid email or password"});
+                return res.status(401).send({error: "Invalid username or password"});
             }
 
             req.logIn(user, async (err) => {

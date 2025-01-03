@@ -49,17 +49,9 @@ export class GetUserEndpoint extends GetEndpoint {
             }
 
             user = selfUser;
-
-            const currentSubscription = await this.db.getActiveUserSubscription(user.id);
-            if (currentSubscription) {
-                user.subscription = currentSubscription;
-            }
         }
 
         user = await UserEnricher.enrichAsync(this.db, user, {
-            follows: true,
-            following: true,
-            badges: true,
             settings: selfUser && user.id === selfUser.id,
             emails: selfUser && user.id === selfUser.id
         });
