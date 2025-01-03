@@ -9,18 +9,30 @@
     "start-bun-prod": "bun server.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.17"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@types/express": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "connect-session-knex": "^5.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
     "knex": "^3.1.0",
-    "passport": "^0.7.0"
+    "mariadb": "^3.4.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.12.0",
+    "nodemailer": "^6.9.16",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "sharp": "^0.33.5",
+    "uuid": "^11.0.3",
+    "uuidv7": "^1.0.2"
   }
 }

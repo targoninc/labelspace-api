@@ -123,11 +123,10 @@ export class TriDB extends MariaDB {
     }
 
     async createAlbum(album: Album): Promise<Album> {
-        await this.query("INSERT INTO tri.albums (user_id, title, upc, visibility, description, release_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+        await this.query("INSERT INTO tri.albums (user_id, title, upc, description, release_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [
             album.user_id,
             album.title,
             album.upc,
-            album.visibility,
             album.description,
             album.release_date,
             album.price

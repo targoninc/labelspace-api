@@ -3,7 +3,6 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../models/Authenticator.js";
 import {CreateAlbumRequestBody} from "../../models/interfaces/CreateAlbumRequestBody.js";
-import {Visibility} from "../../models/enums/Visibility.js";
 import {CLI} from "../../utility/CLI.js";
 import {Album} from "../../models/db/tri/Album.js";
 
@@ -28,7 +27,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
         const today = new Date();
         const title = body.title ?? `Album (${today.toDateString()})`;
         const upc = body.upc ?? "";
-        const visibility = body.visibility ?? Visibility.public;
         const description = body.description ?? "";
         const release_date = new Date(body.release_date ?? today.toISOString());
         const price = body.price ?? 1;
@@ -37,7 +35,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
             user_id: req.user.id,
             title,
             upc,
-            visibility,
             description,
             release_date,
             price

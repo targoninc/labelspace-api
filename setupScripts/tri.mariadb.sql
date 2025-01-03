@@ -41,8 +41,6 @@ create table if not exists tri.users
     password_hash       varchar(256)                             not null,
     displayname         varchar(64)                              not null,
     description         varchar(4096)                            null,
-    verified            tinyint(1)   default 0                   null,
-    verification_status varchar(128) default 'none'              null,
     created_at          timestamp    default current_timestamp() not null,
     updated_at          timestamp    default current_timestamp() not null,
     deleted_at          timestamp                                null,

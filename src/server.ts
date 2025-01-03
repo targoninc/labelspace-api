@@ -4,7 +4,6 @@ import cors from 'cors';
 import {GetUserEndpoint} from "./endpoints/user/GetUserEndpoint.js";
 import {LoginEndpoint} from "./endpoints/auth/LoginEndpoint.js";
 import passport, {SessionOptions} from "passport";
-import {RegisterEndpoint} from "./endpoints/auth/RegisterEndpoint.js";
 import {UpdateUserEndpoint} from "./endpoints/user/actions/UpdateUserEndpoint.js";
 import {ChangePasswordEndpoint} from "./endpoints/auth/ChangePasswordEndpoint.js";
 import {GetTrackEndpoint} from "./endpoints/tracks/GetTrackEndpoint.js";
@@ -19,7 +18,6 @@ import {GetAlbumsByUserEndpoint} from "./endpoints/albums/GetAlbumsByUserEndpoin
 import {TriDB} from "./utility/DB/TriDB.js";
 import {SearchUsersEndpoint} from "./endpoints/search/SearchUsersEndpoint.js";
 import {UploadMediaEndpoint} from "./endpoints/media/UploadMediaEndpoint.js";
-import {GetAudioEndpoint} from "./endpoints/tracks/GetAudioEndpoint.js";
 import {RequestPasswordResetEndpoint} from "./endpoints/auth/RequestPasswordResetEndpoint.js";
 import {ResetPasswordEndpoint} from "./endpoints/auth/ResetPasswordEndpoint.js";
 import {VerifyEmailEndpoint} from "./endpoints/auth/VerifyEmailEndpoint.js";
@@ -42,6 +40,7 @@ import { RoyaltiesByMonthEndpoint } from './endpoints/statistics/RoyaltiesByMont
 import { RoyaltiesByTrackEndpoint } from './endpoints/statistics/RoyaltiesByTrackEndpoint.js';
 import {rateLimit} from "express-rate-limit";
 import * as path from "node:path";
+import {GetUsersEndpoint} from "./endpoints/user/GetUsersEndpoint.ts";
 
 config();
 
@@ -83,7 +82,6 @@ app.use(rateLimit({
 }));
 
 // region Users
-new RegisterEndpoint(app, "/user/actions/register", db).register();
 new DeleteUserEndpoint(app, "/user/actions/delete", db).register();
 new LoginEndpoint(app, "/user/actions/login", db).register();
 new LogoutEndpoint(app, "/user/actions/logout").register();
@@ -91,6 +89,7 @@ new ChangePasswordEndpoint(app, "/user/actions/change-password", db).register();
 new RequestPasswordResetEndpoint(app, "/user/actions/request-password-reset", db).register();
 new ResetPasswordEndpoint(app, "/user/actions/reset-password", db).register();
 new GetUserEndpoint(app, "/user/get", db).register();
+new GetUsersEndpoint(app, "/users/get", db).register();
 new UpdateUserEndpoint(app, "/user/actions/update", db).register();
 new MfaRequestEndpoint(app, "/user/actions/mfa-request", db).register();
 new UpdateSettingEndpoint(app, "/user/actions/update-setting", db).register();
@@ -107,7 +106,6 @@ new GetPermissionsEndpoint(app, "/user/permissions", db).register();
 new GetTrackEndpoint(app, "/tracks/byId", db).register();
 new CreateTrackEndpoint(app, "/tracks/create", db).register();
 new DeleteTrackEndpoint(app, "/tracks/actions/delete", db).register();
-new GetAudioEndpoint(app, "/tracks/audio", db).register();
 new GetTracksByUserEndpoint(app, "/tracks/byUserId", db).register();
 new UpdateTrackFullEndpoint(app, "/tracks/actions/updateFull", db).register();
 // endregion

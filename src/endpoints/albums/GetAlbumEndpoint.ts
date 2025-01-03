@@ -2,7 +2,6 @@ import { Application, Response } from "express";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import { ColumnProtector } from "../../models/ColumnProtector.js";
-import {Visibility} from "../../models/enums/Visibility.js";
 import {ProtectionSchemas} from "../../models/enums/ProtectionSchema.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {Album} from "../../models/db/tri/Album.js";
@@ -35,16 +34,6 @@ export class GetAlbumEndpoint extends GetEndpoint {
             user: true,
             tracks: true,
         });
-
-        if (album.visibility === Visibility.private) {
-            if (!req.isAuthenticated()) {
-                return res.status(401).send({error: "Not authenticated"});
-            }
-
-            if (album.user_id !== req.user.id) {
-                return res.status(403).send({error: "This album is private"});
-            }
-        }
 
         if (!req.isAuthenticated() || album.user_id !== req.user.id) {
             album = ColumnProtector.protect<Album>(album, ProtectionSchemas.album);

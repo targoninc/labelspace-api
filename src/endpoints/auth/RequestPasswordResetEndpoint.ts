@@ -14,12 +14,12 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
     }
 
     async run(req: Request, res: Response, next: NextFunction) {
-        const email = req.body.email;
-        if (!email || email.trim().length === 0) {
-            return res.status(400).send({error: "No email provided"});
+        const username = req.body.username;
+        if (!username || username.trim().length === 0) {
+            return res.status(400).send({error: "No username provided"});
         }
 
-        const user = await this.db.getUserByEmail(email);
+        const user = await this.db.getUserByUsername(username);
         if (!user) {
             return res.status(404).send({error: "User not found"});
         }
