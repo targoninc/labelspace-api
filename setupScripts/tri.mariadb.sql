@@ -56,7 +56,6 @@ create table if not exists tri.users
     state               varchar(128)                           null,
     mfa_enabled         tinyint(1) default 0                   not null,
     password_hash       varchar(256)                           not null,
-    displayname         varchar(64)                            not null,
     description         varchar(4096)                          null,
     created_at          timestamp  default current_timestamp() not null,
     updated_at          timestamp  default current_timestamp() not null,

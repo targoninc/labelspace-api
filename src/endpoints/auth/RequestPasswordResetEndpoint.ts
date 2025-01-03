@@ -4,6 +4,7 @@ import {Mail} from "../../utility/Mail/Mail.js";
 import {v4 as uuidv4} from "uuid";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
+import {CLI} from "../../utility/CLI.ts";
 
 export class RequestPasswordResetEndpoint extends PostEndpoint {
     db: TriDB;
@@ -42,10 +43,16 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
             .get();
 
         const emails = await this.db.getUserEmails(user.id);
+        let anySent = false;
         for (const email of emails) {
             if (email.verified || email.primary) {
                 Mail.sendDefault(email.email, mail);
+                anySent = true;
             }
+        }
+        if (!anySent) {
+            CLI.warning(`No emails verified or primary for ${user.id}, no mail sent`);
+            return res.status(500).send({error: "No valid addresses found"});
         }
 
         return res.send({message: "Password changed"});

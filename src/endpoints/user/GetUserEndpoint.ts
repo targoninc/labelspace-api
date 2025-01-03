@@ -19,6 +19,9 @@ export class GetUserEndpoint extends GetEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         let selfUser = req.user;
+        if (!selfUser) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
 
         let user = await this.db.getUserById(selfUser.id);
 

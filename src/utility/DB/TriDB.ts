@@ -63,16 +63,6 @@ export class TriDB extends MariaDB {
         ]);
     }
 
-    async createUser(user: User, ip: string): Promise<void> {
-        await this.query("INSERT INTO tri.users (username, password_hash, displayname, description, ip) VALUES (?, ?, ?, ?, ?)", [
-            user.username,
-            user.password_hash,
-            user.displayname,
-            user.description,
-            ip
-        ]);
-    }
-
     async getPossibleUserSettings(): Promise<PossibleUsersetting[]> {
         return await this.query("SELECT * FROM tri.possible_usersettings");
     }
@@ -185,16 +175,20 @@ export class TriDB extends MariaDB {
     }
 
     async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
-        const artistNamesLike = "%";
+        const artistConditions = artistNames.map(() => "ar.trackartists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT ar.period1 as id,
-                                        ar.period1 as label,
-                                        SUM(royalty) as value
-                                 FROM finance.royalties ar
-                                 WHERE ar.trackartists LIKE ?
-                                 ORDER BY ar.period1 DESC
-                                     LIMIT ?`,
-            [artistNamesLike, limit]);
+        return await this.query(
+            `SELECT ar.period1 as id,
+                    ar.period1 as label,
+                    SUM(royalty) as value
+             FROM finance.royalties ar
+             WHERE ${artistConditions}
+             GROUP BY ar.period1
+             ORDER BY STR_TO_DATE(CONCAT('01-', ar.period1), '%d-%b-%Y') DESC
+             LIMIT ?`,
+            [...artistNamesLike, limit]
+        );
     }
 
     async getTrackPlayCountSumWithExcludedIds(userId: number, ids: number[]): Promise<number> {

@@ -46,7 +46,6 @@ export class LoginEndpoint extends PostEndpoint {
                 }
                 const outUser = <User>{
                     username: user.username,
-                    displayname: user.displayname,
                     emails: user.emails,
                     mfa_enabled: user.mfa_enabled,
                     verified: user.verified,

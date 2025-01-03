@@ -41,11 +41,11 @@ export class SearchConfigurations {
     static users: SearchTableConfiguration<User> = {
         tableName: "users",
         type: "user",
-        searchableFields: ["username", "displayname", "description"],
+        searchableFields: ["username", "description"],
         urlPrefix: "profile",
         urlIdField: "username",
         hasImageField: "has_avatar",
-        displayField: "displayname",
+        displayField: "username",
         subtitleFunction: u => `@${u.username}`
     };
 }

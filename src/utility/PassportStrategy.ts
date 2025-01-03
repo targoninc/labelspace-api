@@ -33,6 +33,9 @@ export function PassportSerializeUser() {
 export function PassportDeserializeUser(db: TriDB) {
     return async (id: number, done: (err: Error | null, user?: any, info?: any) => void) => {
         const user: PassportUser = await db.getUserById(id) as PassportUser;
+        if (!user) {
+            return done(null, null);
+        }
         // @ts-ignore
         delete user.password_hash;
 

@@ -24,6 +24,6 @@ export class RoyaltiesByMonthEndpoint extends AuthenticatedGetEndpoint {
             tracks.shift();
         }
 
-        return res.send(tracks);
+        return res.send(tracks.reverse());
     }
 }
