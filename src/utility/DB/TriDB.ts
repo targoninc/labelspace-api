@@ -20,6 +20,8 @@ import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {Statistic} from "../../models/interfaces/Statistic.js";
 
 export class TriDB extends MariaDB {
+    private lastLogCleanup: number = 0;
+
     constructor() {
         super(env("MARIADB_HOST"), env("MARIADB_PORT"), env("MARIADB_USER"), env("MARIADB_PASSWORD"), env("MARIADB_NAME"));
 
@@ -225,7 +227,12 @@ export class TriDB extends MariaDB {
     }
 
     async getPermissionsByIds(ids: number[]): Promise<Permission[]> {
-        return await this.query("SELECT * FROM tri.permissions WHERE id IN (?)", [ids]);
+        if (ids.length === 0) {
+            return [];
+        }
+
+        const qs = ids.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.permissions WHERE id IN (${qs})`, [ids.join(",")]);
     }
 
     async getPermissions(): Promise<Permission[]> {
@@ -327,7 +334,11 @@ export class TriDB extends MariaDB {
         this.query("INSERT INTO tri.logs (logLevel, message, stack, correlation_id, host, properties) VALUES (?, ?, ?, ?, ?, ?)",
             [logLevel, message, stack, correlation_id, host, JSON.stringify(properties)])
             .then(async () => {
-                await this.cleanLogs();
+                const cleanupIntervalMinutes = 5;
+                if (Date.now() - this.lastLogCleanup > 1000 * 60 * cleanupIntervalMinutes) {
+                    await this.cleanLogs();
+                    this.lastLogCleanup = Date.now();
+                }
             })
             .catch(e => console.error(e));
     }

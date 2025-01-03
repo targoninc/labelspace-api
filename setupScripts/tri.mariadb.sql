@@ -14,6 +14,9 @@ create table if not exists tri.logs
         check (json_valid(`properties`))
 );
 
+create index if not exists logs_time_index
+    on tri.logs (time);
+
 create table if not exists tri.permissions
 (
     id          int auto_increment

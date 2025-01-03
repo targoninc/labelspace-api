@@ -91,6 +91,9 @@ create index if not exists royalties_isrc_index
 create index if not exists royalties_royalty_index
     on finance.royalties (royalty);
 
+create index if not exists royalties_title_index
+    on finance.royalties (title);
+
 create table if not exists finance.splits
 (
     isrc   varchar(12) not null,
