@@ -160,48 +160,51 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.users WHERE id IN (SELECT user_id FROM tri.albums WHERE id IN (?))", [albumIds]);
     }
 
-    async getRoyaltiesByTrack(userId: number, limit: number): Promise<Statistic[]> {
-        return await this.query(`SELECT tr.track_id                           as id,
-                                        IFNULL(tri.tracks.title, 'Deleted track') as label,
-                                        SUM(amount) as value
-                                 FROM finance.track_royalties tr
-                                     LEFT JOIN tri.tracks
-                                 ON tr.track_id = tracks.id
-                                 WHERE user_id = ?
-                                 GROUP BY track_id
-                                 ORDER BY SUM (amount)
-                                     LIMIT ?`,
-            [userId, limit]);
+    async getRoyaltiesByTrack(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return await this.query(`SELECT r.isrc as id,
+                    r.title as label,
+                    SUM(r.royalty) as value
+             FROM finance.royalties r
+             WHERE ${artistConditions}
+             GROUP BY r.isrc
+             ORDER BY SUM(r.royalty) DESC
+             LIMIT ?`,
+            [...artistNamesLike, limit]);
     }
 
     async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
-        const artistConditions = artistNames.map(() => "ar.trackartists LIKE ?").join(" OR ");
+        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
         return await this.query(
-            `SELECT ar.period1 as id,
-                    ar.period1 as label,
+            `SELECT r.period1 as id,
+                    r.period1 as label,
                     SUM(royalty) as value
-             FROM finance.royalties ar
+             FROM finance.royalties r
              WHERE ${artistConditions}
-             GROUP BY ar.period1
-             ORDER BY STR_TO_DATE(CONCAT('01-', ar.period1), '%d-%b-%Y') DESC
+             GROUP BY r.period1
+             ORDER BY STR_TO_DATE(CONCAT('01-', r.period1), '%d-%b-%Y') DESC
              LIMIT ?`,
             [...artistNamesLike, limit]
         );
     }
 
-    async getTrackPlayCountSumWithExcludedIds(userId: number, ids: number[]): Promise<number> {
-        if (ids.length === 0) {
+    async getRoyaltySumWithExcludedIsrcs(artistNames: string[], isrcs: number[]): Promise<number> {
+        if (isrcs.length === 0) {
             return 0;
         }
 
-        const qMarks = ids.map(() => "?").join(", ");
-        let sql = `SELECT SUM(plays) as plays
-                   FROM tri.tracks t
-                   WHERE user_id = ?
-                     AND id NOT IN (${qMarks})`;
-        return await this.querySingleValue(sql, [userId, ...ids])
+        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        const qMarks = isrcs.map(() => "?").join(", ");
+        let sql = `SELECT SUM(r.royalty) as value
+                   FROM finance.royalties r
+                   WHERE r.isrc NOT IN (${qMarks})`;
+        return await this.querySingleValue(sql, [...artistNamesLike, ...isrcs])
     }
 
     async getPermissionsByIds(ids: number[]): Promise<Permission[]> {
