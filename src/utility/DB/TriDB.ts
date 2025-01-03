@@ -192,6 +192,23 @@ export class TriDB extends MariaDB {
         );
     }
 
+    async getRoyaltiesByYear(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return await this.query(
+            `SELECT SUBSTR(r.period1, 5) as id,
+                    SUBSTR(r.period1, 5) as label,
+                    SUM(royalty) as value
+             FROM finance.royalties r
+             WHERE ${artistConditions}
+             GROUP BY SUBSTR(r.period1, 5)
+             ORDER BY STR_TO_DATE(CONCAT('01-', r.period1), '%d-%b-%Y') DESC
+             LIMIT ?`,
+            [...artistNamesLike, limit]
+        );
+    }
+
     async getRoyaltySumWithExcludedIsrcs(artistNames: string[], isrcs: number[]): Promise<number> {
         if (isrcs.length === 0) {
             return 0;
