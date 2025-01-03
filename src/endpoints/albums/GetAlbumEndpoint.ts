@@ -1,0 +1,59 @@
+import { Application, Response } from "express";
+import {GetEndpoint} from "../base/GetEndpoint.js";
+import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
+import { ColumnProtector } from "../../models/ColumnProtector.js";
+import {Visibility} from "../../models/enums/Visibility.js";
+import {ProtectionSchemas} from "../../models/enums/ProtectionSchema.js";
+import {TriDB} from "../../utility/DB/TriDB.js";
+import {Album} from "../../models/db/tri/Album.js";
+import {AlbumEnricher} from "../../models/enrichers/AlbumEnricher.js";
+
+export class GetAlbumEndpoint extends GetEndpoint {
+    db: TriDB;
+
+    constructor(app: Application, path: string, db: TriDB) {
+        super(app, path);
+        this.db = db;
+    }
+
+    async run(req: AuthenticatedRequest, res: Response) {
+        let idParam = req.query.id as string;
+        if (!idParam) {
+            return res.send({error: "No album id provided"});
+        }
+        const id = parseInt(idParam);
+        if (isNaN(id)) {
+            return res.send({error: "Invalid album id"});
+        }
+
+        let album = await this.db.getAlbumById(id);
+        if (!album) {
+            return res.send({error: "Album not found"});
+        }
+
+        album = await AlbumEnricher.enrichAsync(this.db, album, {
+            user: true,
+            tracks: true,
+        });
+
+        if (album.visibility === Visibility.private) {
+            if (!req.isAuthenticated()) {
+                return res.status(401).send({error: "Not authenticated"});
+            }
+
+            if (album.user_id !== req.user.id) {
+                return res.status(403).send({error: "This album is private"});
+            }
+        }
+
+        if (!req.isAuthenticated() || album.user_id !== req.user.id) {
+            album = ColumnProtector.protect<Album>(album, ProtectionSchemas.album);
+        }
+        album.description ??= "";
+
+        return res.send({
+            album,
+            canEdit: req.isAuthenticated() && album.user_id === req.user.id
+        });
+    }
+}

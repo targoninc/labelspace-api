@@ -1,0 +1,361 @@
+import {env} from "../Environment.js";
+import {Album} from "../../models/db/tri/Album.js";
+import {User} from "../../models/db/tri/User.js";
+import {PossibleUsersetting} from "../../models/db/tri/PossibleUsersetting.js";
+import {Usersetting} from "../../models/db/tri/Usersetting.js";
+import {Track} from "../../models/db/tri/Track.js";
+import {UserPermission} from "../../models/db/tri/UserPermission.js";
+import {AlbumTrack} from "../../models/db/tri/AlbumTrack.js";
+import {Permission} from "../../models/db/tri/Permission.js";
+import {Permissions} from "../../models/enums/Permissions.js";
+import {MariaDB} from "./MariaDB.js";
+import {UpdateTrackRequest} from "../../models/interfaces/UpdateTrackRequest.js";
+import {CLI} from "../CLI.js";
+import {LogLevel} from "../../models/enums/LogLevel.js";
+import {Log} from "../../models/db/tri/Log.js";
+import {SearchTableConfiguration} from "../Search/SearchTableConfiguration.js";
+import {SearchRequest} from "../../models/interfaces/SearchRequest.js";
+import {SearchMode} from "../Search/SearchMode.js";
+import {UserEmail} from "../../models/db/tri/UserEmail.js";
+import {Statistic} from "../../models/interfaces/Statistic.js";
+
+export class TriDB extends MariaDB {
+    constructor() {
+        super(env("MARIADB_HOST"), env("MARIADB_PORT"), env("MARIADB_USER"), env("MARIADB_PASSWORD"), env("MARIADB_NAME"));
+
+        setInterval(() => {
+            CLI.debug("Pinging database", {
+                logToDb: false
+            });
+            this.query("SELECT 1").then();
+        }, 1000 * 60 * 5);
+    }
+
+    async getAlbumsByUserId(userId: number): Promise<Album[]> {
+        return await this.query("SELECT * FROM tri.albums WHERE user_id = ?", [userId]);
+    }
+
+    async getUserById(userId: number, followingId: number = -1): Promise<User> {
+        const user = await this.queryFirst("SELECT * FROM tri.users WHERE id = ?", [userId]);
+        return user;
+    }
+
+    async getUserByEmail(email: string): Promise<User> {
+        return await this.queryFirst("SELECT u.* FROM tri.users u INNER JOIN tri.user_emails ue ON u.id = ue.user_id WHERE ue.email = ?", [email]);
+    }
+
+    async getUserByUsername(username: string): Promise<User> {
+        return await this.queryFirst("SELECT * FROM tri.users WHERE username = ?", [username]);
+    }
+
+    async updateUser(userId: number, updateObject: Partial<User>): Promise<void> {
+        let query = "UPDATE tri.users SET ";
+        const updates = []
+        for (const key in updateObject) {
+            updates.push(`${key} = ?`);
+        }
+        query += updates.join(", ");
+        query += ` WHERE id = ?`;
+        await this.query(query, [
+            ...Object.values(updateObject),
+            userId,
+            userId
+        ]);
+    }
+
+    async createUser(user: User, ip: string): Promise<void> {
+        await this.query("INSERT INTO tri.users (username, password_hash, displayname, description, ip) VALUES (?, ?, ?, ?, ?)", [
+            user.username,
+            user.password_hash,
+            user.displayname,
+            user.description,
+            ip
+        ]);
+    }
+
+    async getPossibleUserSettings(): Promise<PossibleUsersetting[]> {
+        return await this.query("SELECT * FROM tri.possible_usersettings");
+    }
+
+    async getUserSettings(userId: number): Promise<Usersetting[]> {
+        return await this.query("SELECT * FROM tri.user_settings WHERE user_id = ?", [userId]);
+    }
+
+    async getTrackById(id: number): Promise<Track> {
+        return await this.queryFirst("SELECT * FROM tri.tracks WHERE id = ?", [id]);
+    }
+
+    async getTracksByUserId(userId: number): Promise<Track[]> {
+        return await this.query("SELECT * FROM tri.tracks WHERE user_id = ? ORDER BY created_at DESC", [userId]);
+    }
+
+    async getUsersByIds(userIds: number[]): Promise<User[]> {
+        if (userIds.length === 0) {
+            return [];
+        }
+        return await this.query("SELECT * FROM tri.users WHERE id IN (?)", [userIds]);
+    }
+
+    async getTracksByIds(numbers: number[]): Promise<Track[]> {
+        if (numbers.length === 0) {
+            return [];
+        }
+        return await this.query("SELECT * FROM tri.tracks WHERE id IN (?)", [numbers]);
+    }
+
+    async createTrack(track: Partial<Track>): Promise<Track> {
+        await this.query(`INSERT INTO tri.tracks (user_id, title, isrc, upc, monetization, genre, description,
+                                              secretcode, release_date, price)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+            track.user_id,
+            track.title,
+            track.isrc,
+            track.upc,
+            track.monetization,
+            track.genre,
+            track.description,
+            track.secretcode,
+            track.release_date,
+            track.price
+        ]);
+        const id = await this.querySingleValue("SELECT id FROM tri.tracks WHERE user_id = ? AND title = ?", [track.user_id, track.title]);
+        return await this.getTrackById(id);
+    }
+
+    async createAlbum(album: Album): Promise<Album> {
+        await this.query("INSERT INTO tri.albums (user_id, title, upc, visibility, description, release_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+            album.user_id,
+            album.title,
+            album.upc,
+            album.visibility,
+            album.description,
+            album.release_date,
+            album.price
+        ]);
+        const id = await this.querySingleValue("SELECT id FROM tri.albums WHERE user_id = ? ORDER BY created_at DESC", [album.user_id]);
+        return await this.getAlbumById(id);
+    }
+
+    async getUserPermissions(id: number): Promise<UserPermission[]> {
+        return await this.query("SELECT * FROM tri.users_permissions WHERE user_id = ?", [id]);
+    }
+
+    async upsertUserSetting(userId: number, key: any, value: string): Promise<void> {
+        await this.query("INSERT INTO tri.user_settings (user_id, `key`, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = ?", [
+            userId,
+            key,
+            value,
+            value
+        ])
+    }
+
+    async createPossibleUserSetting(name: string, description: string, type: "boolean" | "string"): Promise<void> {
+        await this.query("INSERT INTO tri.possible_usersettings (name, description, type) VALUES (?, ?, ?)", [
+            name,
+            description,
+            type
+        ]);
+    }
+
+    async getAlbumTracksByAlbumIds(albumIds: number[]): Promise<AlbumTrack[]> {
+        if (albumIds.length === 0) {
+            return [];
+        }
+        return await this.query("SELECT track_id FROM tri.albumtracks WHERE album_id IN (?)", [albumIds]);
+    }
+
+    async getUsersByAlbumIds(albumIds: number[]): Promise<User[]> {
+        if (albumIds.length === 0) {
+            return [];
+        }
+        return await this.query("SELECT * FROM tri.users WHERE id IN (SELECT user_id FROM tri.albums WHERE id IN (?))", [albumIds]);
+    }
+
+    async getRoyaltiesByTrack(userId: number, limit: number): Promise<Statistic[]> {
+        return await this.query(`SELECT tr.track_id                           as id,
+                                        IFNULL(tri.tracks.title, 'Deleted track') as label,
+                                        SUM(amount) as value
+                                 FROM finance.track_royalties tr
+                                     LEFT JOIN tri.tracks
+                                 ON tr.track_id = tracks.id
+                                 WHERE user_id = ?
+                                 GROUP BY track_id
+                                 ORDER BY SUM (amount)
+                                     LIMIT ?`,
+            [userId, limit]);
+    }
+
+    async getRoyaltiesByMonth(userId: number, limit: number): Promise<Statistic[]> {
+        return await this.query(`SELECT ar.month as id,
+                                        ar.month as label,
+                                        SUM(amount) as value
+                                 FROM finance.artist_royalties ar
+                                 WHERE ar.user_id = ?
+                                 ORDER BY ar.month DESC
+                                     LIMIT ?`,
+            [userId, limit]);
+    }
+
+    async getTrackPlayCountSumWithExcludedIds(userId: number, ids: number[]): Promise<number> {
+        if (ids.length === 0) {
+            return 0;
+        }
+
+        const qMarks = ids.map(() => "?").join(", ");
+        let sql = `SELECT SUM(plays) as plays
+                   FROM tri.tracks t
+                   WHERE user_id = ?
+                     AND id NOT IN (${qMarks})`;
+        return await this.querySingleValue(sql, [userId, ...ids])
+    }
+
+    async getPermissionsByIds(ids: number[]): Promise<Permission[]> {
+        return await this.query("SELECT * FROM tri.permissions WHERE id IN (?)", [ids]);
+    }
+
+    async getPermissions(): Promise<Permission[]> {
+        return await this.query("SELECT * FROM tri.permissions");
+    }
+
+    async createPermission(name: string) {
+        await this.query("INSERT INTO tri.permissions (name, description) VALUES (?, ?)", [name, ""]);
+    }
+
+    async getPermissionByName(permissionName: Permissions): Promise<Permission> {
+        return await this.queryFirst("SELECT * FROM tri.permissions WHERE name = ?", [permissionName]);
+    }
+
+    async userHasPermission(userId: number, permissionId: number): Promise<boolean> {
+        return await this.querySingleValue("SELECT COUNT(*) FROM tri.users_permissions WHERE user_id = ? AND permission_id = ?", [userId, permissionId]) > 0;
+    }
+
+    async getUserByToken(token: string): Promise<User> {
+        return await this.queryFirst("SELECT * FROM tri.users WHERE password_token = ? AND password_token IS NOT NULL", [token]);
+    }
+
+    async deleteTrack(id: number) {
+        await this.query("DELETE FROM tri.tracks WHERE id = ?", [id]);
+    }
+
+    async deleteUser(id: number) {
+        await this.query("DELETE FROM tri.users WHERE id = ?", [id]);
+    }
+
+    async setTrackProcessed(id: number) {
+        await this.query("UPDATE tri.tracks SET processed = 1 WHERE id = ?", [id]);
+    }
+
+    async setTrackLoudnessData(id: number, loudnessData: string) {
+        await this.query("UPDATE tri.tracks SET loudness_data = ? WHERE id = ?", [loudnessData, id]);
+    }
+
+    async setTrackLength(id: number, length: number) {
+        await this.query("UPDATE tri.tracks SET length = ? WHERE id = ?", [length, id]);
+    }
+
+    async getAlbumById(id: number) {
+        return await this.queryFirst("SELECT * FROM tri.albums WHERE id = ?", [id]);
+    }
+
+    async addTrackToAlbum(album_id: number, user_id: number, track_id: number) {
+        const maxPositionInAlbum = await this.querySingleValue("SELECT MAX(position) FROM tri.albumtracks WHERE album_id = ?", [album_id]) ?? -1;
+
+        await this.query("INSERT INTO tri.albumtracks (album_id, track_id, user_id, position) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE track_id = ?", [
+            album_id,
+            track_id,
+            user_id,
+            maxPositionInAlbum + 1,
+            track_id
+        ]);
+    }
+
+    async removeTrackFromAlbum(albumId: any, userId: number, trackId: any) {
+        await this.query("DELETE FROM tri.albumtracks WHERE album_id = ? AND track_id = ? AND user_id = ?", [albumId, trackId, userId]);
+    }
+
+    async updateTrack(request: UpdateTrackRequest) {
+        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artistname = ?, upc = ?, monetization = ?, genre = ?, description = ?, release_date = ?, price = ? WHERE id = ?", [
+            request.title,
+            request.isrc,
+            request.artistname,
+            request.upc,
+            request.monetization ?? false,
+            request.genre ?? "other",
+            request.description,
+            new Date(request.release_date ?? new Date().getTime()).toISOString().split("T")[0],
+            request.price,
+            request.id
+        ]);
+    }
+
+    async setTrackHasCover(referenceId: number, b: boolean) {
+        await this.query("UPDATE tri.tracks SET has_cover = ? WHERE id = ?", [b, referenceId]);
+    }
+
+    async setAlbumHasCover(referenceId: number, b: boolean) {
+        await this.query("UPDATE tri.albums SET has_cover = ? WHERE id = ?", [b, referenceId]);
+    }
+
+    async setUserHasAvatar(referenceId: number, b: boolean) {
+        await this.query("UPDATE tri.users SET has_avatar = ? WHERE id = ?", [b, referenceId]);
+    }
+
+    async setUserHasBanner(referenceId: number, b: boolean) {
+        await this.query("UPDATE tri.users SET has_banner = ? WHERE id = ?", [b, referenceId]);
+    }
+
+    async cleanLogs() {
+        return await this.query("DELETE FROM tri.logs WHERE time < NOW() - INTERVAL 7 DAY");
+    }
+
+    log(logLevel: LogLevel, message: string, stack: string, correlation_id: string, host: string, properties: any = {}) {
+        this.query("INSERT INTO tri.logs (logLevel, message, stack, correlation_id, host, properties) VALUES (?, ?, ?, ?, ?, ?)",
+            [logLevel, message, stack, correlation_id, host, JSON.stringify(properties)])
+            .then(async () => {
+                await this.cleanLogs();
+            })
+            .catch(e => console.error(e));
+    }
+
+    async getLogs(logLevel: number, offset: number, limit: number): Promise<Log[]> {
+        if (logLevel === LogLevel.debug) {
+            return await this.query("SELECT * FROM tri.logs ORDER BY order_id DESC LIMIT ? OFFSET ?", [limit, offset]);
+        }
+        return await this.query("SELECT * FROM tri.logs WHERE logLevel >= ? ORDER BY order_id DESC LIMIT ? OFFSET ?", [logLevel, limit, offset]);
+    }
+
+    async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, searchMode: SearchMode) {
+        if (searchMode === SearchMode.exact) {
+            return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ") + " LIMIT ? OFFSET ?",
+                [...searchConfiguration.searchableFields.map(() => request.query), request.limit, request.offset]);
+        } else if (searchMode === SearchMode.partial) {
+            const queryValue = `%${request.query}%`.replaceAll("_", "%");
+            const values = searchConfiguration.searchableFields.map(() => [queryValue, request.query]).flat();
+            return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ") + " LIMIT ? OFFSET ?",
+                [...values, request.limit, request.offset]);
+        }
+    }
+
+    async setUserEmails(user_id: number, emails: UserEmail[]) {
+        for (const email of emails) {
+            await this.query("INSERT INTO tri.user_emails (user_id, email, `primary`, verification_code) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `primary` = ?",
+                [user_id, email.email, email.primary, email.verification_code, email.primary]);
+        }
+    }
+
+    async getUserEmails(id: number): Promise<UserEmail[]> {
+        return await this.query("SELECT * FROM tri.user_emails WHERE user_id = ?", [id]);
+    }
+
+    async getUserPrimaryEmail(id: number): Promise<UserEmail> {
+        return await this.queryFirst("SELECT * FROM tri.user_emails WHERE user_id = ? AND `primary` = 1", [id]);
+    }
+
+    async verifyEmail(user_id: number, email: string) {
+        await this.query("UPDATE tri.user_emails SET verified = 1, verified_at = CURRENT_TIMESTAMP WHERE user_id = ? AND email = ?", [user_id, email]);
+    }
+
+    async deleteUserEmail(user_id: number, email: string) {
+        await this.query("DELETE FROM tri.user_emails WHERE user_id = ? AND email = ?", [user_id, email]);
+    }
+}

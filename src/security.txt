@@ -1,0 +1,3 @@
+# Please report any security issues here:
+Contact: alex@targoninc.com
+Preferred-Languages: en,de
