@@ -24,7 +24,7 @@ export class ResetPasswordEndpoint extends PostEndpoint {
 
         const user = await this.db.getUserByToken(token);
         if (!user) {
-            return res.status(404).send({error: "User not found"});
+            return res.status(404).send({error: "Token invalid"});
         }
 
         if (token !== user.password_token) {
