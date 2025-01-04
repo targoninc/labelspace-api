@@ -459,4 +459,12 @@ export class TriDB extends MariaDB {
     async getAlbums(): Promise<Album[]> {
         return await this.query("SELECT * FROM tri.albums");
     }
+
+    async getAlbumByUpc(upc: string): Promise<Album> {
+        return await this.queryFirst("SELECT * FROM tri.albums WHERE upc = ?", [upc]);
+    }
+
+    async getTrackByIsrc(isrc: string): Promise<Track> {
+        return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
+    }
 }
