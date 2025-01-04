@@ -46,17 +46,19 @@ create table if not exists tri.possible_usersettings
 
 create table if not exists tri.artists
 (
-    id         bigint auto_increment
+    id      bigint auto_increment
         primary key,
-    user_id    bigint     null,
-    name       mediumtext not null,
-    constraint artists_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete set null
+    user_id bigint     null,
+    name    mediumtext not null,
+    constraint artists_pk
+        unique (name) using hash
 );
 
 create index if not exists artists_name_index
     on tri.artists (name(768));
+
+create index if not exists artists_users_id_fk
+    on tri.artists (user_id);
 
 create table if not exists tri.users
 (
@@ -127,12 +129,14 @@ create table if not exists tri.albums
     user_id        bigint                                   null,
     compilation_id int                                      null,
     title          varchar(512) default ''                  not null,
-    upc            varchar(12)                              null,
+    upc            varchar(16)                              null,
     release_date   datetime     default current_timestamp() not null,
     created_at     datetime     default current_timestamp() not null,
     updated_at     datetime     default current_timestamp() not null on update current_timestamp(),
     price          double       default 5                   null,
     has_cover      tinyint(1)   default 0                   not null,
+    constraint albums_pk
+        unique (upc),
     constraint albums_compilations_id_fk
         foreign key (compilation_id) references tri.compilations (id)
             on delete set null,
@@ -145,9 +149,10 @@ create table if not exists tri.tracks
 (
     id              bigint auto_increment
         primary key,
+    album_id        bigint                                 null,
     title           varchar(255)                           not null,
     artists         mediumtext                             not null,
-    isrc            varchar(12)                            null,
+    isrc            varchar(16)                            null,
     credits         varchar(512)                           null,
     loudness_data   varchar(2000)                          null,
     genre           varchar(512)                           null,
@@ -163,7 +168,12 @@ create table if not exists tri.tracks
     link_soundcloud mediumtext                             null,
     link_applemusic mediumtext                             null,
     link_bandcamp   mediumtext                             null,
-    link_lyda       mediumtext                             null
+    link_lyda       mediumtext                             null,
+    constraint tracks_pk
+        unique (isrc),
+    constraint tracks_albums_id_fk
+        foreign key (album_id) references tri.albums (id)
+            on delete set null
 );
 
 create index if not exists tracks_artists_index
@@ -172,29 +182,11 @@ create index if not exists tracks_artists_index
 create index if not exists tracks_created_at_index
     on tri.tracks (created_at);
 
-create index if not exists tracks_description_index
-    on tri.tracks (description(768));
-
 create index if not exists tracks_genre_index
     on tri.tracks (genre);
 
 create index if not exists tracks_title_index
     on tri.tracks (title);
-
-create table if not exists tri.albumtracks
-(
-    album_id   bigint                               not null,
-    track_id   bigint                               not null,
-    position   bigint   default -1                  not null,
-    created_at datetime default current_timestamp() not null,
-    primary key (album_id, track_id),
-    constraint albumtracks_albums_id_fk
-        foreign key (album_id) references tri.albums (id)
-            on delete cascade,
-    constraint albumtracks_tracks_id_fk
-        foreign key (track_id) references tri.tracks (id)
-            on delete cascade
-);
 
 create table if not exists tri.user_settings
 (

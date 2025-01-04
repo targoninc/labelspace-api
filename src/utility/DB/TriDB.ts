@@ -148,11 +148,11 @@ export class TriDB extends MariaDB {
         ]);
     }
 
-    async getAlbumTracksByAlbumIds(albumIds: number[]): Promise<AlbumTrack[]> {
+    async getAlbumTracksByAlbumIds(albumIds: number[]): Promise<Track[]> {
         if (albumIds.length === 0) {
             return [];
         }
-        return await this.query("SELECT track_id FROM tri.albumtracks WHERE album_id IN (?)", [albumIds]);
+        return await this.query("SELECT * FROM tri.tracks WHERE album_id IN (?)", [albumIds]);
     }
 
     async getUsersByAlbumIds(albumIds: number[]): Promise<User[]> {
@@ -233,8 +233,8 @@ export class TriDB extends MariaDB {
         const qMarks = isrcs.map(() => "?").join(", ");
         let sql = `SELECT SUM(r.royalty) as value
                    FROM finance.royalties r
-                   WHERE r.isrc NOT IN (${qMarks})`;
-        return await this.querySingleValue(sql, [...artistNamesLike, ...isrcs])
+                   WHERE r.isrc NOT IN (${qMarks}) AND ${artistConditions}`;
+        return await this.querySingleValue(sql, [...artistNamesLike, ...isrcs]);
     }
 
     async getPermissionsByIds(ids: number[]): Promise<Permission[]> {

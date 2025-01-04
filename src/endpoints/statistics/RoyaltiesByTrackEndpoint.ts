@@ -20,6 +20,9 @@ export class RoyaltiesByTrackEndpoint extends AuthenticatedGetEndpoint {
         const artistNames = artists.map(a => a.name);
 
         const tracks = await this.db.getRoyaltiesByTrack(artistNames, 15);
+        if (!tracks || tracks.length === 0) {
+            return res.send([]);
+        }
         const othersSum = await this.db.getRoyaltySumWithExcludedIsrcs(artistNames, tracks.map(track => track.id));
         if (othersSum > 0) {
             tracks.push(<Statistic>{

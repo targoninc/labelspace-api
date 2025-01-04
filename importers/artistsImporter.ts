@@ -13,7 +13,7 @@ export async function importArtists(db: TriDB, srcFile: string) {
 
     console.log("Inserting " + data.length + " rows...");
 
-    const query = "INSERT INTO tri.artists (user_id, name) VALUES (?, ?)";
+    const query = "INSERT INTO tri.artists (user_id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
@@ -25,7 +25,8 @@ export async function importArtists(db: TriDB, srcFile: string) {
 
         const params = [
             user.id,
-            row[header.indexOf("artistname")]
+            row[header.indexOf("artistname")],
+            row[header.indexOf("artistname")],
         ];
 
         if (params.some(p => p === undefined)) {

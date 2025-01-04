@@ -20,6 +20,9 @@ export class RoyaltiesByMonthEndpoint extends AuthenticatedGetEndpoint {
         const artistNames = artists.map(a => a.name);
 
         const tracks = await this.db.getRoyaltiesByMonth(artistNames, 15);
+        if (!tracks || tracks.length === 0) {
+            return res.send([]);
+        }
         if (tracks[0].id === null) {
             tracks.shift();
         }

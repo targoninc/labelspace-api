@@ -6,6 +6,7 @@ import {importArtists} from "./artistsImporter.ts";
 import {importCompilations} from "./compilationsImporter.ts";
 import {importAlbums} from "./albumsImporter.ts";
 import {importPayments} from "./paymentsImporter.ts";
+import {importTracks} from "./tracksImporter.ts";
 
 export async function importAll(db: TriDB, srcDir: string) {
     await importUsers(db, path.join(srcDir, "users.csv"));
@@ -15,4 +16,5 @@ export async function importAll(db: TriDB, srcDir: string) {
 
     await importCompilations(db, path.join(srcDir, "compilations.csv"));
     await importAlbums(db, path.join(srcDir, "albums.csv"));
+    await importTracks(db, path.join(srcDir, "tracks.csv"));
 }
