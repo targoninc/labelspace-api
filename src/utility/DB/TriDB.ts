@@ -392,4 +392,8 @@ export class TriDB extends MariaDB {
     async getUserArtists(userId: number) {
         return await this.query("SELECT * FROM tri.artists WHERE user_id = ?", [userId]);
     }
+
+    async getUserIdByArtistName(artistName: string) {
+        return await this.querySingleValue("SELECT user_id FROM tri.artists WHERE name = ?", [artistName]);
+    }
 }

@@ -26,29 +26,35 @@ create table if not exists finance.bandcamp_sync
 
 create table if not exists finance.requests
 (
-    artist varchar(255)                     not null,
-    amount float                            not null,
-    date   varchar(20)                      not null,
-    id     int auto_increment
+    id         int auto_increment
         primary key,
-    status varchar(128) default 'requested' not null
+    user_id    bigint                           null,
+    amount     float                            not null,
+    created_at datetime                         not null,
+    status     varchar(128) default 'requested' not null,
+    constraint requests_users_id_fk
+        foreign key (user_id) references tri.users (id)
+            on delete set null
 )
-    comment 'Stores all active requests, each gets deleted when paid' engine = InnoDB
-                                                                      collate = utf8mb4_general_ci;
+    comment 'Stores all active requests, each gets deleted when paid' collate = utf8mb4_general_ci;
 
 create table if not exists finance.payments
 (
     id         int auto_increment
         primary key,
     date       varchar(25) not null,
-    artist     varchar(50) not null,
+    user_id    bigint      null,
     amount     float       not null,
     request_id int         null,
+    constraint payments_pk
+        unique (date, amount, user_id),
     constraint payments_requests_id_fk
         foreign key (request_id) references finance.requests (id)
+            on delete set null,
+    constraint payments_users_id_fk
+        foreign key (user_id) references tri.users (id)
             on delete set null
 )
-    engine = InnoDB
     collate = utf8mb4_general_ci;
 
 create table if not exists finance.royalties
