@@ -73,7 +73,7 @@ export class MariaDB {
         await this.connection?.end();
     }
 
-    async query(sql: string, params: any[] = []) {
+    async query<T>(sql: string, params: any[] = []): Promise<T[]> {
         if (!this.connectionPool) {
             CLI.warning("Connecting to database...");
             await this.connect();

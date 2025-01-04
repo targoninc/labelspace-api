@@ -164,8 +164,7 @@ export class TriDB extends MariaDB {
     }
 
     async getRoyaltiesByTrack(artistNames: string[], limit: number): Promise<Statistic[]> {
-        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
-        const artistNamesLike = artistNames.map(name => `%${name}%`);
+        const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
         return await this.query(`SELECT r.isrc as id,
                     r.title as label,
@@ -178,9 +177,22 @@ export class TriDB extends MariaDB {
             [...artistNamesLike, limit]);
     }
 
-    async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
+    getArtistEqual(artistNames: string[]) {
+        return artistNames.map(() => "r.trackartists = ?").join(" OR ");
+    }
+
+    getArtistLike(artistNames: string[]) {
         const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return {
+            artistConditions,
+            artistNamesLike
+        };
+    }
+
+    async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
         return await this.query(
             `SELECT r.period1 as id,
@@ -196,8 +208,7 @@ export class TriDB extends MariaDB {
     }
 
     async getRoyaltiesByYear(artistNames: string[], limit: number): Promise<Statistic[]> {
-        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
-        const artistNamesLike = artistNames.map(name => `%${name}%`);
+        const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
         return await this.query(
             `SELECT SUBSTR(r.period1, 5) as id,
@@ -400,5 +411,53 @@ export class TriDB extends MariaDB {
 
     async getPaymentsByUserId(id: number): Promise<Payment[]> {
         return await this.query("SELECT * FROM finance.payments WHERE user_id = ?", [id]);
+    }
+
+    async getArtistRoyalty(artistNames: string[]) {
+        const artistConditions = this.getArtistEqual(artistNames);
+
+        return await this.querySingleValue("SELECT SUM(r.royalty) FROM finance.royalties r WHERE " + artistConditions, [...artistNames]);
+    }
+
+    async getArtistSplitSum(artistNames: string[]) {
+        let splitSum = 0;
+
+        for (const artistName of artistNames) {
+            const addRows = await this.query<{
+                royalty: number;
+                split: number;
+            }>("SELECT r.royalty, split FROM finance.royalties r INNER JOIN finance.splits ON r.isrc = splits.isrc WHERE artist = ? AND r.trackartists LIKE ? AND NOT r.trackartists = ?",
+                [artistName, `%${artistName}%`, artistName]);
+
+            for (const row of addRows) {
+                splitSum += row.royalty * row.split;
+            }
+        }
+
+        return splitSum;
+    }
+
+    async getArtistTotalRoyalty(artistNames: string[]) {
+        const total = await this.getArtistRoyalty(artistNames);
+        const collabSum = await this.getArtistSplitSum(artistNames);
+
+        return total + collabSum;
+    }
+
+    async getUserPaidAmount(id: number) {
+        return await this.querySingleValue("SELECT SUM(amount) FROM finance.payments WHERE user_id = ?", [id]);
+    }
+
+    async getAvailablePaymentAmount(id: number, artistNames: string[]) {
+        const total = await this.getArtistTotalRoyalty(artistNames);
+        const paidOut = await this.getUserPaidAmount(id);
+
+        const artistCut = 0.85;
+        const artistTotal = total * artistCut;
+        return {
+            total: artistTotal,
+            paidOut,
+            available: artistTotal - paidOut
+        };
     }
 }

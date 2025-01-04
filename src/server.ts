@@ -43,6 +43,7 @@ import * as path from "node:path";
 import {GetUsersEndpoint} from "./endpoints/user/GetUsersEndpoint.ts";
 import {RoyaltiesByYearEndpoint} from "./endpoints/statistics/RoyaltiesByYearEndpoint.ts";
 import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
+import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailablePaymentAmountEndpoint.ts";
 
 config();
 
@@ -134,6 +135,7 @@ new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register()
 
 // region Payments
 new GetPaymentsEndpoint(app, "/payments/get", db).register();
+new GetAvailablePaymentAmountEndpoint(app, "/payments/available", db).register();
 // endregion
 
 // region Search
