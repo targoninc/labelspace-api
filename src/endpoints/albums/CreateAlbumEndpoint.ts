@@ -5,6 +5,7 @@ import {Authenticator} from "../../models/Authenticator.js";
 import {CreateAlbumRequestBody} from "../../models/interfaces/CreateAlbumRequestBody.js";
 import {CLI} from "../../utility/CLI.js";
 import {Album} from "../../models/db/tri/Album.js";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -15,8 +16,13 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        if (!Authenticator.guardEndpoint(req, res)) {
-            return;
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to create albums.");
         }
 
         let body: CreateAlbumRequestBody = req.body;
@@ -27,7 +33,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
         const today = new Date();
         const title = body.title ?? `Album (${today.toDateString()})`;
         const upc = body.upc ?? "";
-        const description = body.description ?? "";
         const release_date = new Date(body.release_date ?? today.toISOString());
         const price = body.price ?? 1;
 
@@ -35,7 +40,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
             user_id: req.user.id,
             title,
             upc,
-            description,
             release_date,
             price
         });

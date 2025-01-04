@@ -1,5 +1,14 @@
 create schema if not exists tri;
 
+create table if not exists tri.compilations
+(
+    id   int auto_increment
+        primary key,
+    name varchar(512) not null
+)
+    engine = InnoDB
+    collate = utf8mb4_general_ci;
+
 create table if not exists tri.logs
 (
     order_id       bigint auto_increment
@@ -113,19 +122,20 @@ create table if not exists tri.action_log
 
 create table if not exists tri.albums
 (
-    id           bigint auto_increment
+    id             bigint auto_increment
         primary key,
-    user_id      bigint                                   not null,
-    title        varchar(512) default ''                  not null,
-    description  varchar(2048)                            null,
-    upc          varchar(12)                              null,
-    release_date datetime     default current_timestamp() not null,
-    created_at   datetime     default current_timestamp() not null,
-    updated_at   datetime     default current_timestamp() not null on update current_timestamp(),
-    visibility   varchar(32)  default 'private'           not null,
-    secretcode   varchar(32)                              null,
-    price        double       default 5                   null,
-    has_cover    tinyint(1)   default 0                   not null,
+    user_id        bigint                                   null,
+    compilation_id int                                      null,
+    title          varchar(512) default ''                  not null,
+    upc            varchar(12)                              null,
+    release_date   datetime     default current_timestamp() not null,
+    created_at     datetime     default current_timestamp() not null,
+    updated_at     datetime     default current_timestamp() not null on update current_timestamp(),
+    price          double       default 5                   null,
+    has_cover      tinyint(1)   default 0                   not null,
+    constraint albums_compilations_id_fk
+        foreign key (compilation_id) references tri.compilations (id)
+            on delete set null,
     constraint albums_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete cascade

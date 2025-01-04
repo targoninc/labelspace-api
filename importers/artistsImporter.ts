@@ -1,11 +1,7 @@
 import * as fs from "node:fs";
 import {TriDB} from "../src/utility/DB/TriDB.ts";
-import {configDotenv} from "dotenv";
 
-configDotenv();
-const db = new TriDB();
-
-async function importArtists(db: TriDB, srcFile: string) {
+export async function importArtists(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
         process.exit(1);
@@ -39,5 +35,3 @@ async function importArtists(db: TriDB, srcFile: string) {
         await db.query(query, params);
     }
 }
-
-await importArtists(db, "./data/user_artists.csv");

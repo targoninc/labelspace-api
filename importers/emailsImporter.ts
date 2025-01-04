@@ -1,13 +1,7 @@
 import * as fs from "node:fs";
 import {TriDB} from "../src/utility/DB/TriDB.ts";
-import {configDotenv} from "dotenv";
-import {Password} from "../src/utility/Password.ts";
-import bcrypt from "bcryptjs";
 
-configDotenv();
-const db = new TriDB();
-
-async function importUsers(db: TriDB, srcFile: string) {
+export async function importEmails(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
         process.exit(1);
@@ -44,6 +38,3 @@ async function importUsers(db: TriDB, srcFile: string) {
         await db.query(query, params);
     }
 }
-
-await importUsers(db, "./data/user_emails.csv");
-process.exit(0);

@@ -7,7 +7,6 @@ export interface Album {
     id: number;
     user_id: number;
     title: string;
-    description: string;
     upc: string;
     release_date: Date;
     created_at: Date;

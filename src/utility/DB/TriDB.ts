@@ -116,11 +116,10 @@ export class TriDB extends MariaDB {
     }
 
     async createAlbum(album: Album): Promise<Album> {
-        await this.query("INSERT INTO tri.albums (user_id, title, upc, description, release_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+        await this.query("INSERT INTO tri.albums (user_id, title, upc, release_date, price) VALUES (?, ?, ?, ?, ?)", [
             album.user_id,
             album.title,
             album.upc,
-            album.description,
             album.release_date,
             album.price
         ]);
@@ -244,7 +243,7 @@ export class TriDB extends MariaDB {
         }
 
         const qs = ids.map(() => "?").join(",");
-        return await this.query(`SELECT * FROM tri.permissions WHERE id IN (${qs})`, [ids.join(",")]);
+        return await this.query(`SELECT * FROM tri.permissions WHERE id IN (${qs})`, ids);
     }
 
     async getPermissions(): Promise<Permission[]> {
@@ -255,12 +254,8 @@ export class TriDB extends MariaDB {
         await this.query("INSERT INTO tri.permissions (name, description) VALUES (?, ?)", [name, ""]);
     }
 
-    async getPermissionByName(permissionName: Permissions): Promise<Permission> {
-        return await this.queryFirst("SELECT * FROM tri.permissions WHERE name = ?", [permissionName]);
-    }
-
-    async userHasPermission(userId: number, permissionId: number): Promise<boolean> {
-        return await this.querySingleValue("SELECT COUNT(*) FROM tri.users_permissions WHERE user_id = ? AND permission_id = ?", [userId, permissionId]) > 0;
+    async userHasPermissionWithName(userId: number, permissionName: Permissions): Promise<boolean> {
+        return await this.querySingleValue("SELECT COUNT(*) FROM tri.users_permissions WHERE user_id = ? AND permission_id = (SELECT id FROM tri.permissions WHERE name = ?)", [userId, permissionName]) > 0;
     }
 
     async getUserByToken(token: string): Promise<User> {
@@ -459,5 +454,9 @@ export class TriDB extends MariaDB {
             paidOut,
             available: artistTotal - paidOut
         };
+    }
+
+    async getAlbums(): Promise<Album[]> {
+        return await this.query("SELECT * FROM tri.albums");
     }
 }

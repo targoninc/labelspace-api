@@ -44,6 +44,8 @@ import {GetUsersEndpoint} from "./endpoints/user/GetUsersEndpoint.ts";
 import {RoyaltiesByYearEndpoint} from "./endpoints/statistics/RoyaltiesByYearEndpoint.ts";
 import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
 import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailablePaymentAmountEndpoint.ts";
+import {GetAlbumsEndpoint} from "./endpoints/albums/GetAlbumsEndpoint.ts";
+import {ImportDataEndpoint} from "./endpoints/migration/ImportDataEndpoint.ts";
 
 config();
 
@@ -115,7 +117,7 @@ new UpdateTrackFullEndpoint(app, "/tracks/actions/updateFull", db).register();
 
 // region Albums
 new GetAlbumEndpoint(app, "/albums/byId", db).register();
-new GetAlbumsByUserEndpoint(app, "/albums/byUserId", db).register();
+new GetAlbumsEndpoint(app, "/albums/get", db).register();
 new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
 new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
@@ -145,7 +147,11 @@ new SearchAlbumsEndpoint(app, "/search/albums", db).register();
 // endregion
 
 // region Logs
-new GetLogsEndpoint(app, "/audit/logs", db).register();
+new GetLogsEndpoint(app, "/logs/get", db).register();
+// endregion
+
+// region Migration
+new ImportDataEndpoint(app, "/migration/import", db).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {
