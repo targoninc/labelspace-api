@@ -32,7 +32,11 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Data directory not found"});
         }
 
-        await importAll(this.db, dataDir);
+        try {
+            await importAll(this.db, dataDir);
+        } catch (e) {
+            return res.status(500).send({error: `Failed to import data: ${e.message}`});
+        }
 
         return res.status(200).send();
     }

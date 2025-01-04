@@ -20,6 +20,7 @@ export async function importCompilations(db: TriDB, srcFile: string) {
         const params = [
             row[header.indexOf("id")],
             row[header.indexOf("name")],
+            row[header.indexOf("name")],
         ];
 
         if (params.some(p => p === undefined)) {

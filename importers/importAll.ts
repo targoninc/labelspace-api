@@ -9,8 +9,8 @@ import {importPayments} from "./paymentsImporter.ts";
 
 export async function importAll(db: TriDB, srcDir: string) {
     await importUsers(db, path.join(srcDir, "users.csv"));
-    await importEmails(db, path.join(srcDir, "emails.csv"));
-    await importArtists(db, path.join(srcDir, "artists.csv"));
+    await importEmails(db, path.join(srcDir, "user_emails.csv"));
+    await importArtists(db, path.join(srcDir, "user_artists.csv"));
     await importPayments(db, path.join(srcDir, "payments.csv"));
 
     await importCompilations(db, path.join(srcDir, "compilations.csv"));

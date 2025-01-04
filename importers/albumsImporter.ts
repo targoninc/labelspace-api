@@ -17,9 +17,16 @@ export async function importAlbums(db: TriDB, srcFile: string) {
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
+        let compilationId: any = row[header.indexOf("compilation_id")];
+        if (compilationId === "") {
+            compilationId = null;
+        } else {
+            compilationId = parseInt(compilationId);
+        }
         const params = [
-            row[header.indexOf("compilation_id")],
+            compilationId,
             row[header.indexOf("upc")],
+            row[header.indexOf("album_name")],
             row[header.indexOf("album_name")],
         ];
 
