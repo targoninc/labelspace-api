@@ -18,6 +18,7 @@ import {SearchRequest} from "../../models/interfaces/SearchRequest.js";
 import {SearchMode} from "../Search/SearchMode.js";
 import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {Statistic} from "../../models/interfaces/Statistic.js";
+import type {Payment} from "../../models/db/finance/Payment.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -395,5 +396,9 @@ export class TriDB extends MariaDB {
 
     async getUserIdByArtistName(artistName: string) {
         return await this.querySingleValue("SELECT user_id FROM tri.artists WHERE name = ?", [artistName]);
+    }
+
+    async getPaymentsByUserId(id: number): Promise<Payment[]> {
+        return await this.query("SELECT * FROM finance.payments WHERE user_id = ?", [id]);
     }
 }

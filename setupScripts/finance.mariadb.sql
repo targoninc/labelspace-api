@@ -42,10 +42,10 @@ create table if not exists finance.payments
 (
     id         int auto_increment
         primary key,
-    date       varchar(25) not null,
-    user_id    bigint      null,
-    amount     float       not null,
-    request_id int         null,
+    date       datetime default current_timestamp() not null,
+    user_id    bigint                               null,
+    amount     float                                not null,
+    request_id int                                  null,
     constraint payments_pk
         unique (date, amount, user_id),
     constraint payments_requests_id_fk

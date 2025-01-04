@@ -42,6 +42,7 @@ import {rateLimit} from "express-rate-limit";
 import * as path from "node:path";
 import {GetUsersEndpoint} from "./endpoints/user/GetUsersEndpoint.ts";
 import {RoyaltiesByYearEndpoint} from "./endpoints/statistics/RoyaltiesByYearEndpoint.ts";
+import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
 
 config();
 
@@ -129,6 +130,10 @@ new DeleteMediaEndpoint(app, "/media/delete", db).register();
 new RoyaltiesByMonthEndpoint(app, "/statistics/royaltiesByMonth", db).register();
 new RoyaltiesByYearEndpoint(app, "/statistics/royaltiesByYear", db).register();
 new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register();
+// endregion
+
+// region Payments
+new GetPaymentsEndpoint(app, "/payments/get", db).register();
 // endregion
 
 // region Search
