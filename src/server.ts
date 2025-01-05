@@ -14,7 +14,6 @@ import {UpdateSettingEndpoint} from "./endpoints/user/actions/UpdateSettingEndpo
 import {ensureDatabaseConsistency, setupPassport} from "./utility/DB/Database.js";
 import {LogoutEndpoint} from "./endpoints/auth/LogoutEndpoint.js";
 import {GetTracksByUserEndpoint} from "./endpoints/tracks/GetTracksByUserEndpoint.js";
-import {GetAlbumsByUserEndpoint} from "./endpoints/albums/GetAlbumsByUserEndpoint.js";
 import {TriDB} from "./utility/DB/TriDB.js";
 import {SearchUsersEndpoint} from "./endpoints/search/SearchUsersEndpoint.js";
 import {UploadMediaEndpoint} from "./endpoints/media/UploadMediaEndpoint.js";
@@ -27,7 +26,6 @@ import {GetImageEndpoint} from "./endpoints/media/GetImageEndpoint.js";
 import {ExportUserDataEndpoint} from "./endpoints/user/actions/ExportUserDataEndpoint.js";
 import {CreateAlbumEndpoint} from "./endpoints/albums/CreateAlbumEndpoint.js";
 import {GetAlbumEndpoint} from "./endpoints/albums/GetAlbumEndpoint.js";
-import {AddTrackToAlbumEndpoint} from "./endpoints/albums/AddTrackToAlbumEndpoint.js";
 import {RemoveTrackFromAlbumEndpoint} from "./endpoints/albums/RemoveTrackFromAlbumEndpoint.js";
 import {DeleteMediaEndpoint} from "./endpoints/media/DeleteMediaEndpoint.js";
 import {UpdateTrackFullEndpoint} from "./endpoints/tracks/actions/UpdateTrackFullEndpoint.js";
@@ -46,6 +44,7 @@ import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
 import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailablePaymentAmountEndpoint.ts";
 import {GetAlbumsEndpoint} from "./endpoints/albums/GetAlbumsEndpoint.ts";
 import {ImportDataEndpoint} from "./endpoints/migration/ImportDataEndpoint.ts";
+import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtistEndpoint.ts";
 
 config();
 
@@ -119,7 +118,6 @@ new UpdateTrackFullEndpoint(app, "/tracks/actions/updateFull", db).register();
 new GetAlbumEndpoint(app, "/albums/byId", db).register();
 new GetAlbumsEndpoint(app, "/albums/get", db).register();
 new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
-new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
 // endregion
 
@@ -133,6 +131,7 @@ new DeleteMediaEndpoint(app, "/media/delete", db).register();
 new RoyaltiesByMonthEndpoint(app, "/statistics/royaltiesByMonth", db).register();
 new RoyaltiesByYearEndpoint(app, "/statistics/royaltiesByYear", db).register();
 new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register();
+new RoyaltiesByArtistEndpoint(app, "/statistics/royaltiesByArtist", db).register();
 // endregion
 
 // region Payments

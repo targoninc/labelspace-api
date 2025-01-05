@@ -6,7 +6,6 @@ import {User} from "../db/tri/User.js";
 
 export interface AlbumEnrichmentConfig {
     tracks?: boolean;
-    user?: boolean;
 }
 
 export class AlbumEnricher extends IEnricher {
@@ -15,9 +14,8 @@ export class AlbumEnricher extends IEnricher {
     }
 
     static async enrichAsync(db: TriDB, base: Album, config: AlbumEnrichmentConfig): Promise<Album> {
-        base.user = await enrichIfAsync<User>(config.user, () => db.getUserById(base.user_id), null);
         base.tracks = await enrichIfAsync<Track[]>(config.tracks, async () => {
-            return await db.getAlbumTracksByAlbumIds([base.id]);
+            return await db.getTracksByAlbumIds([base.id]);
         }, []);
 
         return base;
@@ -29,12 +27,10 @@ export class AlbumEnricher extends IEnricher {
 
     static async enrichManyAsync(db: TriDB, albums: Album[], config: AlbumEnrichmentConfig): Promise<Album[]> {
         const albumIds = albums.map(album => album.id);
-        const tracks = await enrichIfAsync<Track[]>(config.tracks, () => db.getAlbumTracksByAlbumIds(albumIds), []);
-        const users = await enrichIfAsync<User[]>(config.user, () => db.getUsersByAlbumIds(albumIds), []);
+        const tracks = await enrichIfAsync<Track[]>(config.tracks, () => db.getTracksByAlbumIds(albumIds), []);
 
         albums.forEach(album => {
             album.tracks = tracks?.filter(t => t.album_id === album.id) ?? [];
-            album.user = users?.find(user => user.id === album.user_id);
         });
 
         return albums;

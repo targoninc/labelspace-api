@@ -148,7 +148,7 @@ export class TriDB extends MariaDB {
         ]);
     }
 
-    async getAlbumTracksByAlbumIds(albumIds: number[]): Promise<Track[]> {
+    async getTracksByAlbumIds(albumIds: number[]): Promise<Track[]> {
         if (albumIds.length === 0) {
             return [];
         }
@@ -174,6 +174,27 @@ export class TriDB extends MariaDB {
              ORDER BY SUM(r.royalty) DESC
              LIMIT ?`,
             [...artistNamesLike, limit]);
+    }
+
+    async getRoyaltiesByArtist(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const rows = [];
+        for (const artistName of artistNames) {
+            const likeCondition = `%${artistName}%`;
+
+            const row = await this.queryFirst(`
+                SELECT
+                    ? as id,
+                    ? as label,
+                    SUM(r.royalty) as value
+                FROM finance.royalties r
+                WHERE r.trackartists LIKE ?
+                LIMIT 1`,
+                [artistName, artistName, likeCondition]);
+            if (row) {
+                rows.push(row);
+            }
+        }
+        return rows;
     }
 
     getArtistEqual(artistNames: string[]) {

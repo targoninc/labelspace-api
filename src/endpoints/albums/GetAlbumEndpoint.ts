@@ -31,18 +31,10 @@ export class GetAlbumEndpoint extends GetEndpoint {
         }
 
         album = await AlbumEnricher.enrichAsync(this.db, album, {
-            user: true,
             tracks: true,
         });
 
-        if (!req.isAuthenticated() || album.user_id !== req.user.id) {
-            album = ColumnProtector.protect<Album>(album, ProtectionSchemas.album);
-        }
         album.description ??= "";
-
-        return res.send({
-            album,
-            canEdit: req.isAuthenticated() && album.user_id === req.user.id
-        });
+        return res.send(album);
     }
 }
