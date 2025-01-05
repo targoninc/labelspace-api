@@ -24,6 +24,9 @@ export async function importAlbums(db: TriDB, srcFile: string) {
         } else {
             compilationId = parseInt(compilationId);
         }
+        if (compilationId === 0) {
+            compilationId = null;
+        }
         const params = [
             row.album_id,
             compilationId,

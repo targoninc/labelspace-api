@@ -2,7 +2,6 @@ import {enrichIfAsync, IEnricher} from "./IEnricher.js";
 import {Album} from "../db/tri/Album.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {Track} from "../db/tri/Track.js";
-import {User} from "../db/tri/User.js";
 
 export interface AlbumEnrichmentConfig {
     tracks?: boolean;

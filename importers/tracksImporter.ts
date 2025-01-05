@@ -10,11 +10,10 @@ export async function importTracks(db: TriDB, srcFile: string) {
     const content = fs.readFileSync(srcFile, "utf8");
 
     const data = await readCsvAsync<any>(content);
-    const header = Object.keys(data[0]);
 
     console.log("Inserting " + data.length + " rows...");
 
-    const createTrackQuery = "INSERT INTO tri.tracks (artists, title, isrc, credits, loudness_data, genre, length, release_date, link_applemusic, link_bandcamp, link_lyda, link_soundcloud, link_spotify, link_youtube) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = ?";
+    const createTrackQuery = "INSERT INTO tri.tracks (id, album_id, artists, title, isrc, credits, loudness_data, genre, length, release_date, link_applemusic, link_bandcamp, link_lyda, link_soundcloud, link_spotify, link_youtube) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = ?";
 
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
@@ -23,6 +22,8 @@ export async function importTracks(db: TriDB, srcFile: string) {
         }
 
         const createParams = [
+            row.id,
+            row.albumid,
             row.trackartists,
             row.title,
             row.isrc,
