@@ -308,31 +308,12 @@ export class TriDB extends MariaDB {
         return await this.queryFirst("SELECT * FROM tri.albums WHERE id = ?", [id]);
     }
 
-    async addTrackToAlbum(album_id: number, user_id: number, track_id: number) {
-        const maxPositionInAlbum = await this.querySingleValue("SELECT MAX(position) FROM tri.albumtracks WHERE album_id = ?", [album_id]) ?? -1;
-
-        await this.query("INSERT INTO tri.albumtracks (album_id, track_id, user_id, position) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE track_id = ?", [
-            album_id,
-            track_id,
-            user_id,
-            maxPositionInAlbum + 1,
-            track_id
-        ]);
-    }
-
-    async removeTrackFromAlbum(albumId: any, userId: number, trackId: any) {
-        await this.query("DELETE FROM tri.albumtracks WHERE album_id = ? AND track_id = ? AND user_id = ?", [albumId, trackId, userId]);
-    }
-
-    async updateTrack(request: UpdateTrackRequest) {
-        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artistname = ?, upc = ?, monetization = ?, genre = ?, description = ?, release_date = ?, price = ? WHERE id = ?", [
+    async updateTrack(request: Track) {
+        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ? WHERE id = ?", [
             request.title,
             request.isrc,
-            request.artistname,
-            request.upc,
-            request.monetization ?? false,
+            request.artists,
             request.genre ?? "other",
-            request.description,
             new Date(request.release_date ?? new Date().getTime()).toISOString().split("T")[0],
             request.price,
             request.id
@@ -492,5 +473,13 @@ export class TriDB extends MariaDB {
 
     async createPaymentRequest(userId: number, amount: number, status: PaymentStatus) {
         await this.query("INSERT INTO finance.requests (user_id, amount, status) VALUES (?, ?, ?)", [userId, amount, status]);
+    }
+
+    async getAlbumsByIds(albumIds: (number | undefined)[]): Promise<Album[]> {
+        const realIds = albumIds.filter(id => id !== undefined);
+        if (realIds.length === 0) {
+            return [];
+        }
+        return await this.query("SELECT * FROM tri.albums WHERE id IN (?)", [realIds.join(",")]);
     }
 }

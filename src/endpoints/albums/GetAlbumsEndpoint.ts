@@ -26,7 +26,6 @@ export class GetAlbumsEndpoint extends AuthenticatedGetEndpoint {
 
         let albums = await this.db.getAlbums();
         albums = await AlbumEnricher.enrichManyAsync(this.db, albums, {
-            user: true,
             tracks: true
         });
 

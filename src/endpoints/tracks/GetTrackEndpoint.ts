@@ -1,10 +1,10 @@
 import { Application, Response } from "express";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {Visibility} from "../../models/enums/Visibility.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {Track} from "../../models/db/tri/Track.js";
 import {TrackEnricher} from "../../models/enrichers/TrackEnricher.js";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class GetTrackEndpoint extends GetEndpoint {
     db: TriDB;
@@ -15,6 +15,15 @@ export class GetTrackEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to view tracks.");
+        }
+
         let idParam = req.query.id as string;
         if (!idParam) {
             return res.status(400).send({error: "No track id provided"});
@@ -29,21 +38,14 @@ export class GetTrackEndpoint extends GetEndpoint {
             return res.status(404).send({error: "Track not found"});
         }
 
-        const notUploader = !req.isAuthenticated() || track.user_id !== req.user.id;
-
         track = await TrackEnricher.enrichAsync(this.db, track, {
-            user: true,
-            protect: notUploader
+            album: true,
         }, req.user);
 
         return res.send({
-            track: <Track>{
-                ...track,
-                description: track.description ?? "",
-                loudness_data: track.loudness_data ?? "[]",
-                length: track.length ?? 0,
-            },
-            canEdit: !notUploader
+            ...track,
+            loudness_data: track.loudness_data ?? "[]",
+            length: track.length ?? 0,
         });
     }
 }

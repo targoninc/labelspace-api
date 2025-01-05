@@ -112,7 +112,7 @@ new GetTrackEndpoint(app, "/tracks/byId", db).register();
 new CreateTrackEndpoint(app, "/tracks/create", db).register();
 new DeleteTrackEndpoint(app, "/tracks/actions/delete", db).register();
 new GetTracksByUserEndpoint(app, "/tracks/byUserId", db).register();
-new UpdateTrackFullEndpoint(app, "/tracks/actions/updateFull", db).register();
+new UpdateTrackFullEndpoint(app, "/tracks/actions/update", db).register();
 // endregion
 
 // region Albums

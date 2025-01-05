@@ -1,11 +1,10 @@
 import { Application, Response } from "express";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import { ColumnProtector } from "../../models/ColumnProtector.js";
-import {ProtectionSchemas} from "../../models/enums/ProtectionSchema.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {Album} from "../../models/db/tri/Album.js";
 import {AlbumEnricher} from "../../models/enrichers/AlbumEnricher.js";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class GetAlbumEndpoint extends GetEndpoint {
     db: TriDB;
@@ -16,6 +15,15 @@ export class GetAlbumEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to view albums.");
+        }
+
         let idParam = req.query.id as string;
         if (!idParam) {
             return res.send({error: "No album id provided"});
