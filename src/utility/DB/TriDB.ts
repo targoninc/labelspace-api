@@ -19,6 +19,7 @@ import {SearchMode} from "../Search/SearchMode.js";
 import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {Statistic} from "../../models/interfaces/Statistic.js";
 import type {Payment} from "../../models/db/finance/Payment.ts";
+import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -487,5 +488,9 @@ export class TriDB extends MariaDB {
 
     async getTrackByIsrc(isrc: string): Promise<Track> {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
+    }
+
+    async createPaymentRequest(userId: number, amount: number, status: PaymentStatus) {
+        await this.query("INSERT INTO finance.requests (user_id, amount, status) VALUES (?, ?, ?)", [userId, amount, status]);
     }
 }

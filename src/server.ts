@@ -45,6 +45,7 @@ import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailab
 import {GetAlbumsEndpoint} from "./endpoints/albums/GetAlbumsEndpoint.ts";
 import {ImportDataEndpoint} from "./endpoints/migration/ImportDataEndpoint.ts";
 import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtistEndpoint.ts";
+import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoint.ts";
 
 config();
 
@@ -137,6 +138,7 @@ new RoyaltiesByArtistEndpoint(app, "/statistics/royaltiesByArtist", db).register
 // region Payments
 new GetPaymentsEndpoint(app, "/payments/get", db).register();
 new GetAvailablePaymentAmountEndpoint(app, "/payments/available", db).register();
+new RequestPaymentEndpoint(app, "/payments/request", db).register();
 // endregion
 
 // region Search
