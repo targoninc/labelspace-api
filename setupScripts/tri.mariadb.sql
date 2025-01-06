@@ -72,7 +72,7 @@ create table if not exists tri.users
     password_hash       varchar(256)                           not null,
     description         varchar(4096)                          null,
     created_at          timestamp  default current_timestamp() not null,
-    updated_at          timestamp  default current_timestamp() not null,
+    updated_at          timestamp  default current_timestamp() not null on update current_timestamp(),
     deleted_at          timestamp                              null,
     lastlogin           timestamp                              null,
     secondlastlogin     timestamp                              null,

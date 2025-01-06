@@ -14,7 +14,7 @@ export async function importUsers(db: TriDB, srcFile: string) {
 
     console.log("Inserting " + data.length + " rows...");
 
-    const query = "INSERT INTO tri.users (username, legal_name, country, state, password_hash) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE password_hash = ?";
+    const query = "INSERT INTO tri.users (username, legal_name, country, state, password_hash) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE state = ?";
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
@@ -26,7 +26,7 @@ export async function importUsers(db: TriDB, srcFile: string) {
             row[header.indexOf("country")],
             row[header.indexOf("state")],
             hash,
-            hash
+            row[header.indexOf("state")]
         ];
 
         if (params.some(p => p === undefined)) {
