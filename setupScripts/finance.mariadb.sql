@@ -111,3 +111,17 @@ create table if not exists finance.splits
     engine = InnoDB
     collate = utf8mb4_general_ci;
 
+create table if not exists finance.paypal_batch_payments
+(
+    id                  bigint auto_increment
+        primary key,
+    paypal_batch_id     varchar(32)                                              null,
+    request_items_json  longtext collate utf8mb4_bin default '[]'                not null
+        check (json_valid(`request_items_json`)),
+    paypal_batch_status varchar(48)                  default 'UNKNOWN'           not null,
+    created_at          datetime                     default current_timestamp() not null,
+    updated_at          datetime                     default current_timestamp() not null on update current_timestamp()
+);
+
+create index if not exists paypal_batch_payments_paypal_batch_id_index
+    on finance.paypal_batch_payments (paypal_batch_id);

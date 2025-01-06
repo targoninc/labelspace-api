@@ -5,8 +5,11 @@ import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import {Paypal} from "../../utility/Paypal/Paypal.ts";
 import {Mail} from "../../utility/Mail/Mail.ts";
-import {link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.ts";
+import {MailBuilder} from "../../utility/Mail/MailBuilder.ts";
 import {CLI} from "../../utility/CLI.ts";
+import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHeader.ts";
+import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
+import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
 
 export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
     private readonly db: TriDB;
@@ -32,9 +35,14 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
             return res.status(400).send({error: `Money is available, but below minimum (minimum ${minimum})`});
         }
 
+        const userMails = await this.db.getUserEmails(user.id);
+        const paypalMail = userMails.find(m => m.primary && m.verified);
+        if (!paypalMail) {
+            return res.status(400).send({error: "No valid paypal mail found"});
+        }
+
         CLI.info(`Requesting payment for ${user.id} for ${available.available}`);
         await this.db.createPaymentRequest(user.id, available.available, PaymentStatus.requested);
-        const userMails = await this.db.getUserEmails(user.id);
 
         const mailContent = MailBuilder.default()
             .subject("Tri Artist payment requested")
@@ -50,7 +58,32 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
             }
         }
 
-        //Paypal.send
+        const items: PaypalPayoutItem[] = [
+            {
+                amount: {
+                    currency_code: "USD",
+                    value: available.available.toString()
+                },
+                receiver: paypalMail.email
+            }
+        ];
+        await this.db.createPaypalBatchPayment(items);
+        const senderBatchId = await this.db.getLastBatchIdMatchingItems(items);
+
+        const batchHeader: PaypalBatchHeader = {
+            sender_batch_id: senderBatchId,
+            note: "Artist Space payment",
+            recipient_type: "EMAIL",
+            email_subject: "Artist Space payment",
+            email_message: "Artist Space payment for " + user.username + " over " + available.available + " USD"
+        }
+        try {
+            await Paypal.createBatchPayout(items, batchHeader);
+            await this.db.updatePaypalBatchPaymentStatus(senderBatchId, PaypalBatchStatus.PENDING);
+        } catch (e) {
+            console.error(e);
+            return res.status(500).send({error: "Failed to create batch payout"});
+        }
 
         return res.send();
     }

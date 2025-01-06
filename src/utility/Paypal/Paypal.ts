@@ -1,8 +1,10 @@
 import {SubscriptionTransactionsResponse} from "./models/SubscriptionTransactionsResponse.js";
 import {ListPlansResponse} from "./models/ListPlansResponse.js";
 import {CreatedPaypalWebhook} from "./models/CreatedPaypalWebhook.js";
-import {PaypalWebhook} from "../../models/db/finance/PaypalWebhook.js";
 import {PaypalWebhookList} from "./models/PaypalWebhookList.js";
+import type {PaypalBatchHeader} from "./models/PaypalBatchHeader.ts";
+import type {PaypalPayoutItem} from "./models/PaypalPayoutItem.ts";
+import type {PaypalBatchPayoutResponse} from "./models/PaypalBatchPayoutResponse.ts";
 
 let bearerToken: string|null = null;
 
@@ -122,5 +124,9 @@ export class Paypal {
 
     static async listWebhooks() {
         return await Paypal.callEndpointWithResponse<PaypalWebhookList>("GET", "notifications/webhooks");
+    }
+
+    static async createBatchPayout(items: PaypalPayoutItem[], batchHeader: PaypalBatchHeader) {
+        return await Paypal.callEndpointWithResponse<PaypalBatchPayoutResponse>("POST", "payments/payouts", batchHeader);
     }
 }

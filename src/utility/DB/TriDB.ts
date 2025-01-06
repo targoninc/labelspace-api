@@ -20,6 +20,8 @@ import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {Statistic} from "../../models/interfaces/Statistic.js";
 import type {Payment} from "../../models/db/finance/Payment.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
+import type {PaypalPayoutItem} from "../Paypal/models/PaypalPayoutItem.ts";
+import type {PaypalBatchStatus} from "../Paypal/models/PaypalBatchStatus.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -481,5 +483,17 @@ export class TriDB extends MariaDB {
             return [];
         }
         return await this.query("SELECT * FROM tri.albums WHERE id IN (?)", [realIds.join(",")]);
+    }
+
+    async createPaypalBatchPayment(items: PaypalPayoutItem[]) {
+        await this.query("INSERT INTO finance.paypal_batch_payments (request_items_json) VALUES (?)", [JSON.stringify(items)]);
+    }
+
+    async getLastBatchIdMatchingItems(items: PaypalPayoutItem[]) {
+        return await this.querySingleValue("SELECT paypal_batch_id FROM finance.paypal_batch_payments WHERE request_items_json = ? ORDER BY created_at DESC LIMIT 1", [JSON.stringify(items)]);
+    }
+
+    async updatePaypalBatchPaymentStatus(senderBatchId: number, status: PaypalBatchStatus) {
+        await this.query("UPDATE finance.paypal_batch_payments SET paypal_batch_status = ? WHERE id = ?", [status, senderBatchId]);
     }
 }

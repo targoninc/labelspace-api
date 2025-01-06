@@ -1,0 +1,11 @@
+export enum PaypalPayoutPurpose {
+    AWARDS = "AWARDS",
+    PRIZES = "PRIZES",
+    DONATIONS = "DONATIONS",
+    GOODS = "GOODS",
+    SERVICES = "SERVICES",
+    REBATES = "REBATES",
+    CASHBACK = "CASHBACK",
+    DISCOUNTS = "DISCOUNTS",
+    NON_GOODS_OR_SERVICES = "NON_GOODS_OR_SERVICES",
+}
