@@ -25,6 +25,8 @@ import type {PaypalBatchStatus} from "../Paypal/models/PaypalBatchStatus.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {PaypalWebhook} from "../Paypal/internalModels/PaypalWebhook.ts";
 import {uuidv4} from "uuidv7";
+import type {PaymentRequest} from "../../models/db/finance/PaymentRequest.ts";
+import type {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -551,5 +553,30 @@ export class TriDB extends MariaDB {
                           VALUES (?, ?, ?, ?) ON DUPLICATE KEY
                 UPDATE type = ?, content = ?, paypal_user_id = ?`,
             [dbEntry.id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id]);
+    }
+
+    async getPaymentRequestsByUserIdAndStatus(id: number): Promise<PaymentRequest[]> {
+        return await this.query("SELECT * FROM finance.requests WHERE user_id = ?", [id]);
+    }
+
+    async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment> {
+        return await this.queryFirst("SELECT * FROM finance.paypal_batch_payments WHERE paypal_batch_id = ?", [ownBatchId]);
+    }
+
+    async updateBatchPaymentStatus(ownBatchId: string, batch_status: PaypalBatchStatus | undefined) {
+        await this.query("UPDATE finance.paypal_batch_payments SET paypal_batch_status = ? WHERE paypal_batch_id = ?",
+            [batch_status, ownBatchId]);
+    }
+
+    async updateLastPaymentRequestFromUserId(id: number, status: PaymentStatus) {
+        await this.query("UPDATE finance.requests SET status = ? WHERE user_id = ?", [status, id]);
+    }
+
+    async getPaymentRequestByBatchId(ownBatchId: string): Promise<PaymentRequest|null> {
+        return await this.queryFirst("SELECT * FROM finance.requests WHERE payout_batch_id = ?", [ownBatchId]);
+    }
+
+    async updatePaymentRequestByBatchId(ownBatchId: string, status: PaymentStatus) {
+        await this.query("UPDATE finance.requests SET status = ? WHERE payout_batch_id = ?", [status, ownBatchId]);
     }
 }

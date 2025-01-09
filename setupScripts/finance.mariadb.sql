@@ -31,7 +31,7 @@ create table if not exists finance.requests
     user_id    bigint                                   null,
     amount     float                                    not null,
     created_at datetime     default current_timestamp() not null,
-    update_at  datetime     default current_timestamp() not null on update current_timestamp(),
+    updated_at datetime     default current_timestamp() not null on update current_timestamp(),
     status     varchar(128) default 'requested'         not null,
     constraint requests_users_id_fk
         foreign key (user_id) references tri.users (id)

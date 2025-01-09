@@ -71,6 +71,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         if (!senderBatchId) {
             return res.status(500).send({error: "Failed to create batch payout"});
         }
+        await this.db.updateLastPaymentRequestFromUserId(user.id, PaymentStatus.requested);
 
         const batchHeader: PaypalBatchHeader = {
             sender_batch_id: senderBatchId,
