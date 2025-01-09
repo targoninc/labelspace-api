@@ -13,7 +13,6 @@ export function PassportStrategy(db: TriDB) {
         },
         async (username: string, password: string, done: (err: Error | null, user?: any, info?: any) => void) => {
             const user = await db.getUserByUsername(username);
-            console.log(user);
             if (!user) {
                 return done(null, false, {message: "Incorrect username."});
             }

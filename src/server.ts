@@ -88,7 +88,10 @@ const rateLimitWindowInMin = 1;
 app.use(rateLimit({
     windowMs: rateLimitWindowInMin * 60 * 1000,
     limit: 500,
-    message: `Too many requests, please try again in ${rateLimitWindowInMin} minutes.`
+    message: `Too many requests, please try again in ${rateLimitWindowInMin} minutes.`,
+    validate: {
+        xForwardedForHeader: false
+    }
 }));
 
 // region Users
