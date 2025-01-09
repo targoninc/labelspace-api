@@ -43,9 +43,10 @@ import {RoyaltiesByYearEndpoint} from "./endpoints/statistics/RoyaltiesByYearEnd
 import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
 import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailablePaymentAmountEndpoint.ts";
 import {GetAlbumsEndpoint} from "./endpoints/albums/GetAlbumsEndpoint.ts";
-import {ImportDataEndpoint} from "./endpoints/migration/ImportDataEndpoint.ts";
+import {ImportDataEndpoint} from "./endpoints/data/ImportDataEndpoint.ts";
 import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtistEndpoint.ts";
 import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoint.ts";
+import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
 
 config();
 
@@ -77,7 +78,9 @@ setupPassport(app, db);
 
 app.use(passport.initialize());
 app.use(passport.session(<SessionOptions>{}));
-app.use(express.json());
+app.use(express.json({
+    limit: "100mb"
+}));
 
 const rateLimitWindowInMin = 1;
 app.use(rateLimit({
@@ -151,8 +154,9 @@ new SearchAlbumsEndpoint(app, "/search/albums", db).register();
 new GetLogsEndpoint(app, "/logs/get", db).register();
 // endregion
 
-// region Migration
-new ImportDataEndpoint(app, "/migration/import", db).register();
+// region Data
+new ImportDataEndpoint(app, "/data/import", db).register();
+new AddDataEndpoint(app, "/data/add", db).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {

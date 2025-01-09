@@ -22,6 +22,7 @@ import type {Payment} from "../../models/db/finance/Payment.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import type {PaypalPayoutItem} from "../Paypal/models/PaypalPayoutItem.ts";
 import type {PaypalBatchStatus} from "../Paypal/models/PaypalBatchStatus.ts";
+import type {Royalty} from "../../models/db/finance/Royalty.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -101,7 +102,7 @@ export class TriDB extends MariaDB {
 
     async createTrack(track: Partial<Track>): Promise<Track> {
         await this.query(`INSERT INTO tri.tracks (user_id, title, isrc, upc, monetization, genre, description,
-                                              secretcode, release_date, price)
+                                                  secretcode, release_date, price)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             track.user_id,
             track.title,
@@ -168,14 +169,14 @@ export class TriDB extends MariaDB {
     async getRoyaltiesByTrack(artistNames: string[], limit: number): Promise<Statistic[]> {
         const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
-        return await this.query(`SELECT r.isrc as id,
-                    r.title as label,
-                    SUM(r.royalty) as value
-             FROM finance.royalties r
-             WHERE ${artistConditions}
-             GROUP BY r.isrc
-             ORDER BY SUM(r.royalty) DESC
-             LIMIT ?`,
+        return await this.query(`SELECT r.isrc         as id,
+                                        r.title        as label,
+                                        SUM(r.royalty) as value
+                                 FROM finance.royalties r
+                                 WHERE ${artistConditions}
+                                 GROUP BY r.isrc
+                                 ORDER BY SUM(r.royalty) DESC
+                                 LIMIT ?`,
             [...artistNamesLike, limit]);
     }
 
@@ -185,13 +186,12 @@ export class TriDB extends MariaDB {
             const likeCondition = `%${artistName}%`;
 
             const row = await this.queryFirst(`
-                SELECT
-                    ? as id,
-                    ? as label,
-                    SUM(r.royalty) as value
-                FROM finance.royalties r
-                WHERE r.trackartists LIKE ?
-                LIMIT 1`,
+                        SELECT ?              as id,
+                               ?              as label,
+                               SUM(r.royalty) as value
+                        FROM finance.royalties r
+                        WHERE r.trackartists LIKE ?
+                        LIMIT 1`,
                 [artistName, artistName, likeCondition]);
             if (row) {
                 rows.push(row);
@@ -218,8 +218,8 @@ export class TriDB extends MariaDB {
         const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
         return await this.query(
-            `SELECT r.period1 as id,
-                    r.period1 as label,
+            `SELECT r.period1    as id,
+                    r.period1    as label,
                     SUM(royalty) as value
              FROM finance.royalties r
              WHERE ${artistConditions}
@@ -236,7 +236,7 @@ export class TriDB extends MariaDB {
         return await this.query(
             `SELECT SUBSTR(r.period1, 5) as id,
                     SUBSTR(r.period1, 5) as label,
-                    SUM(royalty) as value
+                    SUM(royalty)         as value
              FROM finance.royalties r
              WHERE ${artistConditions}
              GROUP BY SUBSTR(r.period1, 5)
@@ -257,7 +257,8 @@ export class TriDB extends MariaDB {
         const qMarks = isrcs.map(() => "?").join(", ");
         let sql = `SELECT SUM(r.royalty) as value
                    FROM finance.royalties r
-                   WHERE r.isrc NOT IN (${qMarks}) AND ${artistConditions}`;
+                   WHERE r.isrc NOT IN (${qMarks})
+                     AND ${artistConditions}`;
         return await this.querySingleValue(sql, [...artistNamesLike, ...isrcs]);
     }
 
@@ -267,7 +268,9 @@ export class TriDB extends MariaDB {
         }
 
         const qs = ids.map(() => "?").join(",");
-        return await this.query(`SELECT * FROM tri.permissions WHERE id IN (${qs})`, ids);
+        return await this.query(`SELECT *
+                                 FROM tri.permissions
+                                 WHERE id IN (${qs})`, ids);
     }
 
     async getPermissions(): Promise<Permission[]> {
@@ -495,5 +498,42 @@ export class TriDB extends MariaDB {
 
     async updatePaypalBatchPaymentStatus(senderBatchId: number, status: PaypalBatchStatus) {
         await this.query("UPDATE finance.paypal_batch_payments SET paypal_batch_status = ? WHERE id = ?", [status, senderBatchId]);
+    }
+
+    async getTopRoyaltyId(): Promise<number> {
+        return await this.querySingleValue("SELECT MAX(id) FROM finance.royalties");
+    }
+
+    async deleteRoyaltiesAboveId(currentTopId: number) {
+        await this.query("DELETE FROM finance.royalties WHERE id > ?", [currentTopId]);
+    }
+
+    async insertRoyalty(row: Royalty) {
+        await this.query(`INSERT INTO finance.royalties
+                          (period1, label, releasename, releaseartists, upc, catalogue, title, mixver, isrc,
+                           trackartists, provider, period2, territory, delivery, type, salevoid, count, 
+                           royalty, dataprovider, id)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+            row.period1,
+            row.label,
+            row.releasename,
+            row.releaseartists,
+            row.upc,
+            row.catalogue,
+            row.title,
+            row.mixver,
+            row.isrc,
+            row.trackartists,
+            row.provider,
+            row.period2,
+            row.territory,
+            row.delivery,
+            row.type,
+            row.salevoid,
+            row.count,
+            row.royalty,
+            row.dataprovider,
+            row.id
+        ]);
     }
 }

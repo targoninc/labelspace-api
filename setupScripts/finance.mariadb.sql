@@ -80,6 +80,7 @@ create table if not exists finance.royalties
     count          int(4)                                   null,
     royalty        double                                   null,
     dataprovider   varchar(128) default 'Symphonic'         null,
+    created_at     datetime     default current_timestamp() not null,
     updated_at     datetime     default current_timestamp() not null on update current_timestamp(),
     id             int auto_increment
         primary key
