@@ -9,6 +9,7 @@ import {CLI} from "../../utility/CLI.ts";
 import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHeader.ts";
 import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
+import {uuidv4} from "uuidv7";
 
 export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -41,7 +42,8 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         }
 
         CLI.info(`Requesting payment for ${user.id} for ${available.available}`);
-        await this.db.createPaymentRequest(user.id, available.available, PaymentStatus.requested);
+        const batchId = uuidv4();
+        await this.db.createPayment(user.id, available.available, PaymentStatus.requested, batchId);
 
         const mailContent = MailBuilder.default()
             .subject("Tri Artist payment requested")
@@ -66,15 +68,11 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
                 receiver: paypalMail.email
             }
         ];
-        await this.db.createPaypalBatchPayment(items);
-        const senderBatchId = await this.db.getLastBatchIdMatchingItems(items);
-        if (!senderBatchId) {
-            return res.status(500).send({error: "Failed to create batch payout"});
-        }
-        await this.db.updateLastPaymentRequestFromUserId(user.id, PaymentStatus.requested);
+        await this.db.createPaypalBatchPayment(items, batchId);
+        await this.db.updatePaymentByBatchId(batchId, PaymentStatus.requested);
 
         const batchHeader: PaypalBatchHeader = {
-            sender_batch_id: senderBatchId,
+            sender_batch_id: batchId,
             note: "Artist Space payment",
             recipient_type: "EMAIL",
             email_subject: "Artist Space payment",
@@ -89,7 +87,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
                 }
             });
             await Paypal.createBatchPayout(items, batchHeader);
-            await this.db.updatePaypalBatchPaymentStatus(senderBatchId, PaypalBatchStatus.PENDING);
+            await this.db.updatePaypalBatchPaymentStatus(batchId, PaypalBatchStatus.PENDING);
         } catch (e) {
             console.error(e);
             return res.status(500).send({error: "Failed to create batch payout"});

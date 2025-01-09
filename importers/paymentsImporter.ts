@@ -13,7 +13,7 @@ export async function importPayments(db: TriDB, srcFile: string) {
 
     console.log("Inserting " + data.length + " rows...");
 
-    const query = "INSERT INTO finance.payments (date, user_id, amount) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE amount = ?";
+    const query = "INSERT INTO finance.payments (created_at, updated_at, status, user_id, amount, payout_batch_id) VALUES (?, ?, 'paid', ?, ?, 'unknown') ON DUPLICATE KEY UPDATE amount = ?";
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
@@ -24,7 +24,8 @@ export async function importPayments(db: TriDB, srcFile: string) {
         }
 
         const params = [
-            row[header.indexOf("date")],
+            new Date(row[header.indexOf("date")]),
+            new Date(row[header.indexOf("date")]),
             userId,
             row[header.indexOf("amount")],
             row[header.indexOf("amount")]

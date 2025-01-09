@@ -15,11 +15,7 @@ export class GetPaymentsEndpoint extends AuthenticatedGetEndpoint {
         const user = req.user;
 
         const payments = await this.db.getPaymentsByUserId(user.id);
-        const requests = await this.db.getPaymentRequestsByUserIdAndStatus(user.id);
 
-        return res.send({
-            payments,
-            requests
-        });
+        return res.send(payments);
     }
 }

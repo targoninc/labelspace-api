@@ -30,24 +30,14 @@ export class PaypalWebhookHandler {
     }
 
     private async handlePayoutBatchProcessing(event: PaypalPayoutBatchEvent) {
-        const ownBatchId = event.resource?.batch_header.sender_batch_header.sender_batch_id;
-        if (!ownBatchId) {
-            throw new Error("Sender Batch ID not defined in event");
-        }
-        const batchPayment = await this.db.getPaypalBatchPayment(ownBatchId);
-        if (!batchPayment) {
-            throw new Error(`Correlating payment request not found for own batch ID ${ownBatchId}`);
-        }
-        await this.db.updateBatchPaymentStatus(ownBatchId, event.resource?.batch_header.batch_status);
-
-        const request = await this.db.getPaymentRequestByBatchId(ownBatchId);
-        if (!request) {
-            throw new Error(`Correlating payment request not found for own batch ID ${ownBatchId}`);
-        }
-        await this.db.updatePaymentRequestByBatchId(ownBatchId, PaymentStatus.processing);
+        await this.handlePayoutBatchUpdate(event, PaymentStatus.processing);
     }
 
     private async handlePayoutBatchSuccess(event: PaypalPayoutBatchEvent) {
+        await this.handlePayoutBatchUpdate(event, PaymentStatus.paid);
+    }
+
+    private async handlePayoutBatchUpdate(event: PaypalPayoutBatchEvent, newStatus: PaymentStatus) {
         const ownBatchId = event.resource?.batch_header.sender_batch_header.sender_batch_id;
         if (!ownBatchId) {
             throw new Error("Sender Batch ID not defined in event");
@@ -58,10 +48,10 @@ export class PaypalWebhookHandler {
         }
         await this.db.updateBatchPaymentStatus(ownBatchId, event.resource?.batch_header.batch_status);
 
-        const request = await this.db.getPaymentRequestByBatchId(ownBatchId);
-        if (!request) {
-            throw new Error(`Correlating payment request not found for own batch ID ${ownBatchId}`);
+        const payment = await this.db.getPaymentByBatchId(ownBatchId);
+        if (!payment) {
+            throw new Error(`Correlating payment not found for own batch ID ${ownBatchId}`);
         }
-        await this.db.updatePaymentRequestByBatchId(ownBatchId, PaymentStatus.paid);
+        await this.db.updatePaymentByBatchId(ownBatchId, newStatus);
     }
 }

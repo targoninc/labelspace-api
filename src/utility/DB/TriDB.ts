@@ -455,21 +455,15 @@ export class TriDB extends MariaDB {
         return await this.querySingleValue("SELECT SUM(amount) FROM finance.payments WHERE user_id = ?", [id]);
     }
 
-    async getUserRequestedAmount(id: number) {
-        return await this.querySingleValue("SELECT SUM(amount) FROM finance.requests WHERE user_id = ?", [id]);
-    }
-
     async getAvailablePaymentAmount(id: number, artistNames: string[]) {
         const total = await this.getArtistTotalRoyalty(artistNames);
         const paidOut = await this.getUserPaidAmount(id);
-        const requested = await this.getUserRequestedAmount(id);
-        const paid = paidOut + requested;
 
         const artistCut = 0.85;
         const artistTotal = total * artistCut;
         return {
             total: artistTotal,
-            paidOut: paid,
+            paidOut,
             available: 0.01 //artistTotal - paid
         };
     }
@@ -486,8 +480,9 @@ export class TriDB extends MariaDB {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
     }
 
-    async createPaymentRequest(userId: number, amount: number, status: PaymentStatus) {
-        await this.query("INSERT INTO finance.requests (user_id, amount, status) VALUES (?, ?, ?)", [userId, amount, status]);
+    async createPayment(userId: number, amount: number, status: PaymentStatus, batchId: string) {
+        await this.query("INSERT INTO finance.payments (user_id, amount, status, payout_batch_id) VALUES (?, ?, ?, ?)",
+            [userId, amount, status, batchId]);
     }
 
     async getAlbumsByIds(albumIds: (number | undefined)[]): Promise<Album[]> {
@@ -498,16 +493,11 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.albums WHERE id IN (?)", [realIds.join(",")]);
     }
 
-    async createPaypalBatchPayment(items: PaypalPayoutItem[]) {
-        const guid = uuidv4();
+    async createPaypalBatchPayment(items: PaypalPayoutItem[], guid: string) {
         await this.query("INSERT INTO finance.paypal_batch_payments (request_items_json, paypal_batch_id) VALUES (?, ?)", [JSON.stringify(items), guid]);
     }
 
-    async getLastBatchIdMatchingItems(items: PaypalPayoutItem[]) {
-        return await this.querySingleValue("SELECT paypal_batch_id FROM finance.paypal_batch_payments WHERE request_items_json = ? ORDER BY created_at DESC LIMIT 1", [JSON.stringify(items)]);
-    }
-
-    async updatePaypalBatchPaymentStatus(senderBatchId: number, status: PaypalBatchStatus) {
+    async updatePaypalBatchPaymentStatus(senderBatchId: string, status: PaypalBatchStatus) {
         await this.query("UPDATE finance.paypal_batch_payments SET paypal_batch_status = ? WHERE id = ?", [status, senderBatchId]);
     }
 
@@ -555,10 +545,6 @@ export class TriDB extends MariaDB {
             [dbEntry.id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id]);
     }
 
-    async getPaymentRequestsByUserIdAndStatus(id: number): Promise<PaymentRequest[]> {
-        return await this.query("SELECT * FROM finance.requests WHERE user_id = ?", [id]);
-    }
-
     async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment> {
         return await this.queryFirst("SELECT * FROM finance.paypal_batch_payments WHERE paypal_batch_id = ?", [ownBatchId]);
     }
@@ -568,15 +554,11 @@ export class TriDB extends MariaDB {
             [batch_status, ownBatchId]);
     }
 
-    async updateLastPaymentRequestFromUserId(id: number, status: PaymentStatus) {
-        await this.query("UPDATE finance.requests SET status = ? WHERE user_id = ?", [status, id]);
+    async getPaymentByBatchId(ownBatchId: string): Promise<PaymentRequest|null> {
+        return await this.queryFirst("SELECT * FROM finance.payments WHERE payout_batch_id = ?", [ownBatchId]);
     }
 
-    async getPaymentRequestByBatchId(ownBatchId: string): Promise<PaymentRequest|null> {
-        return await this.queryFirst("SELECT * FROM finance.requests WHERE payout_batch_id = ?", [ownBatchId]);
-    }
-
-    async updatePaymentRequestByBatchId(ownBatchId: string, status: PaymentStatus) {
-        await this.query("UPDATE finance.requests SET status = ? WHERE payout_batch_id = ?", [status, ownBatchId]);
+    async updatePaymentByBatchId(ownBatchId: string, status: PaymentStatus) {
+        await this.query("UPDATE finance.payments SET status = ? WHERE payout_batch_id = ?", [status, ownBatchId]);
     }
 }
