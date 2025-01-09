@@ -116,7 +116,7 @@ create table if not exists finance.paypal_batch_payments
 (
     id                  bigint auto_increment
         primary key,
-    paypal_batch_id     varchar(32)                                              null,
+    paypal_batch_id     varchar(255)                                             null,
     request_items_json  longtext collate utf8mb4_bin default '[]'                not null
         check (json_valid(`request_items_json`)),
     paypal_batch_status varchar(48)                  default 'UNKNOWN'           not null,
@@ -126,3 +126,32 @@ create table if not exists finance.paypal_batch_payments
 
 create index if not exists paypal_batch_payments_paypal_batch_id_index
     on finance.paypal_batch_payments (paypal_batch_id);
+
+create table if not exists finance.paypal_users
+(
+    paypal_user_id varchar(128) not null
+        primary key,
+    user_id        bigint       not null,
+    given_name     varchar(512) null,
+    surname        varchar(512) null,
+    email_address  varchar(512) null,
+    constraint paypal_users_users_id_fk
+        foreign key (user_id) references tri.users (id)
+            on delete cascade
+);
+
+create index if not exists paypal_users_userdata_paypal_paypal_user_id_fk
+    on finance.paypal_users (paypal_user_id);
+
+create table if not exists finance.paypal_webhooks
+(
+    id             varchar(128)                           not null
+        primary key,
+    type           varchar(64)                            not null,
+    received_at    datetime   default current_timestamp() not null,
+    content        longtext collate utf8mb4_bin           not null,
+    paypal_user_id varchar(128)                           not null,
+    handled        tinyint(1) default 0                   not null,
+    updated_at     datetime   default current_timestamp() not null
+);
+

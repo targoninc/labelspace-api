@@ -1,7 +1,6 @@
-import {AuthenticatedGetEndpoint} from "../base/AuthenticatedGetEndpoint.ts";
 import type {TriDB} from "../../utility/DB/TriDB.ts";
 import {Application, Response} from "express";
-import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
+import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import {Paypal} from "../../utility/Paypal/Paypal.ts";
 import {Mail} from "../../utility/Mail/Mail.ts";
@@ -11,7 +10,7 @@ import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHea
 import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
 
-export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
+export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
@@ -30,7 +29,7 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
             return res.status(400).send({error: "Not enough money available"});
         }
 
-        const minimum = 10;
+        const minimum = 0.01;
         if (available.available < minimum) {
             return res.status(400).send({error: `Money is available, but below minimum (minimum ${minimum})`});
         }
@@ -61,7 +60,7 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
         const items: PaypalPayoutItem[] = [
             {
                 amount: {
-                    currency_code: "USD",
+                    currency: "USD",
                     value: available.available.toString()
                 },
                 receiver: paypalMail.email
@@ -69,6 +68,9 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
         ];
         await this.db.createPaypalBatchPayment(items);
         const senderBatchId = await this.db.getLastBatchIdMatchingItems(items);
+        if (!senderBatchId) {
+            return res.status(500).send({error: "Failed to create batch payout"});
+        }
 
         const batchHeader: PaypalBatchHeader = {
             sender_batch_id: senderBatchId,
@@ -78,6 +80,13 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
             email_message: "Artist Space payment for " + user.username + " over " + available.available + " USD"
         }
         try {
+            CLI.debug("Creating batch payout", {
+                logToDb: true,
+                info: {
+                    items,
+                    batchHeader
+                }
+            });
             await Paypal.createBatchPayout(items, batchHeader);
             await this.db.updatePaypalBatchPaymentStatus(senderBatchId, PaypalBatchStatus.PENDING);
         } catch (e) {
@@ -85,6 +94,6 @@ export class RequestPaymentEndpoint extends AuthenticatedGetEndpoint {
             return res.status(500).send({error: "Failed to create batch payout"});
         }
 
-        return res.send();
+        return res.status(200).send();
     }
 }

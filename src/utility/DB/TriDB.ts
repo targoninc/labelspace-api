@@ -23,6 +23,8 @@ import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import type {PaypalPayoutItem} from "../Paypal/models/PaypalPayoutItem.ts";
 import type {PaypalBatchStatus} from "../Paypal/models/PaypalBatchStatus.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
+import type {PaypalWebhook} from "../Paypal/internalModels/PaypalWebhook.ts";
+import {uuidv4} from "uuidv7";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -451,16 +453,22 @@ export class TriDB extends MariaDB {
         return await this.querySingleValue("SELECT SUM(amount) FROM finance.payments WHERE user_id = ?", [id]);
     }
 
+    async getUserRequestedAmount(id: number) {
+        return await this.querySingleValue("SELECT SUM(amount) FROM finance.requests WHERE user_id = ?", [id]);
+    }
+
     async getAvailablePaymentAmount(id: number, artistNames: string[]) {
         const total = await this.getArtistTotalRoyalty(artistNames);
         const paidOut = await this.getUserPaidAmount(id);
+        const requested = await this.getUserRequestedAmount(id);
+        const paid = paidOut + requested;
 
         const artistCut = 0.85;
         const artistTotal = total * artistCut;
         return {
             total: artistTotal,
-            paidOut,
-            available: artistTotal - paidOut
+            paidOut: paid,
+            available: 0.01 //artistTotal - paid
         };
     }
 
@@ -489,7 +497,8 @@ export class TriDB extends MariaDB {
     }
 
     async createPaypalBatchPayment(items: PaypalPayoutItem[]) {
-        await this.query("INSERT INTO finance.paypal_batch_payments (request_items_json) VALUES (?)", [JSON.stringify(items)]);
+        const guid = uuidv4();
+        await this.query("INSERT INTO finance.paypal_batch_payments (request_items_json, paypal_batch_id) VALUES (?, ?)", [JSON.stringify(items), guid]);
     }
 
     async getLastBatchIdMatchingItems(items: PaypalPayoutItem[]) {
@@ -535,5 +544,12 @@ export class TriDB extends MariaDB {
             row.dataprovider,
             row.id
         ]);
+    }
+
+    async insertPaypalWebhookEvent(dbEntry: PaypalWebhook) {
+        await this.query(`INSERT INTO finance.paypal_webhooks (id, type, content, paypal_user_id)
+                          VALUES (?, ?, ?, ?) ON DUPLICATE KEY
+                UPDATE type = ?, content = ?, paypal_user_id = ?`,
+            [dbEntry.id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id]);
     }
 }

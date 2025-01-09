@@ -52,7 +52,7 @@ export class Paypal {
         }
         if (!res.ok) {
             console.log(await res.text());
-            throw new Error("Failed to call PayPal endpoint, status code " + res.status);
+            throw new Error(`Failed to call PayPal endpoint ${endpoint}, status code ` + res.status);
         }
         if (!expectsResponse) {
             return undefined;
@@ -127,6 +127,9 @@ export class Paypal {
     }
 
     static async createBatchPayout(items: PaypalPayoutItem[], batchHeader: PaypalBatchHeader) {
-        return await Paypal.callEndpointWithResponse<PaypalBatchPayoutResponse>("POST", "payments/payouts", batchHeader);
+        return await Paypal.callEndpointWithResponse<PaypalBatchPayoutResponse>("POST", "payments/payouts", {
+            sender_batch_header: batchHeader,
+            items
+        });
     }
 }

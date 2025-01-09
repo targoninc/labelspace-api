@@ -47,6 +47,8 @@ import {ImportDataEndpoint} from "./endpoints/data/ImportDataEndpoint.ts";
 import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtistEndpoint.ts";
 import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoint.ts";
 import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
+import {PaypalEventsWebhookEndpoint} from "./endpoints/webhooks/PaypalEventsWebhookEndpoint.ts";
+import {setupNgrok} from "./utility/Ngrok.ts";
 
 config();
 
@@ -159,6 +161,10 @@ new ImportDataEndpoint(app, "/data/import", db).register();
 new AddDataEndpoint(app, "/data/add", db).register();
 // endregion
 
+// region Webhooks
+new PaypalEventsWebhookEndpoint(app, "/webhooks/paypal", db).register();
+// endregion
+
 app.get("/security.txt", (req, res) => {
     CLI.debug("Serving security.txt", {
         logToDb: true,
@@ -175,3 +181,5 @@ const port = process.env.PORT || 8080;
 app.listen(port, () => {
     CLI.info(`Server is running on port http://localhost:${port}`);
 });
+
+await setupNgrok(port);
