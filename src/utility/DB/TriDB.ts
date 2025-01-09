@@ -417,7 +417,7 @@ export class TriDB extends MariaDB {
     }
 
     async getPaymentsByUserId(id: number): Promise<Payment[]> {
-        return await this.query("SELECT * FROM finance.payments WHERE user_id = ?", [id]);
+        return await this.query("SELECT * FROM finance.payments WHERE user_id = ? ORDER BY created_at DESC", [id]);
     }
 
     async getArtistRoyalty(artistNames: string[]) {

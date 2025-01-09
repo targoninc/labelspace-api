@@ -35,7 +35,7 @@ create table if not exists finance.payments
     created_at      datetime     default current_timestamp() not null,
     updated_at      datetime     default current_timestamp() not null on update current_timestamp(),
     constraint payments_pk
-        unique (amount, user_id),
+        unique (created_at, user_id, amount),
     constraint payments_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete set null
