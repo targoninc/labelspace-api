@@ -25,10 +25,8 @@ export class DeleteTrackEndpoint extends AuthenticatedPostEndpoint {
             return res.status(404).send("Track not found.");
         }
 
-        if (track.user_id !== req.user.id) {
-            if (!(await Authenticator.userHasPermission(req.user, Permissions.canDeleteTracksOfOthers, this.db))) {
-                return res.status(403).send("You are not allowed to delete this track.");
-            }
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to delete tracks.");
         }
 
         await MediaClient.deleteMediaForEntity(this.db, MediaFileType.audio, track.id);

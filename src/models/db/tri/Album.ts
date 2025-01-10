@@ -5,7 +5,6 @@ export interface Album {
     tracks?: Track[];
     user?: User;
     id: number;
-    user_id: number;
     title: string;
     upc: string;
     release_date: Date;
@@ -15,4 +14,5 @@ export interface Album {
     secretcode: string;
     has_cover: boolean;
     price: number;
+    artists: string;
 }

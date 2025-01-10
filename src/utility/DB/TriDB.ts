@@ -86,10 +86,6 @@ export class TriDB extends MariaDB {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE id = ?", [id]);
     }
 
-    async getTracksByUserId(userId: number): Promise<Track[]> {
-        return await this.query("SELECT * FROM tri.tracks WHERE user_id = ? ORDER BY created_at DESC", [userId]);
-    }
-
     async getUsersByIds(userIds: number[]): Promise<User[]> {
         if (userIds.length === 0) {
             return [];
@@ -120,19 +116,19 @@ export class TriDB extends MariaDB {
             track.link_bandcamp,
             track.link_lyda,
         ]);
-        const id = await this.querySingleValue("SELECT id FROM tri.tracks WHERE user_id = ? AND title = ?", [track.user_id, track.title]);
+        const id = await this.querySingleValue("SELECT id FROM tri.tracks WHERE title = ? ORDER BY created_at DESC LIMIT 1", [track.title]);
         return await this.getTrackById(id);
     }
 
     async createAlbum(album: Album): Promise<Album> {
-        await this.query("INSERT INTO tri.albums (user_id, title, upc, release_date, price) VALUES (?, ?, ?, ?, ?)", [
-            album.user_id,
+        await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists) VALUES (?, ?, ?, ?, ?)", [
             album.title,
             album.upc,
             album.release_date,
-            album.price
+            album.price,
+            album.artists,
         ]);
-        const id = await this.querySingleValue("SELECT id FROM tri.albums WHERE user_id = ? ORDER BY created_at DESC", [album.user_id]);
+        const id = await this.querySingleValue("SELECT id FROM tri.albums WHERE title = ? ORDER BY created_at DESC LIMIT 1", [album.title]);
         return await this.getAlbumById(id);
     }
 
@@ -162,13 +158,6 @@ export class TriDB extends MariaDB {
             return [];
         }
         return await this.query("SELECT * FROM tri.tracks WHERE album_id IN (?)", [albumIds]);
-    }
-
-    async getUsersByAlbumIds(albumIds: number[]): Promise<User[]> {
-        if (albumIds.length === 0) {
-            return [];
-        }
-        return await this.query("SELECT * FROM tri.users WHERE id IN (SELECT user_id FROM tri.albums WHERE id IN (?))", [albumIds]);
     }
 
     async getRoyaltiesByTrack(artistNames: string[], limit: number): Promise<Statistic[]> {
@@ -471,14 +460,6 @@ export class TriDB extends MariaDB {
 
     async getAlbums(): Promise<Album[]> {
         return await this.query("SELECT * FROM tri.albums");
-    }
-
-    async getAlbumByUpc(upc: string): Promise<Album> {
-        return await this.queryFirst("SELECT * FROM tri.albums WHERE upc = ?", [upc]);
-    }
-
-    async getTrackByIsrc(isrc: string): Promise<Track> {
-        return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
     }
 
     async createPayment(userId: number, amount: number, status: PaymentStatus, batchId: string) {

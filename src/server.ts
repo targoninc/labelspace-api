@@ -13,7 +13,6 @@ import {GetPermissionsEndpoint} from "./endpoints/user/GetPermissionsEndpoint.js
 import {UpdateSettingEndpoint} from "./endpoints/user/actions/UpdateSettingEndpoint.js";
 import {ensureDatabaseConsistency, setupPassport} from "./utility/DB/Database.js";
 import {LogoutEndpoint} from "./endpoints/auth/LogoutEndpoint.js";
-import {GetTracksByUserEndpoint} from "./endpoints/tracks/GetTracksByUserEndpoint.js";
 import {TriDB} from "./utility/DB/TriDB.js";
 import {SearchUsersEndpoint} from "./endpoints/search/SearchUsersEndpoint.js";
 import {UploadMediaEndpoint} from "./endpoints/media/UploadMediaEndpoint.js";
@@ -21,7 +20,6 @@ import {RequestPasswordResetEndpoint} from "./endpoints/auth/RequestPasswordRese
 import {ResetPasswordEndpoint} from "./endpoints/auth/ResetPasswordEndpoint.js";
 import {VerifyEmailEndpoint} from "./endpoints/auth/VerifyEmailEndpoint.js";
 import {DeleteTrackEndpoint} from "./endpoints/tracks/DeleteTrackEndpoint.js";
-import {DeleteUserEndpoint} from "./endpoints/user/actions/DeleteUserEndpoint.js";
 import {GetImageEndpoint} from "./endpoints/media/GetImageEndpoint.js";
 import {ExportUserDataEndpoint} from "./endpoints/user/actions/ExportUserDataEndpoint.js";
 import {CreateAlbumEndpoint} from "./endpoints/albums/actions/CreateAlbumEndpoint.js";
@@ -96,7 +94,6 @@ app.use(rateLimit({
 }));
 
 // region Users
-new DeleteUserEndpoint(app, "/user/actions/delete", db).register();
 new LoginEndpoint(app, "/user/actions/login", db).register();
 new LogoutEndpoint(app, "/user/actions/logout").register();
 new ChangePasswordEndpoint(app, "/user/actions/change-password", db).register();
@@ -120,7 +117,6 @@ new GetPermissionsEndpoint(app, "/user/permissions", db).register();
 new GetTrackEndpoint(app, "/tracks/byId", db).register();
 new CreateTrackEndpoint(app, "/tracks/create", db).register();
 new DeleteTrackEndpoint(app, "/tracks/actions/delete", db).register();
-new GetTracksByUserEndpoint(app, "/tracks/byUserId", db).register();
 new UpdateTrackFullEndpoint(app, "/tracks/actions/update", db).register();
 // endregion
 

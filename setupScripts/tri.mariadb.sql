@@ -126,7 +126,7 @@ create table if not exists tri.albums
 (
     id             bigint auto_increment
         primary key,
-    user_id        bigint                                   null,
+    artists        mediumtext                               not null,
     compilation_id int                                      null,
     title          varchar(512) default ''                  not null,
     upc            varchar(16)                              null,
@@ -139,10 +139,7 @@ create table if not exists tri.albums
         unique (upc),
     constraint albums_compilations_id_fk
         foreign key (compilation_id) references tri.compilations (id)
-            on delete set null,
-    constraint albums_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade
+            on delete set null
 );
 
 create table if not exists tri.tracks
