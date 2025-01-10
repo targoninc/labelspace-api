@@ -4,6 +4,7 @@ import {Authenticator} from "../../../models/Authenticator.js";
 import {TriDB} from "../../../utility/DB/TriDB.js";
 import {CLI} from "../../../utility/CLI.js";
 import {UploadTrackRequestBody} from "../../../models/interfaces/UploadTrackRequestBody.js";
+import {Permissions} from "../../../models/enums/Permissions.ts";
 
 export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -14,8 +15,13 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        if (!Authenticator.guardEndpoint(req, res)) {
-            return;
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to create tracks.");
         }
 
         let body: UploadTrackRequestBody = req.body;

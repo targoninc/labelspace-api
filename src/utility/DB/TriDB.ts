@@ -459,7 +459,7 @@ export class TriDB extends MariaDB {
     }
 
     async getAlbums(): Promise<Album[]> {
-        return await this.query("SELECT * FROM tri.albums");
+        return await this.query("SELECT * FROM tri.albums ORDER BY release_date DESC");
     }
 
     async createPayment(userId: number, amount: number, status: PaymentStatus, batchId: string) {
@@ -547,5 +547,13 @@ export class TriDB extends MariaDB {
     async updateAlbum(album: Partial<Album>) {
         await this.query("UPDATE tri.albums SET title = ?, upc = ?, release_date = ?, price = ? WHERE id = ?",
             [album.title, album.upc, album.release_date, album.price, album.id]);
+    }
+
+    async removeTrackFromAlbum(album_id: number, track_id: number) {
+        await this.query("UPDATE tri.tracks SET album_id = NULL WHERE album_id = ? AND id = ?", [album_id, track_id]);
+    }
+
+    async getTracks(): Promise<Track[]> {
+        return await this.query("SELECT * FROM tri.tracks ORDER BY release_date DESC");
     }
 }

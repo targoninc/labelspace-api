@@ -2,6 +2,7 @@ import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/Authen
 import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
+import {Permissions} from "../../../models/enums/Permissions.ts";
 
 export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -12,8 +13,13 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        if (!Authenticator.guardEndpoint(req, res)) {
-            return;
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to edit albums.");
         }
 
         let body = req.body;
@@ -32,9 +38,9 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
 
         let addedErrors = 0;
         for (const id of album_ids) {
-            await this.db.removeTrackFromAlbum(id, req.user.id, track_id);
+            await this.db.removeTrackFromAlbum(id, track_id);
         }
 
-        return res.send(`Track successfully added to ${album_ids.length - addedErrors} albums`);
+        return res.send(`Track successfully removed from ${album_ids.length - addedErrors} albums`);
     }
 }

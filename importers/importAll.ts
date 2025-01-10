@@ -15,6 +15,6 @@ export async function importAll(db: TriDB, srcDir: string) {
     await importPayments(db, path.join(srcDir, "payments.csv"));
 
     await importCompilations(db, path.join(srcDir, "compilations.csv"));
-    await importAlbums(db, path.join(srcDir, "albums.csv"));
+    await importAlbums(db, path.join(srcDir, "albums.csv"), path.join(srcDir, "tracks.csv"));
     await importTracks(db, path.join(srcDir, "tracks.csv"));
 }

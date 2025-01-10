@@ -48,6 +48,7 @@ import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
 import {PaypalEventsWebhookEndpoint} from "./endpoints/webhooks/PaypalEventsWebhookEndpoint.ts";
 import {setupNgrok} from "./utility/Ngrok.ts";
 import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFullEndpoint.ts";
+import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 
 config();
 
@@ -115,6 +116,7 @@ new GetPermissionsEndpoint(app, "/user/permissions", db).register();
 
 // region Tracks
 new GetTrackEndpoint(app, "/tracks/byId", db).register();
+new GetTracksEndpoint(app, "/tracks/get", db).register();
 new CreateTrackEndpoint(app, "/tracks/create", db).register();
 new DeleteTrackEndpoint(app, "/tracks/actions/delete", db).register();
 new UpdateTrackFullEndpoint(app, "/tracks/actions/update", db).register();

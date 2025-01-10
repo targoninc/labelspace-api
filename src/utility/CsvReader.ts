@@ -14,6 +14,10 @@ export async function readCsvAsync<T>(data: string): Promise<T[]> {
                 const parsedRow: Record<string, string | number> & T = {};
 
                 for (const [key, value] of Object.entries(row)) {
+                    if (value.includes("-")) {
+                        parsedRow[key] = value;
+                        continue;
+                    }
                     const triedNumber = parseFloat(value);
                     parsedRow[key] = !isNaN(triedNumber) ? triedNumber : value;
                 }
