@@ -9,7 +9,7 @@ export class SearchConfigurations {
     static albums: SearchTableConfiguration<Album> = {
         tableName: "albums",
         type: "album",
-        searchableFields: ["title", "upc", "description"],
+        searchableFields: ["title", "artists"],
         urlPrefix: "album",
         urlIdField: "id",
         hasImageField: "has_cover",
@@ -17,7 +17,7 @@ export class SearchConfigurations {
         subtitleFunction: a => `by @${a.user?.username}` ?? "Unknown user",
         enrichAfterSearchFunction: async (db, a) => {
             return await AlbumEnricher.enrichManyAsync(db, a, {
-                user: true
+                tracks: true
             });
         }
     };
@@ -25,15 +25,15 @@ export class SearchConfigurations {
     static tracks: SearchTableConfiguration<Track> = {
         tableName: "tracks",
         type: "track",
-        searchableFields: ["title", "isrc", "description"],
+        searchableFields: ["title", "isrc", "artists", "credits"],
         urlPrefix: "track",
         urlIdField: "id",
         hasImageField: "has_cover",
         displayField: "title",
-        subtitleFunction: t => `by @${t.user?.username}` ?? "Unknown user",
+        subtitleFunction: t => t.artists,
         enrichAfterSearchFunction: async (db, a) => {
             return await TrackEnricher.enrichManyAsync(db, a, {
-                user: true
+                album: true
             });
         }
     };

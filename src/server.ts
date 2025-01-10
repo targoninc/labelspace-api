@@ -49,6 +49,7 @@ import {PaypalEventsWebhookEndpoint} from "./endpoints/webhooks/PaypalEventsWebh
 import {setupNgrok} from "./utility/Ngrok.ts";
 import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFullEndpoint.ts";
 import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
+import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
 
 config();
 
@@ -126,6 +127,7 @@ new UpdateTrackFullEndpoint(app, "/tracks/actions/update", db).register();
 new GetAlbumEndpoint(app, "/albums/byId", db).register();
 new GetAlbumsEndpoint(app, "/albums/get", db).register();
 new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
+new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
 new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();
 // endregion

@@ -359,7 +359,7 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.logs WHERE logLevel >= ? ORDER BY order_id DESC LIMIT ? OFFSET ?", [logLevel, limit, offset]);
     }
 
-    async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, searchMode: SearchMode) {
+    async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, searchMode: SearchMode): Promise<T[]> {
         if (searchMode === SearchMode.exact) {
             return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ") + " LIMIT ? OFFSET ?",
                 [...searchConfiguration.searchableFields.map(() => request.query), request.limit, request.offset]);
@@ -555,5 +555,9 @@ export class TriDB extends MariaDB {
 
     async getTracks(): Promise<Track[]> {
         return await this.query("SELECT * FROM tri.tracks ORDER BY release_date DESC");
+    }
+
+    async addTrackToAlbum(album_id: number, track_id: number) {
+        await this.query("UPDATE tri.tracks SET album_id = ? WHERE id = ?", [album_id, track_id]);
     }
 }

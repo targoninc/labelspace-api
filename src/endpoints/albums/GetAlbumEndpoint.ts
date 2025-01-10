@@ -42,7 +42,6 @@ export class GetAlbumEndpoint extends GetEndpoint {
             tracks: true,
         });
 
-        album.description ??= "";
         return res.send(album);
     }
 }

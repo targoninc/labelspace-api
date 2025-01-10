@@ -35,11 +35,13 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
         const upc = body.upc ?? "";
         const release_date = new Date(body.release_date ?? today.toISOString());
         const price = body.price ?? 1;
+        const artists = body.artists ?? "";
 
         const album = await this.db.createAlbum(<Album>{
             user_id: req.user.id,
             title,
             upc,
+            artists,
             release_date,
             price
         });
