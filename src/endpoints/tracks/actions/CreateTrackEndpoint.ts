@@ -26,27 +26,33 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
         const today = new Date();
         const title = body.title ?? `Track (${today.toDateString()})`;
         const isrc = body.isrc ?? "";
-        const upc = body.upc ?? "";
-        const monetization = (body.monetization ?? false) ? 1 : 0;
         const genre = body.genre ?? "";
-        const description = body.description ?? "";
         const release_date = new Date(body.release_date ?? today.toISOString());
         const price = body.price ?? 1;
-
-        const secretcode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const artists = body.artists ?? "";
+        const credits = body.credits ?? "";
+        const link_spotify = body.link_spotify ?? "";
+        const link_youtube = body.link_youtube ?? "";
+        const link_soundcloud = body.link_soundcloud ?? "";
+        const link_applemusic = body.link_applemusic ?? "";
+        const link_bandcamp = body.link_bandcamp ?? "";
+        const link_lyda = body.link_lyda ?? "";
 
         CLI.debug("Creating track...");
         const track = await this.db.createTrack({
-            user_id: req.user.id,
             title,
             isrc,
-            upc,
-            monetization: !!monetization,
-            secretcode,
             genre,
-            description,
             release_date,
-            price
+            price,
+            artists,
+            credits,
+            link_spotify,
+            link_youtube,
+            link_soundcloud,
+            link_applemusic,
+            link_bandcamp,
+            link_lyda,
         });
         if (!track) {
             CLI.error("Failed to create track");

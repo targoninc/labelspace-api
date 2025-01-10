@@ -1,11 +1,11 @@
-import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {TriDB} from "../../utility/DB/TriDB.js";
+import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.js";
+import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
-import {Authenticator} from "../../models/Authenticator.js";
-import {CreateAlbumRequestBody} from "../../models/interfaces/CreateAlbumRequestBody.js";
-import {CLI} from "../../utility/CLI.js";
-import {Album} from "../../models/db/tri/Album.js";
-import {Permissions} from "../../models/enums/Permissions.ts";
+import {Authenticator} from "../../../models/Authenticator.js";
+import {CreateAlbumRequestBody} from "../../../models/interfaces/CreateAlbumRequestBody.js";
+import {CLI} from "../../../utility/CLI.js";
+import {Album} from "../../../models/db/tri/Album.js";
+import {Permissions} from "../../../models/enums/Permissions.ts";
 
 export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;

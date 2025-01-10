@@ -24,9 +24,9 @@ import {DeleteTrackEndpoint} from "./endpoints/tracks/DeleteTrackEndpoint.js";
 import {DeleteUserEndpoint} from "./endpoints/user/actions/DeleteUserEndpoint.js";
 import {GetImageEndpoint} from "./endpoints/media/GetImageEndpoint.js";
 import {ExportUserDataEndpoint} from "./endpoints/user/actions/ExportUserDataEndpoint.js";
-import {CreateAlbumEndpoint} from "./endpoints/albums/CreateAlbumEndpoint.js";
+import {CreateAlbumEndpoint} from "./endpoints/albums/actions/CreateAlbumEndpoint.js";
 import {GetAlbumEndpoint} from "./endpoints/albums/GetAlbumEndpoint.js";
-import {RemoveTrackFromAlbumEndpoint} from "./endpoints/albums/RemoveTrackFromAlbumEndpoint.js";
+import {RemoveTrackFromAlbumEndpoint} from "./endpoints/albums/actions/RemoveTrackFromAlbumEndpoint.js";
 import {DeleteMediaEndpoint} from "./endpoints/media/DeleteMediaEndpoint.js";
 import {UpdateTrackFullEndpoint} from "./endpoints/tracks/actions/UpdateTrackFullEndpoint.js";
 import {CLI, configureDBLogging} from "./utility/CLI.js";
@@ -49,6 +49,7 @@ import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoin
 import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
 import {PaypalEventsWebhookEndpoint} from "./endpoints/webhooks/PaypalEventsWebhookEndpoint.ts";
 import {setupNgrok} from "./utility/Ngrok.ts";
+import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFullEndpoint.ts";
 
 config();
 
@@ -128,6 +129,7 @@ new GetAlbumEndpoint(app, "/albums/byId", db).register();
 new GetAlbumsEndpoint(app, "/albums/get", db).register();
 new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
+new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();
 // endregion
 
 // region Media

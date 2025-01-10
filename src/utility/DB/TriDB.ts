@@ -105,19 +105,20 @@ export class TriDB extends MariaDB {
     }
 
     async createTrack(track: Partial<Track>): Promise<Track> {
-        await this.query(`INSERT INTO tri.tracks (user_id, title, isrc, upc, monetization, genre, description,
-                                                  secretcode, release_date, price)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-            track.user_id,
+        await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, release_date, link_spotify, link_youtube, link_soundcloud, link_applemusic, link_bandcamp, link_lyda)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             track.title,
+            track.artists,
             track.isrc,
-            track.upc,
-            track.monetization,
+            track.credits,
             track.genre,
-            track.description,
-            track.secretcode,
             track.release_date,
-            track.price
+            track.link_spotify,
+            track.link_youtube,
+            track.link_soundcloud,
+            track.link_applemusic,
+            track.link_bandcamp,
+            track.link_lyda,
         ]);
         const id = await this.querySingleValue("SELECT id FROM tri.tracks WHERE user_id = ? AND title = ?", [track.user_id, track.title]);
         return await this.getTrackById(id);
@@ -313,7 +314,7 @@ export class TriDB extends MariaDB {
         await this.query("UPDATE tri.tracks SET length = ? WHERE id = ?", [length, id]);
     }
 
-    async getAlbumById(id: number) {
+    async getAlbumById(id: number): Promise<Album> {
         return await this.queryFirst("SELECT * FROM tri.albums WHERE id = ?", [id]);
     }
 
@@ -464,7 +465,7 @@ export class TriDB extends MariaDB {
         return {
             total: artistTotal,
             paidOut,
-            available: 0.01 //artistTotal - paid
+            available: artistTotal - paidOut
         };
     }
 
@@ -560,5 +561,10 @@ export class TriDB extends MariaDB {
 
     async updatePaymentByBatchId(ownBatchId: string, status: PaymentStatus) {
         await this.query("UPDATE finance.payments SET status = ? WHERE payout_batch_id = ?", [status, ownBatchId]);
+    }
+
+    async updateAlbum(album: Partial<Album>) {
+        await this.query("UPDATE tri.albums SET title = ?, upc = ?, release_date = ?, price = ? WHERE id = ?",
+            [album.title, album.upc, album.release_date, album.price, album.id]);
     }
 }

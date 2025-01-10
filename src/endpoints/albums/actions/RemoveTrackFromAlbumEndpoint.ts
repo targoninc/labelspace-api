@@ -1,7 +1,7 @@
-import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {TriDB} from "../../utility/DB/TriDB.js";
+import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.js";
+import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
-import {Authenticator} from "../../models/Authenticator.js";
+import {Authenticator} from "../../../models/Authenticator.js";
 
 export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
