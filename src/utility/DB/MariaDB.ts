@@ -12,6 +12,7 @@ export class MariaDB {
     private connection: dbInterface.Connection | null = null;
 
     constructor(host: string, port: number|null = null, user: string|null = null, password: string|null = null, database = "tri") {
+        CLI.debug(`Initializing MariaDB connection to ${host}:${port}/${database}`);
         this.host = host;
         this.port = port || 3306;
         this.user = user || process.env.MARIADB_USER;
