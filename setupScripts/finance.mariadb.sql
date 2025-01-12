@@ -2,27 +2,13 @@ create schema if not exists finance;
 
 create table if not exists finance.bandcamp_sync
 (
-    id               varchar(32)                             not null
+    id         bigint auto_increment
         primary key,
-    created_at       datetime    default current_timestamp() not null,
-    synced_at        bigint                                  null,
-    sync_status      varchar(32) default 'success'           null,
-    time             int(20)                                 null,
-    reporting_period varchar(16)                             null,
-    item_url         varchar(2048)                           null,
-    type             varchar(128)                            null,
-    territory        varchar(8)                              null,
-    name             varchar(1024)                           null,
-    email            varchar(2048)                           null,
-    note             varchar(2048)                           null,
-    country          varchar(128)                            null,
-    count            int                                     null,
-    royalty          float                                   null,
-    upc              varchar(32)                             null,
-    constraint bandcamp_sync_id_uindex
-        unique (id)
-)
-    engine = InnoDB;
+    created_at datetime                     default current_timestamp() not null,
+    updated_at datetime                     default current_timestamp() not null on update current_timestamp(),
+    status     varchar(32)                  default 'received'          not null,
+    report     longtext collate utf8mb4_bin default '{}'                not null
+);
 
 create table if not exists finance.payments
 (
@@ -58,7 +44,7 @@ create table if not exists finance.royalties
     provider       varchar(512)                             null,
     period2        varchar(512)                             null,
     territory      varchar(3)                               null,
-    delivery       varchar(9)                               null,
+    delivery       varchar(32)                              null,
     type           varchar(512)                             null,
     salevoid       varchar(4)                               null,
     count          int(4)                                   null,

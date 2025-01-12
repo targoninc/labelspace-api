@@ -94,7 +94,7 @@ export class AddDataEndpoint extends AuthenticatedPostEndpoint {
             mixver: row["Mix Version"],
             isrc: row["ISRC Code"],
             trackartists: row["Track Artists"],
-            provider: row["Provider"],
+            provider: row["Digital Service Provider"],
             period2: row["Activity Period"],
             territory: row["Territory"],
             delivery: row["Delivery"],

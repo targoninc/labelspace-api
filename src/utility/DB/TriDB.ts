@@ -27,6 +27,8 @@ import type {PaypalWebhook} from "../Paypal/internalModels/PaypalWebhook.ts";
 import {uuidv4} from "uuidv7";
 import type {PaymentRequest} from "../../models/db/finance/PaymentRequest.ts";
 import type {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
+import type {SalesReport} from "../Bandcamp/SalesReport.ts";
+import type {BandcampReportStatus} from "../Bandcamp/BandcampReportStatus.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -559,5 +561,30 @@ export class TriDB extends MariaDB {
 
     async addTrackToAlbum(album_id: number, track_id: number) {
         await this.query("UPDATE tri.tracks SET album_id = ? WHERE id = ?", [album_id, track_id]);
+    }
+
+    async getLastBandcampReportTime(): Promise<Date> {
+        return await this.querySingleValue("SELECT created_at FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1");
+    }
+
+    async insertBandcampReport(report: SalesReport): Promise<number> {
+        await this.query("INSERT INTO finance.bandcamp_sync (report) VALUES (?)", [JSON.stringify(report)]);
+        return await this.querySingleValue("SELECT id FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1");
+    }
+
+    async updateBandcampReportStatus(id: number, received: BandcampReportStatus) {
+        await this.query("UPDATE finance.bandcamp_sync SET status = ? WHERE id = ?", [received, id]);
+    }
+
+    async getAlbumByUpc(upc: string): Promise<Album|null> {
+        return await this.queryFirst("SELECT * FROM tri.albums WHERE upc = ?", [upc]);
+    }
+
+    async getTrackByIsrc(isrc: string): Promise<Track|null> {
+        return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
+    }
+
+    async getTracksByBandcampLink(item_url: string): Promise<Track[]> {
+        return await this.query("SELECT * FROM tri.tracks WHERE link_bandcamp = ?", [item_url]);
     }
 }

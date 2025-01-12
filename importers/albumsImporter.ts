@@ -20,7 +20,7 @@ export async function importAlbums(db: TriDB, srcFile: string, tracksSrcFile: st
 
     console.log("Inserting " + data.length + " rows...");
 
-    const query = "INSERT INTO tri.albums (id, compilation_id, upc, title, artists, release_date, created_at, updated_at) VALUES (?, ?, ?, ?, '', ?, ?, ?) ON DUPLICATE KEY UPDATE title = ?";
+    const query = "INSERT INTO tri.albums (id, compilation_id, upc, title, artists, release_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = ?";
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
@@ -45,6 +45,7 @@ export async function importAlbums(db: TriDB, srcFile: string, tracksSrcFile: st
             compilationId,
             row.upc,
             row.album_name,
+            row.artists,
             new Date(firstTrack.date),
             new Date(firstTrack.date),
             new Date(firstTrack.date),
