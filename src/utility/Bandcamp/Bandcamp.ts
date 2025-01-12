@@ -87,6 +87,10 @@ export class Bandcamp {
             await Bandcamp.authorize();
         }
 
+        if (auth && auth.expires_in + lastAuth < Date.now()) {
+            await Bandcamp.refreshAccessToken();
+        }
+
         CLI.debug("Calling Bandcamp API", {
             logToDb: true,
             info: {

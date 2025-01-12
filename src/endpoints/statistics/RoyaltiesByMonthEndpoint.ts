@@ -16,17 +16,26 @@ export class RoyaltiesByMonthEndpoint extends AuthenticatedGetEndpoint {
     async run(req: AuthenticatedRequest, res: Response) {
         const user = req.user;
 
-        const artists = await this.db.getUserArtists(user.id);
-        const artistNames = artists.map(a => a.name);
+        let months: Statistic[];
+        const upc = req.query.upc as string;
+        const isrc = req.query.isrc as string;
+        if (upc) {
+            months = await this.db.getRoyaltiesByMonthForUPC(upc, 15);
+        } else if (isrc) {
+            months = await this.db.getRoyaltiesByMonthForISRC(isrc, 15);
+        } else {
+            const artists = await this.db.getUserArtists(user.id);
+            const artistNames = artists.map(a => a.name);
 
-        const tracks = await this.db.getRoyaltiesByMonth(artistNames, 15);
-        if (!tracks || tracks.length === 0) {
+            months = await this.db.getRoyaltiesByMonth(artistNames, 15);
+        }
+        if (!months || months.length === 0) {
             return res.send([]);
         }
-        if (tracks[0].id === null) {
-            tracks.shift();
+        if (months[0].id === null) {
+            months.shift();
         }
 
-        return res.send(tracks.reverse());
+        return res.send(months.reverse());
     }
 }
