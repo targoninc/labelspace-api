@@ -25,8 +25,7 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to import data.");
         }
 
-        const workingDir = process.cwd();
-        const dataDir = path.join(workingDir, "data");
+        const dataDir = process.env.IMPORT_DATA_DIR;
         console.log("Importing data from " + dataDir);
         if (!fs.existsSync(dataDir)) {
             return res.status(400).send({error: "Data directory not found"});
