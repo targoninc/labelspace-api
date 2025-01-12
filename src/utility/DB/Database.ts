@@ -9,11 +9,20 @@ import {PassportDeserializeUser, PassportSerializeUser, PassportStrategy} from "
 import {Permissions} from "../../models/enums/Permissions.js";
 import {Application} from "express";
 import {CLI} from "../CLI.js";
+import {importAll} from "../../importers/importAll.ts";
 
 export async function ensureDatabaseConsistency(db: TriDB) {
     await ensurePossibleUsersettings(db);
     await ensurePermissions(db);
     await ensureSessionStore(db);
+    await ensureData(db);
+}
+
+async function ensureData(db: TriDB) {
+    const users = await db.getUsers();
+    if (!users || users.length === 0) {
+        await importAll(db, process.env.IMPORT_DATA_DIR);
+    }
 }
 
 async function ensurePossibleUsersettings(db: TriDB) {
