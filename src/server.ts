@@ -50,6 +50,7 @@ import {setupNgrok} from "./utility/Ngrok.ts";
 import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFullEndpoint.ts";
 import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
+import {BandcampWorker} from "./utility/Bandcamp/BandcampWorker.ts";
 
 config();
 
@@ -188,3 +189,6 @@ app.listen(port, () => {
 });
 
 await setupNgrok(port);
+
+const bandcampWorker = new BandcampWorker(db);
+bandcampWorker.run();

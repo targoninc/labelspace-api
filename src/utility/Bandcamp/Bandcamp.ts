@@ -39,6 +39,9 @@ export class Bandcamp {
             auth = data as BandcampAuthorizationResponse;
             lastAuth = Date.now();
         } else {
+            if (data.error === "duplicate_grant") {
+                return Bandcamp.refreshAccessToken();
+            }
             console.log(data);
             throw new Error("Failed to get access token: " + data.exception);
         }

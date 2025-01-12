@@ -15,11 +15,11 @@ export class BandcampWorker {
         this.db = db;
     }
 
-    async run() {
+    run() {
         setInterval(async () => {
             await this.getReport();
         }, this.refreshIntervalInMinutes * 60 * 1000);
-        await this.getReport();
+        this.getReport().then();
     }
 
     private async getReport() {
@@ -28,6 +28,15 @@ export class BandcampWorker {
             lastReportTime = new Date(2025, 0, 1);
         }
         const report = await Bandcamp.getSalesReport(lastReportTime, new Date());
+        if (report.sales.length === 0) {
+            CLI.debug("No sales found", {
+                logToDb: true,
+                info: {
+                    report
+                }
+            });
+            return;
+        }
         const id = await this.db.insertBandcampReport(report);
         await this.mapAndInsertReport(id, report);
         return report;
@@ -37,7 +46,14 @@ export class BandcampWorker {
         const sales = report.sales;
 
         const royalties = [];
-        for (const sale of sales) {
+        for (let i = 0; i < sales.length; i++) {
+            const sale = sales[i];
+            CLI.debug(`Processing sale ${i}/${sales.length}`, {
+                logToDb: true,
+                info: {
+                    sale
+                }
+            });
             try {
                 const royalties = await this.mapSale(sale);
                 royalties.forEach(r => royalties.push(r));
@@ -77,7 +93,7 @@ export class BandcampWorker {
                     period2: month,
                     provider: "Bandcamp",
                     releaseartists: album.artists,
-                    releasename: "",
+                    releasename: album.title,
                     royalty: perTrackRoyalty * (1 - estimatedPaypalFee),
                     salevoid: "Sale",
                     territory: sale.country_code,
@@ -85,7 +101,6 @@ export class BandcampWorker {
                     trackartists: sale.artist,
                     type: sale.package,
                     upc: album?.upc ?? "",
-                    updated_at: new Date(),
                 }
             });
         } else if (sale.isrc && sale.isrc != "") {
@@ -110,8 +125,8 @@ export class BandcampWorker {
                 period1: month,
                 period2: month,
                 provider: "Bandcamp",
-                releaseartists: "",
-                releasename: "",
+                releaseartists: album.artists,
+                releasename: album.title,
                 royalty: sale.net_amount * (1 - estimatedPaypalFee),
                 salevoid: "Sale",
                 territory: sale.country_code,
@@ -119,7 +134,6 @@ export class BandcampWorker {
                 trackartists: sale.artist,
                 type: sale.package,
                 upc: album?.upc ?? "",
-                updated_at: new Date(),
             }];
         } else {
             return await this.mapSaleByLinks(sale, estimatedPaypalFee);
@@ -154,7 +168,7 @@ export class BandcampWorker {
                 period2: month,
                 provider: "Bandcamp",
                 releaseartists: album.artists,
-                releasename: "",
+                releasename: album.title,
                 royalty: perTrackRoyalty * (1 - estimatedPaypalFee),
                 salevoid: "Sale",
                 territory: sale.country_code,
@@ -162,18 +176,16 @@ export class BandcampWorker {
                 trackartists: t.artists,
                 type: sale.package,
                 upc: album?.upc ?? "",
-                updated_at: new Date(),
             };
         });
     }
 
     private getMonthFromSale(sale: BandcampSale) {
         const date = new Date(sale.date);
-        const month = date.toLocaleString("en-US", {
+        return date.toLocaleString("en-US", {
             month: "short",
             year: "numeric"
         });
-        return month;
     }
 
     private getVersionFromTrack(t: Track) {
