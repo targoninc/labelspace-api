@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import {TriDB} from "../src/utility/DB/TriDB.ts";
+import {TriDB} from "../utility/DB/TriDB.ts";
 
 export async function importEmails(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {

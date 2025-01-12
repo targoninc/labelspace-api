@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
-import {TriDB} from "../src/utility/DB/TriDB.ts";
+import {TriDB} from "../utility/DB/TriDB.ts";
 
-export async function importArtists(db: TriDB, srcFile: string) {
+export async function importPayments(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
         process.exit(1);
@@ -13,20 +13,22 @@ export async function importArtists(db: TriDB, srcFile: string) {
 
     console.log("Inserting " + data.length + " rows...");
 
-    const query = "INSERT INTO tri.artists (user_id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
+    const query = "INSERT INTO finance.payments (created_at, updated_at, status, user_id, amount, payout_batch_id) VALUES (?, ?, 'paid', ?, ?, 'unknown') ON DUPLICATE KEY UPDATE amount = ?";
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
 
-        const user = await db.getUserByUsername(row[header.indexOf("username")]);
-        if (!user) {
-            console.error("User not found: " + row[header.indexOf("username")]);
+        const userId = await db.getUserIdByArtistName(row[header.indexOf("artist")]);
+        if (!userId) {
+            console.error("User not found: " + row[header.indexOf("artist")]);
             process.exit(1);
         }
 
         const params = [
-            user.id,
-            row[header.indexOf("artistname")],
-            row[header.indexOf("artistname")],
+            new Date(row[header.indexOf("date")]),
+            new Date(row[header.indexOf("date")]),
+            userId,
+            row[header.indexOf("amount")],
+            row[header.indexOf("amount")]
         ];
 
         if (params.some(p => p === undefined)) {

@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
-import {TriDB} from "../src/utility/DB/TriDB.ts";
-import {readCsvAsync} from "../src/utility/CsvReader.ts";
+import {TriDB} from "../utility/DB/TriDB.ts";
+import {readCsvAsync} from "../utility/CsvReader.ts";
 
 export async function importAlbums(db: TriDB, srcFile: string, tracksSrcFile: string) {
     if (!fs.existsSync(srcFile)) {

@@ -3,7 +3,7 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
-import {importAll} from "../../../importers/importAll.ts";
+import {importAll} from "../../importers/importAll.ts";
 import * as fs from "node:fs";
 
 export class ImportDataEndpoint extends AuthenticatedPostEndpoint {

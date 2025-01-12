@@ -1,5 +1,5 @@
 import {importAll} from "./importAll.ts";
-import {TriDB} from "../src/utility/DB/TriDB.ts";
+import {TriDB} from "../utility/DB/TriDB.ts";
 import {configDotenv} from "dotenv";
 
 configDotenv();
