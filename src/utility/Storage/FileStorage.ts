@@ -1,12 +1,12 @@
 import {mkdir, readdir, rm} from "node:fs/promises";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
-import {IStorage} from "./IStorage.js";
+import type {IStorage} from "./IStorage.js";
 import * as Bun from "bun";
 import {CLI} from "../CLI.js";
 
 const STORAGE_DRIVES = 1;
 const DEFAULT_BASE_PATH = "mock/storage";
-let BASE_PATH = DEFAULT_BASE_PATH;
+let BASE_PATH = process.env.ARTIST_SPACE_STORAGE_PATH || DEFAULT_BASE_PATH;
 
 async function checkAndSetBasePath() {
     try {
