@@ -32,10 +32,11 @@ export class MariaDB {
                 connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
             });
             this.connection = await this.connectionPool.getConnection();
-        } catch (e) {
+        } catch (e: any) {
             if (tryReconnection) {
                 await this.tryToReConnect();
             } else {
+                CLI.debug(e);
                 return false;
             }
         }
