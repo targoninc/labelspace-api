@@ -72,49 +72,25 @@ export class BandcampWorker {
     private async mapSale(sale: BandcampSale): Promise<Royalty[]> {
         const estimatedPaypalFee = 0.01;
         if (sale.upc && sale.upc != "") {
-            const album = await this.db.getAlbumByUpc(sale.upc);
-            if (!album) {
-                throw new Error("No album found for upc: " + sale.upc);
-            }
-            const month = this.getMonthFromSale(sale);
-            const tracks = await this.db.getTracksByAlbumIds([album.id]);
-            const perTrackRoyalty = sale.net_amount / tracks.length;
-
-            return tracks.map(track => {
-                return <Royalty>{
-                    catalogue: sale.catalog_number,
-                    count: 1,
-                    dataprovider: "bandcamp-sync",
-                    delivery: "Download",
-                    isrc: track.isrc,
-                    label: "Tri",
-                    mixver: this.getVersionFromTrack(track),
-                    period1: month,
-                    period2: month,
-                    provider: "Bandcamp",
-                    releaseartists: album.artists,
-                    releasename: album.title,
-                    royalty: perTrackRoyalty * (1 - estimatedPaypalFee),
-                    salevoid: "Sale",
-                    territory: sale.country_code,
-                    title: track.title,
-                    trackartists: sale.artist,
-                    type: sale.package,
-                    upc: album?.upc ?? "",
-                }
-            });
+            return await this.mapSaleByUpc(sale, estimatedPaypalFee);
         } else if (sale.isrc && sale.isrc != "") {
-            const track = await this.db.getTrackByIsrc(sale.isrc);
-            if (!track) {
-                throw new Error("No track found for isrc: " + sale.isrc);
-            }
-            const album = await this.db.getAlbumById(track.album_id ?? 0);
-            if (!album) {
-                throw new Error("No album found for track: " + track.title);
-            }
-            const month = this.getMonthFromSale(sale);
+            return await this.mapSaleByIsrc(sale, estimatedPaypalFee);
+        } else {
+            return await this.mapSaleByLinks(sale, estimatedPaypalFee);
+        }
+    }
 
-            return [<Royalty>{
+    private async mapSaleByUpc(sale: BandcampSale, estimatedPaypalFee: number) {
+        const album = await this.db.getAlbumByUpc(sale.upc);
+        if (!album) {
+            throw new Error("No album found for upc: " + sale.upc);
+        }
+        const month = this.getMonthFromSale(sale);
+        const tracks = await this.db.getTracksByAlbumIds([album.id]);
+        const perTrackRoyalty = sale.net_amount / tracks.length;
+
+        return tracks.map(track => {
+            return <Royalty>{
                 catalogue: sale.catalog_number,
                 count: 1,
                 dataprovider: "bandcamp-sync",
@@ -127,17 +103,49 @@ export class BandcampWorker {
                 provider: "Bandcamp",
                 releaseartists: album.artists,
                 releasename: album.title,
-                royalty: sale.net_amount * (1 - estimatedPaypalFee),
+                royalty: perTrackRoyalty * (1 - estimatedPaypalFee),
                 salevoid: "Sale",
                 territory: sale.country_code,
                 title: track.title,
                 trackartists: sale.artist,
                 type: sale.package,
                 upc: album?.upc ?? "",
-            }];
-        } else {
-            return await this.mapSaleByLinks(sale, estimatedPaypalFee);
+            }
+        });
+    }
+
+    private async mapSaleByIsrc(sale: BandcampSale, estimatedPaypalFee: number) {
+        const track = await this.db.getTrackByIsrc(sale.isrc);
+        if (!track) {
+            throw new Error("No track found for isrc: " + sale.isrc);
         }
+        const album = await this.db.getAlbumById(track.album_id ?? 0);
+        if (!album) {
+            throw new Error("No album found for track: " + track.title);
+        }
+        const month = this.getMonthFromSale(sale);
+
+        return [<Royalty>{
+            catalogue: sale.catalog_number,
+            count: 1,
+            dataprovider: "bandcamp-sync",
+            delivery: "Download",
+            isrc: track.isrc,
+            label: "Tri",
+            mixver: this.getVersionFromTrack(track),
+            period1: month,
+            period2: month,
+            provider: "Bandcamp",
+            releaseartists: album.artists,
+            releasename: album.title,
+            royalty: sale.net_amount * (1 - estimatedPaypalFee),
+            salevoid: "Sale",
+            territory: sale.country_code,
+            title: track.title,
+            trackartists: sale.artist,
+            type: sale.package,
+            upc: album?.upc ?? "",
+        }];
     }
 
     private async mapSaleByLinks(sale: BandcampSale, estimatedPaypalFee: number): Promise<Royalty[]> {
