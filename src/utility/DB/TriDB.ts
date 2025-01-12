@@ -34,7 +34,7 @@ export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
 
     constructor() {
-        super(env("MARIADB_HOST"), env("MARIADB_PORT"), env("MARIADB_USER"), env("MARIADB_PASSWORD"), env("MARIADB_NAME"));
+        super(env("MARIADB_HOST"), parseInt(env("MARIADB_PORT")), env("MARIADB_USER"), env("MARIADB_PASSWORD"), env("MARIADB_NAME"));
 
         setInterval(() => {
             CLI.debug("Pinging database", {
