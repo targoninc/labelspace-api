@@ -4,7 +4,6 @@ import {Application, Response} from "express";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {importAll} from "../../../importers/importAll.ts";
-import * as path from "node:path";
 import * as fs from "node:fs";
 
 export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
@@ -26,6 +25,9 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
         }
 
         const dataDir = process.env.IMPORT_DATA_DIR;
+        if (!dataDir) {
+            return res.status(400).send({error: "IMPORT_DATA_DIR environment variable not set"});
+        }
         console.log("Importing data from " + dataDir);
         if (!fs.existsSync(dataDir)) {
             return res.status(400).send({error: "Data directory not found"});
