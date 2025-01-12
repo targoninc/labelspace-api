@@ -55,11 +55,15 @@ export class Bandcamp {
             throw new Error("BANDCAMP_CLIENT_ID and BANDCAMP_CLIENT_SECRET must be set");
         }
 
+        if (!auth) {
+            return Bandcamp.authorize();
+        }
+
         const params = {
             client_id: clientId,
             client_secret: clientSecret,
             grant_type: BandcampCredentialType.refresh_token,
-            refresh_token: auth!.refresh_token
+            refresh_token: auth.refresh_token
         };
         const urlParams = new URLSearchParams(params);
         const url = `https://bandcamp.com/oauth_token` + "?" + urlParams;
