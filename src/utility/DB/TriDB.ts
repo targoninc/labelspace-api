@@ -374,7 +374,7 @@ export class TriDB extends MariaDB {
         this.query("INSERT INTO tri.logs (logLevel, message, stack, correlation_id, host, properties) VALUES (?, ?, ?, ?, ?, ?)",
             [logLevel, message, stack, correlation_id, host, JSON.stringify(properties)])
             .then(async () => {
-                const cleanupIntervalMinutes = 5;
+                const cleanupIntervalMinutes = 60;
                 if (Date.now() - this.lastLogCleanup > 1000 * 60 * cleanupIntervalMinutes) {
                     await this.cleanLogs();
                     this.lastLogCleanup = Date.now();
