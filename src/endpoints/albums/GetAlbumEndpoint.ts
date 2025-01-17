@@ -15,15 +15,6 @@ export class GetAlbumEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const user = req.user;
-        if (!user) {
-            return res.status(401).send({error: "Not authenticated"});
-        }
-
-        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            return res.status(403).send("You are not allowed to view albums.");
-        }
-
         let idParam = req.query.id as string;
         if (!idParam) {
             return res.send({error: "No album id provided"});
@@ -36,6 +27,12 @@ export class GetAlbumEndpoint extends GetEndpoint {
         let album = await this.db.getAlbumById(id);
         if (!album) {
             return res.send({error: "Album not found"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            if (new Date(album.release_date).getTime() > new Date().getTime()) {
+                return res.status(403).send("You are not allowed to view this album.");
+            }
         }
 
         album = await AlbumEnricher.enrichAsync(this.db, album, {

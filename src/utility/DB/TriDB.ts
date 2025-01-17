@@ -498,7 +498,10 @@ export class TriDB extends MariaDB {
         };
     }
 
-    async getAlbums(): Promise<Album[]> {
+    async getAlbums(notAuthenticated: boolean): Promise<Album[]> {
+        if (notAuthenticated) {
+            return await this.query("SELECT * FROM tri.albums WHERE release_date < CURRENT_TIMESTAMP ORDER BY release_date DESC");
+        }
         return await this.query("SELECT * FROM tri.albums ORDER BY release_date DESC");
     }
 
@@ -593,7 +596,10 @@ export class TriDB extends MariaDB {
         await this.query("UPDATE tri.tracks SET album_id = NULL WHERE album_id = ? AND id = ?", [album_id, track_id]);
     }
 
-    async getTracks(): Promise<Track[]> {
+    async getTracks(notAuthenticated: boolean): Promise<Track[]> {
+        if (notAuthenticated) {
+            return await this.query("SELECT * FROM tri.tracks WHERE release_date < CURRENT_TIMESTAMP ORDER BY release_date DESC");
+        }
         return await this.query("SELECT * FROM tri.tracks ORDER BY release_date DESC");
     }
 

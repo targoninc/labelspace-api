@@ -15,16 +15,8 @@ export class GetTracksEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const user = req.user;
-        if (!user) {
-            return res.status(401).send({error: "Not authenticated"});
-        }
-
-        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            return res.status(403).send("You are not allowed to view tracks.");
-        }
-
-        const tracks = await this.db.getTracks();
+        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
+        const tracks = await this.db.getTracks(notAuthenticated);
 
         for (let track of tracks) {
             track = await TrackEnricher.enrichAsync(this.db, track, {

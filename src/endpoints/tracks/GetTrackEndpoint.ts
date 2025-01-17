@@ -15,15 +15,6 @@ export class GetTrackEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const user = req.user;
-        if (!user) {
-            return res.status(401).send({error: "Not authenticated"});
-        }
-
-        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            return res.status(403).send("You are not allowed to view tracks.");
-        }
-
         let idParam = req.query.id as string;
         if (!idParam) {
             return res.status(400).send({error: "No track id provided"});
@@ -36,6 +27,12 @@ export class GetTrackEndpoint extends GetEndpoint {
         let track = await this.db.getTrackById(id);
         if (!track) {
             return res.status(404).send({error: "Track not found"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            if (new Date(track.release_date).getTime() > new Date().getTime()) {
+                return res.status(403).send("You are not allowed to view this track.");
+            }
         }
 
         track = await TrackEnricher.enrichAsync(this.db, track, {
