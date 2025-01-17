@@ -74,8 +74,9 @@ await ensureDatabaseConsistency(db);
 configureDBLogging(db);
 
 const app = express();
+const corsOrigins = process.env.CORS_ORIGINS?.split(",") ?? [];
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: corsOrigins,
     credentials: true
 }));
 setupPassport(app, db);
@@ -183,7 +184,7 @@ app.get("/security.txt", (req, res) => {
     res.sendFile(path.join(__dirname, "./security.txt"));
 });
 
-const port = process.env.PORT || 8080;
+const port = parseInt(process.env.PORT ?? "8080");
 app.listen(port, () => {
     CLI.info(`Server is running on port http://localhost:${port}`);
 });
