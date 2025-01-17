@@ -5,7 +5,7 @@ import {readCsvAsync} from "../utility/CsvReader.ts";
 export async function importTracks(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
-        process.exit(1);
+        return;
     }
     const content = fs.readFileSync(srcFile, "utf8");
 

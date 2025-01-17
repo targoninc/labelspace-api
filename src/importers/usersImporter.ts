@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export async function importUsers(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
-        process.exit(1);
+        return;
     }
     const lines = fs.readFileSync(srcFile, "utf8").trim().split("\n");
 

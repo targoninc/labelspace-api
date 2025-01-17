@@ -24,11 +24,10 @@ import type {PaypalPayoutItem} from "../Paypal/models/PaypalPayoutItem.ts";
 import type {PaypalBatchStatus} from "../Paypal/models/PaypalBatchStatus.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {PaypalWebhook} from "../Paypal/internalModels/PaypalWebhook.ts";
-import {uuidv4} from "uuidv7";
-import type {PaymentRequest} from "../../models/db/finance/PaymentRequest.ts";
-import type {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
 import type {SalesReport} from "../Bandcamp/SalesReport.ts";
 import type {BandcampReportStatus} from "../Bandcamp/BandcampReportStatus.ts";
+import { Artist } from "../../models/db/tri/Artist.ts";
+import { PaypalBatchPayment } from "../../models/db/finance/PaypalBatchPayment.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -399,6 +398,8 @@ export class TriDB extends MariaDB {
             const values = searchConfiguration.searchableFields.map(() => [queryValue, request.query]).flat();
             return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ") + " LIMIT ? OFFSET ?",
                 [...values, request.limit, request.offset]);
+        } else {
+            throw new Error("Invalid search mode, must be exact or partial.");
         }
     }
 
@@ -429,7 +430,7 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.users");
     }
 
-    async getUserArtists(userId: number) {
+    async getUserArtists(userId: number): Promise<Artist[]> {
         return await this.query("SELECT * FROM tri.artists WHERE user_id = ?", [userId]);
     }
 
@@ -558,7 +559,7 @@ export class TriDB extends MariaDB {
             [dbEntry.id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id]);
     }
 
-    async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment> {
+    async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment|null> {
         return await this.queryFirst("SELECT * FROM finance.paypal_batch_payments WHERE paypal_batch_id = ?", [ownBatchId]);
     }
 
@@ -615,5 +616,17 @@ export class TriDB extends MariaDB {
 
     async getTracksByBandcampLink(item_url: string): Promise<Track[]> {
         return await this.query("SELECT * FROM tri.tracks WHERE link_bandcamp = ?", [item_url]);
+    }
+
+    async setArtistHasLogo(referenceId: number, hasImage: boolean) {
+        await this.query("UPDATE tri.artists SET has_logo = ? WHERE id = ?", [hasImage, referenceId]);
+    }
+
+    async getArtistById(referenceId: number): Promise<Artist|null> {
+        return await this.queryFirst("SELECT * FROM tri.artists WHERE id = ?", [referenceId]);
+    }
+
+    async getArtistByName(name: string): Promise<Artist|null> {
+        return await this.queryFirst("SELECT * FROM tri.artists WHERE name = ?", [name]);
     }
 }

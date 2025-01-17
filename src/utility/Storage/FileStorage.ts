@@ -6,28 +6,8 @@ import {CLI} from "../CLI.js";
 
 const STORAGE_DRIVES = 1;
 const DEFAULT_BASE_PATH = "mock/storage";
-let BASE_PATH = process.env.ARTIST_SPACE_STORAGE_PATH || DEFAULT_BASE_PATH;
+let BASE_PATH = process.env.ARTIST_SPACE_STORAGE_PATH ?? DEFAULT_BASE_PATH;
 
-async function checkAndSetBasePath() {
-    try {
-        const rootDirs = await readdir("/", {withFileTypes: true});
-        const mntExists = rootDirs.some(dirent => dirent.name === "mnt");
-        if (!mntExists) {
-            return;
-        }
-
-        const mntDirectories = await readdir("/mnt", {withFileTypes: true});
-        const anyMountExists = mntDirectories.some(dirent => dirent.isDirectory());
-
-        if (anyMountExists) {
-            BASE_PATH = "/mnt";
-        }
-    } catch (error) {
-        console.error("Error accessing /mnt:", error);
-    }
-}
-
-await checkAndSetBasePath();
 CLI.debug(`Using base path for storage: ${BASE_PATH}`);
 
 if (BASE_PATH === DEFAULT_BASE_PATH) {
@@ -36,7 +16,7 @@ if (BASE_PATH === DEFAULT_BASE_PATH) {
 
 export class FileStorage implements IStorage {
     private static drive(driveId: number) {
-        return `${BASE_PATH}/lydrive-${driveId}`;
+        return `${BASE_PATH}/tridrive-${driveId}`;
     }
 
     private static selectDriveById(fileType: MediaFileType, entityId: number) {

@@ -4,7 +4,7 @@ import {TriDB} from "../utility/DB/TriDB.ts";
 export async function importPayments(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
-        process.exit(1);
+        return;
     }
     const lines = fs.readFileSync(srcFile, "utf8").split("\n");
 

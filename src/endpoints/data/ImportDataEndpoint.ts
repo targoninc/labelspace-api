@@ -5,6 +5,7 @@ import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {importAll} from "../../importers/importAll.ts";
 import * as fs from "node:fs";
+import path from "node:path";
 
 export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -24,7 +25,7 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to import data.");
         }
 
-        const dataDir = process.env.IMPORT_DATA_DIR;
+        const dataDir = process.env.IMPORT_DATA_DIR ?? path.join(process.cwd(), "./data");
         if (!dataDir) {
             return res.status(400).send({error: "IMPORT_DATA_DIR environment variable not set"});
         }
@@ -35,7 +36,7 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
 
         try {
             await importAll(this.db, dataDir);
-        } catch (e) {
+        } catch (e: any) {
             return res.status(500).send({error: `Failed to import data: ${e.message}`});
         }
 

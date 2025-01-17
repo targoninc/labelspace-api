@@ -46,10 +46,11 @@ create table if not exists tri.possible_usersettings
 
 create table if not exists tri.artists
 (
-    id      bigint auto_increment
+    id       bigint auto_increment
         primary key,
-    user_id bigint     null,
-    name    mediumtext not null,
+    user_id  bigint               null,
+    name     mediumtext           not null,
+    has_logo tinyint(1) default 0 not null,
     constraint artists_pk
         unique (name) using hash
 );
@@ -80,8 +81,6 @@ create table if not exists tri.users
     tos_agreed_at       timestamp  default current_timestamp() null,
     ip                  varchar(128)                           null,
     password_token      varchar(64)                            null,
-    has_avatar          tinyint(1) default 0                   not null,
-    has_banner          tinyint(1) default 0                   not null,
     constraint users_id_uindex
         unique (id),
     constraint users_pk

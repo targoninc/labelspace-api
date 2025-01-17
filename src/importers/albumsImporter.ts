@@ -5,11 +5,11 @@ import {readCsvAsync} from "../utility/CsvReader.ts";
 export async function importAlbums(db: TriDB, srcFile: string, tracksSrcFile: string) {
     if (!fs.existsSync(srcFile)) {
         console.error("File not found: " + srcFile);
-        process.exit(1);
+        return;
     }
     if (!fs.existsSync(tracksSrcFile)) {
         console.error("File not found: " + tracksSrcFile);
-        process.exit(1);
+        return;
     }
 
     const lines = fs.readFileSync(srcFile, "utf8");

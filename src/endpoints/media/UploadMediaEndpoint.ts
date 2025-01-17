@@ -4,11 +4,8 @@ import { AuthenticatedRequest } from "../base/AuthenticatedPostEndpoint.js";
 import { Authenticator } from "../../models/Authenticator.js";
 import { TriDB } from "../../utility/DB/TriDB.js";
 import multer from "multer";
-import {MinioClient} from "../../utility/Storage/MinioClient.js";
 import {MediaClient} from "../../utility/Media/MediaClient.js";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
-import {FileStorage} from "../../utility/Storage/FileStorage.js";
-import {AudioProcessor} from "../../utility/Media/AudioProcessor.js";
 import {CLI} from "../../utility/CLI.js";
 
 const storage = multer.memoryStorage();
@@ -58,13 +55,13 @@ export class UploadMediaEndpoint extends AuthenticatedPostEndpoint {
                 return res.status(error.code).send(error.error);
             }
 
-            const originalExtension = req.file.originalname.split(".").pop().replace("/", "");
+            const originalExtension = req.file.originalname.split(".").pop()?.replace("/", "") ?? ".mp3";
 
             const fileName = `source.${originalExtension.toLowerCase()}`;
             const startTime = performance.now();
             try {
                 await MediaClient.uploadMedia(this.db, fileType, referenceId, fileName, req.file);
-            } catch (e) {
+            } catch (e: any) {
                 console.error("Error during file upload:", e);
                 res.status(500).send(e.toString());
                 return;

@@ -6,6 +6,8 @@ import {CLI} from "../CLI.js";
 import {AudioProcessor} from "./AudioProcessor.js";
 import {ImageProcessor} from "./ImageProcessor.js";
 import * as fs from "node:fs";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 const storage = new FileStorage();
 
@@ -22,7 +24,7 @@ export class MediaClient {
                     };
                 }
 
-                if (track.user_id !== requestingUser.id) {
+                if (!await Authenticator.userHasPermission(requestingUser, Permissions.releaseManagement, db)) {
                     return {
                         code: 403,
                         error: "You do not have permission to upload this file."
@@ -30,13 +32,31 @@ export class MediaClient {
                 }
 
                 const allowedExtensions = ["mp3", "m4a", "flac", "ogg", "wav", "webm"];
-                const originalExtension = file.originalname.split(".").pop().replace("/", "");
+                const originalExtension = file.originalname.split(".").pop()?.replace("/", "") ?? ".unknown";
                 if (!allowedExtensions.includes(originalExtension)) {
                     return {
                         code: 403,
                         error: "Invalid file type. Must be one of " + allowedExtensions.join(", ")
                     };
                 }
+                break;
+            case MediaFileType.artistLogo:
+                const artist = await db.getArtistById(referenceId);
+                if (!artist) {
+                    return {
+                        code: 404,
+                        error: "Artist not found."
+                    };
+                }
+
+                const userArtists = await db.getUserArtists(requestingUser.id);
+                if (!userArtists.some(a => a.id === artist.id)) {
+                    return {
+                        code: 403,
+                        error: "You do not have permission to upload this logo."
+                    };
+                }
+
                 break;
             default:
                 break;
@@ -55,6 +75,16 @@ export class MediaClient {
         return null;
     }
 
+    static async addMedia(db: TriDB, type: MediaFileType, referenceId: number, fileName: string, sourceFilePath: string) {
+        await MediaClient.deleteMediaForEntity(db, type, referenceId);
+        CLI.debug("Adding media...");
+        const blob = fs.readFileSync(sourceFilePath);
+        await storage.save(type, referenceId, fileName, blob);
+        CLI.success("Media added");
+        await MediaClient.finalizeUpload(db, type, referenceId, fileName);
+        return null;
+    }
+
     static async finalizeUpload(db: TriDB, type: MediaFileType, referenceId: number, fileName: string) {
         const sourceFile = FileStorage.filePath(type, referenceId, fileName);
 
@@ -66,7 +96,7 @@ export class MediaClient {
     }
 
     private static async postProcessImage(referenceId: number,
-                                          type: MediaFileType.trackCover | MediaFileType.albumCover | MediaFileType.playlistCover | MediaFileType.userAvatar | MediaFileType.userBanner,
+                                          type: MediaFileType.trackCover | MediaFileType.albumCover | MediaFileType.artistLogo,
                                           db: TriDB, sourceFile: string) {
         const defaultImageExtension = "webp";
         CLI.debug(sourceFile);
@@ -96,14 +126,6 @@ export class MediaClient {
         const heights = [50, 100, 500];
         let widths = [50, 100, 500];
 
-        if (type === MediaFileType.userBanner) {
-            const bannerAspectRatio = 4;
-            if (dimensions.aspectRatio != bannerAspectRatio) {
-                await ImageProcessor.cropToCenter(sourceFile, bannerAspectRatio, dimensions);
-            }
-            widths = heights.map(h => h * bannerAspectRatio);
-        }
-
         const promise = new Promise<void>((resolve, reject) => {
             let done = 0;
             const updateProgress = () => {
@@ -122,6 +144,11 @@ export class MediaClient {
 
         await promise;
         const hasImage = true;
+        await MediaClient.setImageToggleInDb(type, db, referenceId, hasImage);
+        CLI.success(`Image upload for ID ${referenceId} finalized`);
+    }
+
+    private static async setImageToggleInDb(type: MediaFileType, db: TriDB, referenceId: number, hasImage: boolean) {
         switch (type) {
             case MediaFileType.trackCover:
                 await db.setTrackHasCover(referenceId, hasImage);
@@ -129,17 +156,10 @@ export class MediaClient {
             case MediaFileType.albumCover:
                 await db.setAlbumHasCover(referenceId, hasImage);
                 break;
-            case MediaFileType.playlistCover:
-                await db.setPlaylistHasCover(referenceId, hasImage);
-                break;
-            case MediaFileType.userAvatar:
-                await db.setUserHasAvatar(referenceId, hasImage);
-                break;
-            case MediaFileType.userBanner:
-                await db.setUserHasBanner(referenceId, hasImage);
+            case MediaFileType.artistLogo:
+                await db.setArtistHasLogo(referenceId, hasImage);
                 break;
         }
-        CLI.success(`Image upload for ID ${referenceId} finalized`);
     }
 
     private static async postProcessAudio(referenceId: number, type: MediaFileType.audio, db: TriDB, sourceFile: string) {
@@ -187,10 +207,8 @@ export class MediaClient {
     static isImageType(type: MediaFileType) {
         const types = [
             MediaFileType.trackCover,
-            MediaFileType.playlistCover,
             MediaFileType.albumCover,
-            MediaFileType.userAvatar,
-            MediaFileType.userBanner,
+            MediaFileType.artistLogo,
         ];
         return types.includes(type);
     }
@@ -198,9 +216,8 @@ export class MediaClient {
     static isSquareType(type: MediaFileType) {
         const types = [
             MediaFileType.trackCover,
-            MediaFileType.playlistCover,
+            MediaFileType.artistLogo,
             MediaFileType.albumCover,
-            MediaFileType.userAvatar,
         ];
         return types.includes(type);
     }
@@ -210,23 +227,7 @@ export class MediaClient {
         await storage.deleteEntity(type, referenceId);
 
         const hasImage = false;
-        switch (type) {
-            case MediaFileType.trackCover:
-                await db.setTrackHasCover(referenceId, hasImage);
-                break;
-            case MediaFileType.albumCover:
-                await db.setAlbumHasCover(referenceId, hasImage);
-                break;
-            case MediaFileType.playlistCover:
-                await db.setPlaylistHasCover(referenceId, hasImage);
-                break;
-            case MediaFileType.userAvatar:
-                await db.setUserHasAvatar(referenceId, hasImage);
-                break;
-            case MediaFileType.userBanner:
-                await db.setUserHasBanner(referenceId, hasImage);
-                break;
-        }
+        await MediaClient.setImageToggleInDb(type, db, referenceId, hasImage);
         CLI.success("Media deleted");
         return null;
     }
