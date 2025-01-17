@@ -8,7 +8,10 @@ import {importAlbums} from "./albumsImporter.ts";
 import {importPayments} from "./paymentsImporter.ts";
 import {importTracks} from "./tracksImporter.ts";
 
-export async function importAll(db: TriDB, srcDir: string) {
+export async function importAll(db: TriDB, srcDir: string|undefined) {
+    if (!srcDir) {
+        srcDir = path.join(process.cwd(), "data");
+    }
     await importUsers(db, path.join(srcDir, "users.csv"));
     await importEmails(db, path.join(srcDir, "user_emails.csv"));
     await importArtists(db, path.join(srcDir, "user_artists.csv"));
