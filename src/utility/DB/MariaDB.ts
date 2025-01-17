@@ -77,7 +77,7 @@ export class MariaDB {
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
         if (!this.connectionPool) {
-            CLI.warning("Connecting to database...");
+            CLI.warning(`Connecting to database @${this.host}...`);
             await this.connect();
         }
         let conn = this.connection;

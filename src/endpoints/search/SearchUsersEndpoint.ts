@@ -6,6 +6,9 @@ import {User} from "../../models/db/tri/User.js";
 import {SearchResult} from "../../utility/Search/SearchResult.js";
 import {SearchEngine} from "../../utility/Search/SearchEngine.js";
 import {SearchConfigurations} from "../../utility/Search/SearchConfigurations.js";
+import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class SearchUsersEndpoint extends GetEndpoint {
     db: TriDB;
@@ -34,7 +37,16 @@ export class SearchUsersEndpoint extends GetEndpoint {
         return true;
     }
 
-    async run(req: Request, res: Response) {
+    async run(req: AuthenticatedRequest, res: Response) {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).send({error: "Not authenticated"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
+            return res.status(403).send("You are not allowed to search users.");
+        }
+
         let request: SearchRequest = {
             query: req.query.search as string,
             limit: parseInt(req.query.limit as string ?? "10"),

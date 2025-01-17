@@ -6,6 +6,9 @@ import {SearchResult} from "../../utility/Search/SearchResult.js";
 import {Track} from "../../models/db/tri/Track.js";
 import {SearchEngine} from "../../utility/Search/SearchEngine.js";
 import {SearchConfigurations} from "../../utility/Search/SearchConfigurations.js";
+import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class SearchTracksEndpoint extends GetEndpoint {
     db: TriDB;
@@ -34,7 +37,9 @@ export class SearchTracksEndpoint extends GetEndpoint {
         return true;
     }
 
-    async run(req: Request, res: Response) {
+    async run(req: AuthenticatedRequest, res: Response) {
+        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
+
         let request: SearchRequest = {
             query: req.query.search as string,
             limit: parseInt(req.query.limit as string ?? "10"),
@@ -45,7 +50,7 @@ export class SearchTracksEndpoint extends GetEndpoint {
             return;
         }
 
-        const searchResults = await SearchEngine.search(this.db, SearchConfigurations.tracks, request);
+        const searchResults = await SearchEngine.search(this.db, SearchConfigurations.tracks, request, notAuthenticated);
         return res.status(200).send(searchResults);
     }
 }

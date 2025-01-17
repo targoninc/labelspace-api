@@ -21,6 +21,9 @@ export class Authenticator {
     }
 
     static async userHasPermission(user: User, permissionName: Permissions, db: TriDB) {
+        if (!user) {
+            return false;
+        }
         return await db.userHasPermissionWithName(user.id, permissionName);
     }
 }

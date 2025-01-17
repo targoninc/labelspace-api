@@ -389,14 +389,22 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.logs WHERE logLevel >= ? ORDER BY order_id DESC LIMIT ? OFFSET ?", [logLevel, limit, offset]);
     }
 
-    async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, searchMode: SearchMode): Promise<T[]> {
+    async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, noAuth: boolean, searchMode: SearchMode): Promise<T[]> {
         if (searchMode === SearchMode.exact) {
-            return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ") + " LIMIT ? OFFSET ?",
+            let exactQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ");
+            if (noAuth) {
+                exactQuery += " AND " + searchConfiguration.noAuthCondition;
+            }
+            return await this.query(exactQuery + " LIMIT ? OFFSET ?",
                 [...searchConfiguration.searchableFields.map(() => request.query), request.limit, request.offset]);
         } else if (searchMode === SearchMode.partial) {
             const queryValue = `%${request.query}%`.replaceAll("_", "%");
             const values = searchConfiguration.searchableFields.map(() => [queryValue, request.query]).flat();
-            return await this.query("SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ") + " LIMIT ? OFFSET ?",
+            let partialQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ");
+            if (noAuth) {
+                partialQuery += " AND " + searchConfiguration.noAuthCondition;
+            }
+            return await this.query(partialQuery + " LIMIT ? OFFSET ?",
                 [...values, request.limit, request.offset]);
         } else {
             throw new Error("Invalid search mode, must be exact or partial.");

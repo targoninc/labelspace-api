@@ -6,13 +6,13 @@ import {SearchMode} from "./SearchMode.js";
 import {Entity} from "../../models/interfaces/Entity.js";
 
 export class SearchEngine {
-    static async search<T extends Entity>(db: TriDB, searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest): Promise<SearchResult[]> {
+    static async search<T extends Entity>(db: TriDB, searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, noAuth: boolean = false): Promise<SearchResult[]> {
         let exactResults: T[];
 
-        exactResults = await db.searchGeneric<T>(searchConfiguration, request, SearchMode.exact);
+        exactResults = await db.searchGeneric<T>(searchConfiguration, request, noAuth, SearchMode.exact);
         let partialResults: T[] = [];
         if (exactResults.length < request.limit) {
-            partialResults = await db.searchGeneric<T>(searchConfiguration, request, SearchMode.partial);
+            partialResults = await db.searchGeneric<T>(searchConfiguration, request, noAuth, SearchMode.partial);
             partialResults = partialResults.filter(u => !exactResults.some(e => e.id === u.id));
         }
 
