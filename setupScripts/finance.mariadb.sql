@@ -53,8 +53,8 @@ create table if not exists finance.royalties
     created_at     datetime     default current_timestamp() not null,
     updated_at     datetime     default current_timestamp() not null on update current_timestamp(),
     id             int auto_increment
-        primary key
-)
+    primary key
+    )
     collate = utf8mb3_general_ci;
 
 create index if not exists artistindex
@@ -66,11 +66,17 @@ create index if not exists periodindex
 create index if not exists royalties_isrc_index
     on finance.royalties (isrc);
 
+create index if not exists royalties_provider_index
+    on finance.royalties (provider);
+
 create index if not exists royalties_royalty_index
     on finance.royalties (royalty);
 
 create index if not exists royalties_title_index
     on finance.royalties (title);
+
+create index if not exists royalties_upc_index
+    on finance.royalties (upc);
 
 create table if not exists finance.splits
 (
