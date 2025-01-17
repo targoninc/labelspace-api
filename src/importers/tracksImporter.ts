@@ -1,6 +1,9 @@
 import * as fs from "node:fs";
 import {TriDB} from "../utility/DB/TriDB.ts";
 import {readCsvAsync} from "../utility/CsvReader.ts";
+import {MediaClient} from "../utility/Media/MediaClient.ts";
+import {MediaFileType} from "../models/enums/MediaFileType.ts";
+import {FileStorage} from "../utility/Storage/FileStorage.ts";
 
 export async function importTracks(db: TriDB, srcFile: string) {
     if (!fs.existsSync(srcFile)) {
@@ -43,5 +46,25 @@ export async function importTracks(db: TriDB, srcFile: string) {
 
         console.log(createTrackQuery, createParams);
         await db.query(createTrackQuery, createParams);
+
+        const track = await db.getTrackById(row.id);
+        if (track.has_cover) {
+            console.log("Track already has cover: " + track.title);
+            continue;
+        }
+
+        const album = await db.getAlbumById(row.albumid);
+        if (!album || !album.has_cover) {
+            console.error("No album found for track: " + track.title);
+            continue;
+        }
+        const imagePath = FileStorage.filePath(MediaFileType.albumCover, album.id, "source.png");
+        if (!fs.existsSync(imagePath)) {
+            console.error("Cover not found: " + imagePath);
+            continue;
+        }
+        await MediaClient.addMedia(db, MediaFileType.trackCover, track.id, "source.png", imagePath);
+        await db.setTrackHasCover(track.id, true);
+        console.log("Added cover for track " + track.title);
     }
 }

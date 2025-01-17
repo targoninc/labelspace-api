@@ -61,7 +61,6 @@ export async function importArtists(db: TriDB, srcFile: string) {
             console.error("Logo not found: " + logoPath);
             continue;
         }
-        const logo = fs.readFileSync(logoPath);
         await MediaClient.addMedia(db, MediaFileType.artistLogo, artist.id, "source.png", logoPath);
         await db.setArtistHasLogo(artist.id, true);
         console.log("Added logo for artist " + artist.name);
