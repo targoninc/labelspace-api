@@ -1,10 +1,10 @@
 import {Application, Response} from "express";
-import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {TriDB} from "../../utility/DB/TriDB.js";
-import {Authenticator} from "../../models/Authenticator.js";
-import {Permissions} from "../../models/enums/Permissions.js";
-import {MediaClient} from "../../utility/Media/MediaClient.js";
-import {MediaFileType} from "../../models/enums/MediaFileType.js";
+import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.js";
+import {TriDB} from "../../../utility/DB/TriDB.js";
+import {Authenticator} from "../../../models/Authenticator.js";
+import {Permissions} from "../../../models/enums/Permissions.js";
+import {MediaClient} from "../../../utility/Media/MediaClient.js";
+import {MediaFileType} from "../../../models/enums/MediaFileType.js";
 
 export class DeleteTrackEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;

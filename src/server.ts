@@ -19,7 +19,7 @@ import {UploadMediaEndpoint} from "./endpoints/media/UploadMediaEndpoint.js";
 import {RequestPasswordResetEndpoint} from "./endpoints/auth/RequestPasswordResetEndpoint.js";
 import {ResetPasswordEndpoint} from "./endpoints/auth/ResetPasswordEndpoint.js";
 import {VerifyEmailEndpoint} from "./endpoints/auth/VerifyEmailEndpoint.js";
-import {DeleteTrackEndpoint} from "./endpoints/tracks/DeleteTrackEndpoint.js";
+import {DeleteTrackEndpoint} from "./endpoints/tracks/actions/DeleteTrackEndpoint.js";
 import {GetImageEndpoint} from "./endpoints/media/GetImageEndpoint.js";
 import {ExportUserDataEndpoint} from "./endpoints/user/actions/ExportUserDataEndpoint.js";
 import {CreateAlbumEndpoint} from "./endpoints/albums/actions/CreateAlbumEndpoint.js";
@@ -51,6 +51,7 @@ import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFul
 import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
 import {BandcampWorker} from "./utility/Bandcamp/BandcampWorker.ts";
+import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoint.ts";
 
 config();
 
@@ -166,6 +167,10 @@ new GetLogsEndpoint(app, "/logs/get", db).register();
 // region Data
 new ImportDataEndpoint(app, "/data/import", db).register();
 new AddDataEndpoint(app, "/data/add", db).register();
+// endregion
+
+// region Submissions
+new SubmitReleaseEndpoint(app, "/submissions/create").register();
 // endregion
 
 // region Webhooks
