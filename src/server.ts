@@ -54,6 +54,7 @@ import {BandcampWorker} from "./utility/Bandcamp/BandcampWorker.ts";
 import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoint.ts";
 import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 import {GetArtistEndpoint} from "./endpoints/artists/GetArtistEndpoint.ts";
+import {UpdateArtistEndpoint} from "./endpoints/artists/UpdateArtistEndpoint.ts";
 
 config();
 
@@ -103,6 +104,7 @@ app.use(rateLimit({
 // region Artists
 new GetArtistsEndpoint(app, "/artists/get", db).register();
 new GetArtistEndpoint(app, "/artists/byName", db).register();
+new UpdateArtistEndpoint(app, "/artists/update", db).register();
 // endregion
 
 // region Users

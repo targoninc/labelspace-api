@@ -667,4 +667,9 @@ export class TriDB extends MariaDB {
 
         return await this.query(`SELECT * FROM tri.albums WHERE ${likeQuery} ORDER BY release_date DESC`, [...artistNamesLike]);
     }
+
+    async updateArtist(artistName: string, updatedArtist: Partial<Artist>) {
+        await this.query("UPDATE tri.artists SET description = ? WHERE name = ?",
+            [updatedArtist.description, artistName]);
+    }
 }
