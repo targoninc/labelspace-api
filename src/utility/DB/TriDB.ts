@@ -655,7 +655,7 @@ export class TriDB extends MariaDB {
         const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT * FROM tri.tracks WHERE ${likeQuery}`, [...artistNamesLike]);
+        return await this.query(`SELECT * FROM tri.tracks WHERE ${likeQuery} ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 
     async getAlbumsByArtists(artistNames: string[]) {
@@ -665,6 +665,6 @@ export class TriDB extends MariaDB {
         const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT * FROM tri.albums WHERE ${likeQuery}`, [...artistNamesLike]);
+        return await this.query(`SELECT * FROM tri.albums WHERE ${likeQuery} ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 }

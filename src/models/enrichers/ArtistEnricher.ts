@@ -3,6 +3,7 @@ import {Artist} from "../db/tri/Artist.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {Track} from "../db/tri/Track.js";
 import {Album} from "../db/tri/Album.ts";
+import {AlbumEnricher} from "./AlbumEnricher.ts";
 
 export interface ArtistEnrichmentConfig {
     tracks?: boolean;
@@ -15,7 +16,13 @@ export class ArtistEnricher extends IEnricher {
     }
 
     static async enrichAsync(db: TriDB, base: Artist, config: ArtistEnrichmentConfig): Promise<Artist> {
-        throw new Error("Method not implemented.");
+        base.tracks = await enrichIfAsync<Track[]>(config.tracks, () => db.getTracksByArtists([base.name]), []);
+        base.albums = await enrichIfAsync<Album[]>(config.albums, () => db.getAlbumsByArtists([base.name]), []);
+        base.albums = await AlbumEnricher.enrichManyAsync(db, base.albums, {
+            tracks: config.tracks
+        });
+
+        return base;
     }
 
     static enrichMany(db: TriDB, base: Artist[], config: ArtistEnrichmentConfig): Artist[] {
