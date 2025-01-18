@@ -44,7 +44,6 @@ export async function importTracks(db: TriDB, srcFile: string) {
             row.title,
         ];
 
-        console.log(createTrackQuery, createParams);
         await db.query(createTrackQuery, createParams);
 
         const track = await db.getTrackById(row.id);

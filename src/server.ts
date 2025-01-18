@@ -52,6 +52,7 @@ import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
 import {BandcampWorker} from "./utility/Bandcamp/BandcampWorker.ts";
 import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoint.ts";
+import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 
 config();
 
@@ -97,6 +98,10 @@ app.use(rateLimit({
         xForwardedForHeader: false
     }
 }));
+
+// region Artists
+new GetArtistsEndpoint(app, "/artists/get", db).register();
+// endregion
 
 // region Users
 new LoginEndpoint(app, "/user/actions/login", db).register();

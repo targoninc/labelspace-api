@@ -61,7 +61,6 @@ export async function importAlbums(db: TriDB, srcFile: string, tracksSrcFile: st
             console.error("Undefined parameter found", params);
             return;
         }
-        console.log(query, params);
         await db.query(query, params);
 
         const album = await db.getAlbumById(row.album_id);

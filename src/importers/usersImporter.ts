@@ -32,7 +32,6 @@ export async function importUsers(db: TriDB, srcFile: string) {
         if (params.some(p => p === undefined)) {
             return;
         }
-        console.log(query, params);
         await db.query(query, params);
     }
 }

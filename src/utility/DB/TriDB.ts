@@ -643,4 +643,28 @@ export class TriDB extends MariaDB {
     async getArtistByName(name: string): Promise<Artist|null> {
         return await this.queryFirst("SELECT * FROM tri.artists WHERE name = ?", [name]);
     }
+
+    async getArtists(): Promise<Artist[]> {
+        return await this.query("SELECT id, name, has_logo FROM tri.artists");
+    }
+
+    async getTracksByArtists(artistNames: string[]) {
+        if (artistNames.length === 0) {
+            return [];
+        }
+        const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return await this.query(`SELECT * FROM tri.tracks WHERE ${likeQuery}`, [...artistNamesLike]);
+    }
+
+    async getAlbumsByArtists(artistNames: string[]) {
+        if (artistNames.length === 0) {
+            return [];
+        }
+        const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return await this.query(`SELECT * FROM tri.albums WHERE ${likeQuery}`, [...artistNamesLike]);
+    }
 }

@@ -37,7 +37,6 @@ export async function importArtists(db: TriDB, srcFile: string) {
         if (params.some(p => p === undefined)) {
             return;
         }
-        console.log(query, params);
         await db.query(query, params);
 
         const artist = await db.getArtistByName(row[header.indexOf("artistname")]);
