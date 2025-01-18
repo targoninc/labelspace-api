@@ -3,7 +3,6 @@ import {Response} from "express";
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../utility/DB/TriDB.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
-import {User} from "../../models/db/tri/User.ts";
 import {CLI} from "../../utility/CLI.ts";
 import {Artist} from "../../models/db/tri/Artist.ts";
 
@@ -17,11 +16,6 @@ export class UpdateArtistEndpoint extends AuthenticatedPostEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         Authenticator.guardEndpoint(req, res);
-
-        const user = req.body.user as User;
-        if (!user) {
-            return res.status(400).send({error: "No user provided"});
-        }
 
         const artist = req.body as Artist;
         if (!artist) {
