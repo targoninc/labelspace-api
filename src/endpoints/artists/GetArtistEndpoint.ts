@@ -29,6 +29,7 @@ export class GetArtistEndpoint extends GetEndpoint {
 
         let artist = <Artist>{
             name: fullArtist.name,
+            description: fullArtist.description,
             id: fullArtist.id,
             has_logo: fullArtist.has_logo,
         };
