@@ -492,9 +492,9 @@ export class TriDB extends MariaDB {
         const artistCut = 0.85;
         const artistTotal = total * artistCut;
         return {
-            total: artistTotal,
-            paidOut,
-            available: artistTotal - paidOut
+            total: artistTotal.toFixed(2),
+            paidOut: paidOut.toFixed(2),
+            available: (artistTotal - paidOut).toFixed(2)
         };
     }
 
