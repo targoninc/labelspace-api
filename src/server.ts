@@ -205,7 +205,7 @@ app.listen(port, () => {
     CLI.info(`Server is running on port http://localhost:${port}`);
 });
 
-await setupNgrok(port);
+//await setupNgrok(port);
 
 const bandcampWorker = new BandcampWorker(db);
 bandcampWorker.run();

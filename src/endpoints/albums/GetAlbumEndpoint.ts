@@ -29,12 +29,6 @@ export class GetAlbumEndpoint extends GetEndpoint {
             return res.send({error: "Album not found"});
         }
 
-        if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            if (new Date(album.release_date).getTime() > new Date().getTime()) {
-                return res.status(403).send("You are not allowed to view this album.");
-            }
-        }
-
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
         });

@@ -20,9 +20,9 @@ export class RoyaltiesByServiceEndpoint extends AuthenticatedGetEndpoint {
         const upc = req.query.upc as string;
         const isrc = req.query.isrc as string;
         if (upc) {
-            services = await this.db.getRoyaltiesByServiceForUPC(upc, 36);
+            services = await this.db.getRoyaltiesByServiceForUPC(upc, 15);
         } else if (isrc) {
-            services = await this.db.getRoyaltiesByServiceForISRC(isrc, 36);
+            services = await this.db.getRoyaltiesByServiceForISRC(isrc, 15);
         } else {
             const artists = await this.db.getUserArtists(user.id);
             const artistNames = artists.map(a => a.name);
