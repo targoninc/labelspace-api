@@ -57,7 +57,7 @@ export class MailBuilder {
     static default() {
         return MailBuilder.new()
             .style(defaultMailStyle)
-            .image("https://artists.trirecords.eu/img/icons/tri_black_32.png", "Tri Artist", 32, 32);
+            .image("https://artists.trirecords.eu/images/LOGO128.png", "Tri Artists", 32, 32);
     }
 
     public subject(text: string) {

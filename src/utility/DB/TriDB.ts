@@ -5,11 +5,9 @@ import {PossibleUsersetting} from "../../models/db/tri/PossibleUsersetting.js";
 import {Usersetting} from "../../models/db/tri/Usersetting.js";
 import {Track} from "../../models/db/tri/Track.js";
 import {UserPermission} from "../../models/db/tri/UserPermission.js";
-import {AlbumTrack} from "../../models/db/tri/AlbumTrack.js";
 import {Permission} from "../../models/db/tri/Permission.js";
 import {Permissions} from "../../models/enums/Permissions.js";
 import {MariaDB} from "./MariaDB.js";
-import {UpdateTrackRequest} from "../../models/interfaces/UpdateTrackRequest.js";
 import {CLI} from "../CLI.js";
 import {LogLevel} from "../../models/enums/LogLevel.js";
 import {Log} from "../../models/db/tri/Log.js";
@@ -26,8 +24,8 @@ import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {PaypalWebhook} from "../Paypal/internalModels/PaypalWebhook.ts";
 import type {SalesReport} from "../Bandcamp/SalesReport.ts";
 import type {BandcampReportStatus} from "../Bandcamp/BandcampReportStatus.ts";
-import { Artist } from "../../models/db/tri/Artist.ts";
-import { PaypalBatchPayment } from "../../models/db/finance/PaypalBatchPayment.ts";
+import {Artist} from "../../models/db/tri/Artist.ts";
+import {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -43,13 +41,8 @@ export class TriDB extends MariaDB {
         }, 1000 * 60 * 5);
     }
 
-    async getAlbumsByUserId(userId: number): Promise<Album[]> {
-        return await this.query("SELECT * FROM tri.albums WHERE user_id = ?", [userId]);
-    }
-
     async getUserById(userId: number, followingId: number = -1): Promise<User> {
-        const user = await this.queryFirst("SELECT * FROM tri.users WHERE id = ?", [userId]);
-        return user;
+        return await this.queryFirst("SELECT * FROM tri.users WHERE id = ?", [userId]);
     }
 
     async getUserByEmail(email: string): Promise<User> {
