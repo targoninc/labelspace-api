@@ -16,7 +16,9 @@ export class GetTracksEndpoint extends GetEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
-        let tracks = await this.db.getTracks(notAuthenticated);
+
+        const onlyReleased = req.query.onlyReleased === "true";
+        let tracks = await this.db.getTracks(notAuthenticated || !onlyReleased);
 
         tracks = await TrackEnricher.enrichManyAsync(this.db, tracks, {
             album: true,
