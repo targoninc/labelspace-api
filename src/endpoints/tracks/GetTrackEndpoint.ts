@@ -31,7 +31,7 @@ export class GetTrackEndpoint extends GetEndpoint {
 
         const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
         const trackReleaseTime = new Date(track.release_date).getTime();
-        if (trackReleaseTime < new Date().getTime() && !hasReleaseManagementPermission) {
+        if (trackReleaseTime > new Date().getTime() && !hasReleaseManagementPermission) {
             return res.status(404).send({error: "Track not found"});
         }
 
