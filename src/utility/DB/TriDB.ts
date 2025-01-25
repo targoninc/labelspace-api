@@ -718,6 +718,6 @@ export class TriDB extends MariaDB {
     }
 
     async getTrackCountByAlbumIds(ids: number[]): Promise<{ id: number, count: number }[]> {
-        return await this.query(`SELECT album_id, COUNT(*) AS count FROM tri.tracks GROUP BY album_id`, ids);
+        return await this.query(`SELECT album_id AS id, COUNT(*) AS count FROM tri.tracks GROUP BY album_id`, ids);
     }
 }
