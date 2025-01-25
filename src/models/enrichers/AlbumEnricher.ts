@@ -16,6 +16,9 @@ export class AlbumEnricher extends IEnricher {
         base.tracks = await enrichIfAsync<Track[]>(config.tracks, async () => {
             return await db.getTracksByAlbumIds([base.id]);
         }, []);
+        for (const t of base.tracks) {
+            t.earnings = await db.getTrackTotalRoyalty(t.isrc);
+        }
 
         return base;
     }

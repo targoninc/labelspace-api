@@ -38,6 +38,7 @@ export class GetAlbumEndpoint extends GetEndpoint {
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
         });
+        album.earnings = await this.db.getReleaseTotalRoyalty(album.upc);
 
         return res.send(album);
     }

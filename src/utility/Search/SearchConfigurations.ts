@@ -43,7 +43,7 @@ export class SearchConfigurations {
     static users: SearchTableConfiguration<User> = {
         tableName: "users",
         type: "user",
-        searchableFields: ["username", "description"],
+        searchableFields: ["username"],
         urlPrefix: "profile",
         urlIdField: "username",
         hasImageField: "has_avatar",

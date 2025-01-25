@@ -672,4 +672,55 @@ export class TriDB extends MariaDB {
         await this.query("UPDATE tri.artists SET description = ? WHERE name = ?",
             [updatedArtist.description, artistName]);
     }
+
+    async getRoyaltiesByService(artistNames: string[], limit: number): Promise<Statistic[]> {
+        if (artistNames.length === 0) {
+            return [];
+        }
+
+        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistNamesLike = artistNames.map(name => `%${name}%`);
+
+        return await this.query(`SELECT r.provider as id,
+                                        r.provider as label,
+                                        SUM(r.royalty) as value
+                                 FROM finance.royalties r
+                                 WHERE ${artistConditions}
+                                 GROUP BY r.provider
+                                 ORDER BY SUM(r.royalty) DESC
+                                 LIMIT ?`,
+            [...artistNamesLike, limit]);
+    }
+
+    async getRoyaltiesByServiceForUPC(upc: string, limit: number): Promise<Statistic[]> {
+        return await this.query(`SELECT r.provider as id,
+                                        r.provider as label,
+                                        SUM(r.royalty) as value
+                                 FROM finance.royalties r
+                                 WHERE r.upc = ?
+                                 GROUP BY r.provider
+                                 ORDER BY SUM(r.royalty) DESC
+                                 LIMIT ?`,
+            [upc, limit]);
+    }
+
+    async getRoyaltiesByServiceForISRC(isrc: string, limit: number): Promise<Statistic[]> {
+        return await this.query(`SELECT r.provider as id,
+                                        r.provider as label,
+                                        SUM(r.royalty) as value
+                                 FROM finance.royalties r
+                                 WHERE r.isrc = ?
+                                 GROUP BY r.provider
+                                 ORDER BY SUM(r.royalty) DESC
+                                 LIMIT ?`,
+            [isrc, limit]);
+    }
+
+    async getReleaseTotalRoyalty(upc: string) {
+        return await this.querySingleValue(`SELECT SUM(r.royalty) FROM finance.royalties r WHERE r.upc = ?`, [upc]);
+    }
+
+    async getTrackTotalRoyalty(isrc: string) {
+        return await this.querySingleValue(`SELECT SUM(r.royalty) FROM finance.royalties r WHERE r.isrc = ?`, [isrc]);
+    }
 }

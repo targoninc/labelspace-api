@@ -16,13 +16,11 @@ export class GetTracksEndpoint extends GetEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
-        const tracks = await this.db.getTracks(notAuthenticated);
+        let tracks = await this.db.getTracks(notAuthenticated);
 
-        for (let track of tracks) {
-            track = await TrackEnricher.enrichAsync(this.db, track, {
-                album: true,
-            }, req.user);
-        }
+        tracks = await TrackEnricher.enrichManyAsync(this.db, tracks, {
+            album: true,
+        }, req.user);
 
         return res.send(tracks);
     }

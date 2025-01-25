@@ -55,6 +55,7 @@ import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoi
 import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 import {GetArtistEndpoint} from "./endpoints/artists/GetArtistEndpoint.ts";
 import {UpdateArtistEndpoint} from "./endpoints/artists/UpdateArtistEndpoint.ts";
+import {RoyaltiesByServiceEndpoint} from "./endpoints/statistics/RoyaltiesByServiceEndpoint.ts";
 
 config();
 
@@ -155,6 +156,7 @@ new RoyaltiesByMonthEndpoint(app, "/statistics/royaltiesByMonth", db).register()
 new RoyaltiesByYearEndpoint(app, "/statistics/royaltiesByYear", db).register();
 new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register();
 new RoyaltiesByArtistEndpoint(app, "/statistics/royaltiesByArtist", db).register();
+new RoyaltiesByServiceEndpoint(app, "/statistics/royaltiesByService", db).register();
 // endregion
 
 // region Payments

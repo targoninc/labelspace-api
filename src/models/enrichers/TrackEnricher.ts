@@ -10,7 +10,15 @@ export interface TrackEnrichmentConfig {
 
 export class TrackEnricher extends IEnricher {
     static async enrichAsync(db: TriDB, base: Track, config: TrackEnrichmentConfig, user?: User): Promise<Track> {
-        base.album = await enrichIfAsync<Album>(config.album, () => db.getAlbumById(base.album_id ?? 0), {} as Album);
+        base.album = await enrichIfAsync<Album>(config.album, async () => {
+            const album = await db.getAlbumById(base.album_id ?? 0)
+            if (!album) {
+                return null;
+            }
+            album.earnings = await db.getReleaseTotalRoyalty(album.upc);
+
+            return album;
+        }, {} as Album);
 
         return base;
     }
