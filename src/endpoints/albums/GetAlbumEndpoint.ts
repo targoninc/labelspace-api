@@ -3,8 +3,6 @@ import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {AlbumEnricher} from "../../models/enrichers/AlbumEnricher.js";
-import {Authenticator} from "../../models/Authenticator.ts";
-import {Permissions} from "../../models/enums/Permissions.ts";
 
 export class GetAlbumEndpoint extends GetEndpoint {
     db: TriDB;
