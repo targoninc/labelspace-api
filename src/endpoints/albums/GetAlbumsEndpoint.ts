@@ -18,7 +18,7 @@ export class GetAlbumsEndpoint extends GetEndpoint {
         const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
 
         const onlyReleased = req.query.onlyReleased === "true";
-        let albums = await this.db.getAlbums(notAuthenticated || !onlyReleased);
+        let albums = await this.db.getAlbums(notAuthenticated || onlyReleased);
         const trackCounts = await this.db.getTrackCountByAlbumIds(albums.map(a => a.id));
         albums = albums.map(a => {
             const count = trackCounts.find(c => c.id === a.id)?.count ?? 0;
