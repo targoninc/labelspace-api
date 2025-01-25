@@ -386,7 +386,7 @@ export class TriDB extends MariaDB {
 
     async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, noAuth: boolean, searchMode: SearchMode): Promise<T[]> {
         if (searchMode === SearchMode.exact) {
-            let exactQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ");
+            let exactQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE (" + searchConfiguration.searchableFields.map(f => `${f.toString()} = ?`).join(" OR ") + ")";
             if (noAuth) {
                 exactQuery += " AND " + searchConfiguration.noAuthCondition;
             }
@@ -395,7 +395,7 @@ export class TriDB extends MariaDB {
         } else if (searchMode === SearchMode.partial) {
             const queryValue = `%${request.query}%`.replaceAll("_", "%");
             const values = searchConfiguration.searchableFields.map(() => [queryValue, request.query]).flat();
-            let partialQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE " + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ");
+            let partialQuery = "SELECT * FROM " + searchConfiguration.tableName + " WHERE (" + searchConfiguration.searchableFields.map(f => `${f.toString()} LIKE ? AND ${f.toString()} != ?`).join(" OR ") + ")";
             if (noAuth) {
                 partialQuery += " AND " + searchConfiguration.noAuthCondition;
             }

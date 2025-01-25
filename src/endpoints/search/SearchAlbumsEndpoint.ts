@@ -38,8 +38,6 @@ export class SearchAlbumsEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
-
         let request: SearchRequest = {
             query: req.query.search as string,
             limit: parseInt(req.query.limit as string ?? "10"),
@@ -49,6 +47,9 @@ export class SearchAlbumsEndpoint extends GetEndpoint {
         if (!this.validateRequest(res, request)) {
             return;
         }
+
+        const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
+        const notAuthenticated = !hasReleaseManagementPermission;
 
         const searchResults = await SearchEngine.search(this.db, SearchConfigurations.albums, request, notAuthenticated);
         return res.status(200).send(searchResults);
