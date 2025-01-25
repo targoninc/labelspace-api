@@ -38,6 +38,19 @@ export class GetArtistEndpoint extends GetEndpoint {
             albums: true,
             tracks: true
         });
+        const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
+        if (artist.tracks) {
+            artist.tracks = artist.tracks.filter(t => {
+                const trackReleaseTime = new Date(t.release_date).getTime();
+                return trackReleaseTime < new Date().getTime() || hasReleaseManagementPermission;
+            });
+        }
+        if (artist.albums) {
+            artist.albums = artist.albums.filter(a => {
+                const albumReleaseTime = new Date(a.release_date).getTime();
+                return albumReleaseTime < new Date().getTime() || hasReleaseManagementPermission;
+            });
+        }
 
         return res.send(artist);
     }
