@@ -96,12 +96,13 @@ create table if not exists tri.user_emails
     verified          tinyint(1) default 0 not null,
     verified_at       datetime             null,
     primary key (user_id, email),
-    constraint user_emails_pk
-        unique (verification_code),
     constraint user_emails_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete cascade
 );
+
+create index if not exists user_emails_verification_code_index
+    on tri.user_emails (verification_code);
 
 create table if not exists tri.action_log
 (
