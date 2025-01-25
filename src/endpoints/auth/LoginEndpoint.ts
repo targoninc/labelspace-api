@@ -22,13 +22,6 @@ export class LoginEndpoint extends PostEndpoint {
             return res.status(401).send({error: "Invalid username or password"});
         }
 
-        if (!existing.ip) {
-            const ip = IP.get(req);
-            await this.db.updateUser(existing.id, {
-                ip: ip
-            });
-        }
-
         passport.authenticate("local", async (err: Error, user: any, info: any, status: number) => {
             if (err) {
                 CLI.error(err);
@@ -52,6 +45,14 @@ export class LoginEndpoint extends PostEndpoint {
                     verification_status: user.verification_status,
                     ip: user.ip
                 };
+
+                const ip = IP.get(req);
+                await this.db.updateUser(user.id, {
+                    secondlastlogin: user.lastlogin,
+                    lastlogin: new Date(),
+                    ip: ip
+                });
+
                 return res.send({
                     user: outUser
                 });
