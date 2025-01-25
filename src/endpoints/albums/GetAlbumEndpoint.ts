@@ -3,6 +3,8 @@ import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {AlbumEnricher} from "../../models/enrichers/AlbumEnricher.js";
+import {Permissions} from "../../models/enums/Permissions.ts";
+import {Authenticator} from "../../models/Authenticator.ts";
 
 export class GetAlbumEndpoint extends GetEndpoint {
     db: TriDB;
@@ -15,16 +17,22 @@ export class GetAlbumEndpoint extends GetEndpoint {
     async run(req: AuthenticatedRequest, res: Response) {
         let idParam = req.query.id as string;
         if (!idParam) {
-            return res.send({error: "No album id provided"});
+            return res.status(400).send({error: "No album id provided"});
         }
         const id = parseInt(idParam);
         if (isNaN(id)) {
-            return res.send({error: "Invalid album id"});
+            return res.status(400).send({error: "Invalid album id"});
         }
 
         let album = await this.db.getAlbumById(id);
         if (!album) {
-            return res.send({error: "Album not found"});
+            return res.status(404).send({error: "Album not found"});
+        }
+
+        const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
+        const albumReleaseTime = new Date(album.release_date).getTime();
+        if (albumReleaseTime < new Date().getTime() && !hasReleaseManagementPermission) {
+            return res.status(404).send({error: "Album not found"});
         }
 
         album = await AlbumEnricher.enrichAsync(this.db, album, {
