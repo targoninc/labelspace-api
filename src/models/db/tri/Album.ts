@@ -11,8 +11,6 @@ export interface Album {
     release_date: Date;
     created_at: Date;
     updated_at: Date;
-    visibility: string;
-    secretcode: string;
     has_cover: boolean;
     price: number;
     artists: string;

@@ -331,13 +331,15 @@ export class TriDB extends MariaDB {
     }
 
     async updateTrack(request: Track) {
-        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ? WHERE id = ?", [
+        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ?, length = ?, credits = ? WHERE id = ?", [
             request.title,
             request.isrc,
             request.artists,
             request.genre ?? "other",
             new Date(request.release_date ?? new Date().getTime()).toISOString().split("T")[0],
             request.price,
+            request.length,
+            request.credits,
             request.id
         ]);
     }
@@ -581,8 +583,8 @@ export class TriDB extends MariaDB {
     }
 
     async updateAlbum(album: Partial<Album>) {
-        await this.query("UPDATE tri.albums SET title = ?, upc = ?, release_date = ?, price = ? WHERE id = ?",
-            [album.title, album.upc, album.release_date, album.price, album.id]);
+        await this.query("UPDATE tri.albums SET title = ?, upc = ?, release_date = ?, price = ?, artists = ? WHERE id = ?",
+            [album.title, album.upc, album.release_date, album.price, album.artists, album.id]);
     }
 
     async removeTrackFromAlbum(album_id: number, track_id: number) {
