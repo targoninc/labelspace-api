@@ -142,6 +142,9 @@ create table if not exists tri.albums
             on delete set null
 );
 
+create index if not exists albums_release_date_index
+    on tri.albums (release_date);
+
 create table if not exists tri.tracks
 (
     id              bigint auto_increment
