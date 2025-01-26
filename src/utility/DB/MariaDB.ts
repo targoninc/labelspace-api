@@ -81,9 +81,11 @@ export class MariaDB {
             await this.connect();
         }
         let conn = this.connection;
+        const connStart = performance.now();
         if (!conn || !conn.isValid()) {
-            CLI.warning("Reconnecting to database because existing connection is invalid...");
             conn = await this.connectionPool!.getConnection();
+            const connTime = performance.now() - connStart;
+            CLI.debug(`Connection acquisition took ${connTime.toFixed(2)}ms`);
         }
         try {
             const start = performance.now();
