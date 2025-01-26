@@ -5,6 +5,7 @@ import {UserEmail} from "../db/tri/UserEmail.js";
 import {Usersetting} from "../db/tri/Usersetting.js";
 import type {Artist} from "../db/tri/Artist.ts";
 import type {Permission} from "../db/tri/Permission.ts";
+import {UserTotp} from "../db/tri/UserTotp.ts";
 
 export interface UserEnrichmentConfig {
     tracks?: boolean;
@@ -13,6 +14,7 @@ export interface UserEnrichmentConfig {
     emails?: boolean;
     artists?: boolean;
     permissions?: boolean;
+    totp?: boolean;
 }
 
 export class UserEnricher extends IEnricher {
@@ -27,6 +29,14 @@ export class UserEnricher extends IEnricher {
         user.permissions = await enrichIfAsync<Permission[]>(config.permissions, async () => {
             const userPerms = await db.getUserPermissions(user.id);
             return await db.getPermissionsByIds(userPerms.map(p => p.permission_id));
+        }, []);
+        user.totp = await enrichIfAsync<UserTotp[]>(config.totp, async () => {
+            const userTotp = await db.getUserTotp(user.id);
+            return userTotp.map(t => (<UserTotp>{
+                id: t.id,
+                name: t.name,
+                verified: t.verified,
+            }));
         }, []);
 
         return user;

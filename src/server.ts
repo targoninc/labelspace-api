@@ -56,6 +56,10 @@ import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 import {GetArtistEndpoint} from "./endpoints/artists/GetArtistEndpoint.ts";
 import {UpdateArtistEndpoint} from "./endpoints/artists/UpdateArtistEndpoint.ts";
 import {RoyaltiesByServiceEndpoint} from "./endpoints/statistics/RoyaltiesByServiceEndpoint.ts";
+import {AddTotpMethodEndpoint} from "./endpoints/auth/totp/AddTotpMethodEndpoint.ts";
+import {VerifyTotpEndpoint} from "./endpoints/auth/totp/VerifyTotpEndpoint.ts";
+import {DeleteTotpMethodEndpoint} from "./endpoints/auth/totp/DeleteTotpMethodEndpoint.ts";
+import {MfaStore} from "./utility/MfaStore.ts";
 
 config();
 
@@ -102,6 +106,8 @@ app.use(rateLimit({
     }
 }));
 
+const mfaStore = new MfaStore();
+
 // region Artists
 new GetArtistsEndpoint(app, "/artists/get", db).register();
 new GetArtistEndpoint(app, "/artists/byName", db).register();
@@ -109,7 +115,8 @@ new UpdateArtistEndpoint(app, "/artists/update", db).register();
 // endregion
 
 // region Users
-new LoginEndpoint(app, "/user/actions/login", db).register();
+new MfaRequestEndpoint(app, "/user/actions/mfa-request", db, mfaStore).register();
+new LoginEndpoint(app, "/user/actions/login", db, mfaStore).register();
 new LogoutEndpoint(app, "/user/actions/logout").register();
 new ChangePasswordEndpoint(app, "/user/actions/change-password", db).register();
 new RequestPasswordResetEndpoint(app, "/user/actions/request-password-reset", db).register();
@@ -117,7 +124,6 @@ new ResetPasswordEndpoint(app, "/user/actions/reset-password", db).register();
 new GetUserEndpoint(app, "/user/get", db).register();
 new GetUsersEndpoint(app, "/users/get", db).register();
 new UpdateUserEndpoint(app, "/user/actions/update", db).register();
-new MfaRequestEndpoint(app, "/user/actions/mfa-request", db).register();
 new UpdateSettingEndpoint(app, "/user/actions/update-setting", db).register();
 new VerifyEmailEndpoint(app, "/user/actions/verify-email", db).register();
 new ExportUserDataEndpoint(app, "/user/export", db).register();
@@ -186,6 +192,12 @@ new SubmitReleaseEndpoint(app, "/submissions/create").register();
 
 // region Webhooks
 new PaypalEventsWebhookEndpoint(app, "/webhooks/paypal", db).register();
+// endregion
+
+// region TOTP
+new AddTotpMethodEndpoint(app, "/totp/add", db).register();
+new VerifyTotpEndpoint(app, "/totp/verify", db, mfaStore).register();
+new DeleteTotpMethodEndpoint(app, "/totp/delete", db).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {

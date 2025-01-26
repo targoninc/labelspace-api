@@ -5,13 +5,16 @@ import {IP} from "../../utility/IP.js";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../../models/db/tri/User.js";
+import {MfaStore} from "../../utility/MfaStore.ts";
 
 export class LoginEndpoint extends PostEndpoint {
     db: TriDB;
+    private readonly mfaStore: MfaStore;
 
-    constructor(app: Application, path: string, db: TriDB) {
+    constructor(app: Application, path: string, db: TriDB, mfaStore: MfaStore) {
         super(app, path);
         this.db = db;
+        this.mfaStore = mfaStore;
     }
 
     async run(req: Request, res: Response, next: NextFunction) {
@@ -31,6 +34,18 @@ export class LoginEndpoint extends PostEndpoint {
             if (!user) {
                 CLI.warning(`No user, status: ${status}, info: ${JSON.stringify(info)}`);
                 return res.status(401).send({error: "Invalid username or password"});
+            }
+
+            if (this.mfaStore.hasUncompletedMfaProcess(user.id)) {
+                return res.status(401).send({error: "MFA required"});
+            }
+
+            const primaryEmail = await this.db.getUserPrimaryEmail(user.id);
+            const userTotp = await this.db.getUserTotp(user.id);
+            const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
+            const needsMfa = useTotp || (primaryEmail && primaryEmail.verified);
+            if (needsMfa && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
+                return res.status(401).send({error: "MFA required"});
             }
 
             req.logIn(user, async (err) => {

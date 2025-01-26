@@ -26,6 +26,7 @@ import type {SalesReport} from "../Bandcamp/SalesReport.ts";
 import type {BandcampReportStatus} from "../Bandcamp/BandcampReportStatus.ts";
 import {Artist} from "../../models/db/tri/Artist.ts";
 import {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
+import {UserTotp} from "../../models/db/tri/UserTotp.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -721,5 +722,25 @@ export class TriDB extends MariaDB {
 
     async getTrackCountByAlbumIds(ids: number[]): Promise<{ id: number, count: number }[]> {
         return await this.query(`SELECT album_id AS id, COUNT(*) AS count FROM tri.tracks GROUP BY album_id`, ids);
+    }
+
+    async addTotpMethod(userId: number, methodName: string, secret: string) {
+        await this.query("INSERT INTO tri.user_totp (user_id, secret, name) VALUES (?, ?, ?)", [userId, secret, methodName]);
+    }
+
+    async getUserTotp(id: number): Promise<UserTotp[]> {
+        return await this.query("SELECT * FROM tri.user_totp WHERE user_id = ?", [id]);
+    }
+
+    async deleteTotpMethod(userId: number, id: number) {
+        await this.query("DELETE FROM tri.user_totp WHERE user_id = ? AND id = ?", [userId, id]);
+    }
+
+    async getTotp(userId: number, id: number): Promise<UserTotp|null> {
+        return await this.queryFirst("SELECT * FROM tri.user_totp WHERE user_id = ? AND id = ?", [userId, id]);
+    }
+
+    async verifyTotp(userId: number, id: number) {
+        await this.query("UPDATE tri.user_totp SET verified = 1 WHERE user_id = ? AND id = ?", [userId, id]);
     }
 }

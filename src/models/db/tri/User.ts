@@ -2,8 +2,10 @@ import {Usersetting} from "./Usersetting.js";
 import {UserEmail} from "./UserEmail.js";
 import type {Artist} from "./Artist.ts";
 import type {Permission} from "./Permission.ts";
+import {UserTotp} from "./UserTotp.ts";
 
 export interface User extends Express.User {
+    totp?: UserTotp[];
     permissions?: Permission[];
     artists?: Artist[];
     settings?: Usersetting[];
@@ -28,4 +30,5 @@ export interface User extends Express.User {
     ip: string;
     has_avatar: boolean;
     has_banner: boolean;
+    email_mfa_code: string;
 }
