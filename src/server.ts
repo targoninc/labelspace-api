@@ -59,7 +59,10 @@ import {RoyaltiesByServiceEndpoint} from "./endpoints/statistics/RoyaltiesByServ
 import {AddTotpMethodEndpoint} from "./endpoints/auth/totp/AddTotpMethodEndpoint.ts";
 import {VerifyTotpEndpoint} from "./endpoints/auth/totp/VerifyTotpEndpoint.ts";
 import {DeleteTotpMethodEndpoint} from "./endpoints/auth/totp/DeleteTotpMethodEndpoint.ts";
-import {MfaStore} from "./utility/MfaStore.ts";
+import {MfaStore} from "./utility/MFA/MfaStore.ts";
+import {AddWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/AddWebauthnMethodEndpoint.ts";
+import {RegisterWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/RegisterWebauthnMethodEndpoint.ts";
+import {ChallengeStore} from "./utility/MFA/ChallengeStore.ts";
 
 config();
 
@@ -107,6 +110,7 @@ app.use(rateLimit({
 }));
 
 const mfaStore = new MfaStore();
+const challengeStore = new ChallengeStore();
 
 // region Artists
 new GetArtistsEndpoint(app, "/artists/get", db).register();
@@ -194,10 +198,13 @@ new SubmitReleaseEndpoint(app, "/submissions/create").register();
 new PaypalEventsWebhookEndpoint(app, "/webhooks/paypal", db).register();
 // endregion
 
-// region TOTP
+// region MFA
 new AddTotpMethodEndpoint(app, "/totp/add", db).register();
 new VerifyTotpEndpoint(app, "/totp/verify", db, mfaStore).register();
 new DeleteTotpMethodEndpoint(app, "/totp/delete", db).register();
+
+new AddWebauthnMethodEndpoint(app, "/webauthn/add", db, challengeStore).register();
+new RegisterWebauthnMethodEndpoint(app, "/webauthn/register", db, challengeStore).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {

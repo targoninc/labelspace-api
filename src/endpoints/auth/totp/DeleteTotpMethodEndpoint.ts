@@ -1,7 +1,7 @@
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Response} from "express";
-import {TOTP} from "../../../utility/TOTP/TOTP.ts";
+import {TOTP} from "../../../utility/MFA/TOTP.ts";
 
 export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -23,12 +23,12 @@ export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
 
         const totp = await this.db.getTotp(req.user.id, id);
         if (!totp) {
-            return res.status(404).send({error: "TOTP method not found"});
+            return res.status(404).send({error: "MFA method not found"});
         }
 
         if (!totp.verified) {
             await this.db.deleteTotpMethod(req.user.id, id);
-            return res.status(200).send({message: "TOTP method deleted"});
+            return res.status(200).send({message: "MFA method deleted"});
         }
 
         const token = req.body.token as string;
@@ -41,6 +41,6 @@ export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
         }
         await this.db.deleteTotpMethod(req.user.id, id);
 
-        return res.status(200).send({message: "TOTP method deleted"});
+        return res.status(200).send({message: "MFA method deleted"});
     }
 }

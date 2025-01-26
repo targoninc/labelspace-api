@@ -1,8 +1,8 @@
 import {AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Response} from "express";
-import {TOTP} from "../../../utility/TOTP/TOTP.ts";
-import {MfaStore} from "../../../utility/MfaStore.ts";
+import {TOTP} from "../../../utility/MFA/TOTP.ts";
+import {MfaStore} from "../../../utility/MFA/MfaStore.ts";
 import {PostEndpoint} from "../../base/PostEndpoint.ts";
 
 export class VerifyTotpEndpoint extends PostEndpoint {
@@ -26,7 +26,7 @@ export class VerifyTotpEndpoint extends PostEndpoint {
 
         const userTotp = await this.db.getUserTotp(userId);
         if (!userTotp || userTotp.length === 0) {
-            return res.status(404).send({error: "TOTP method not found"});
+            return res.status(404).send({error: "MFA method not found"});
         }
 
         for (const totp of userTotp) {
@@ -35,7 +35,7 @@ export class VerifyTotpEndpoint extends PostEndpoint {
                     this.mfaStore.completeMfaProcesses(userId);
                 }
                 await this.db.verifyTotp(userId, totp.id);
-                return res.status(200).send({message: "TOTP verified"});
+                return res.status(200).send({message: "MFA verified"});
             } else {
                 const manualToken = TOTP.generateToken(totp.secret);
                 console.log(`current: ${token}, manual: ${manualToken}`);

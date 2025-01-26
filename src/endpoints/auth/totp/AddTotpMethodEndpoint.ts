@@ -1,7 +1,7 @@
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Response} from "express";
-import {TOTP} from "../../../utility/TOTP/TOTP.ts";
+import {TOTP} from "../../../utility/MFA/TOTP.ts";
 
 export class AddTotpMethodEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;

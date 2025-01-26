@@ -5,7 +5,7 @@ import {IP} from "../../utility/IP.js";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../../models/db/tri/User.js";
-import {MfaStore} from "../../utility/MfaStore.ts";
+import {MfaStore} from "../../utility/MFA/MfaStore.ts";
 
 export class LoginEndpoint extends PostEndpoint {
     db: TriDB;
