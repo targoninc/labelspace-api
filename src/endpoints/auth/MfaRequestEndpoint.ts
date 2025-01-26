@@ -53,8 +53,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
 
             if (!needsMfa) {
                 return res.send({
-                    user,
-                    mfa_needed: false
+                    user
                 });
             }
 
