@@ -42,8 +42,11 @@ export class LoginEndpoint extends PostEndpoint {
 
             const primaryEmail = await this.db.getUserPrimaryEmail(user.id);
             const userTotp = await this.db.getUserTotp(user.id);
+            const userPublicKeys = await this.db.getUserPublicKeys(user.passkey_user_id);
             const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
-            const needsMfa = useTotp;
+            const useWebauthn = userPublicKeys && userPublicKeys.length > 0;
+            const needsMfa = useTotp || useWebauthn || (primaryEmail && primaryEmail.verified);
+
             if (needsMfa && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
                 return res.status(401).send({error: "MFA required"});
             }

@@ -52,7 +52,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
             const userPublicKeys = await this.db.getUserPublicKeys(user.passkey_user_id);
             const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
             const useWebauthn = userPublicKeys && userPublicKeys.length > 0;
-            const needsMfa = useTotp || useWebauthn;
+            const needsMfa = useTotp || useWebauthn || (primaryEmail && primaryEmail.verified);
 
             if (!needsMfa) {
                 return res.send({
