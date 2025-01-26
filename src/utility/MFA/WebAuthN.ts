@@ -8,7 +8,7 @@ export class WebAuthN {
     static async verifyChallenge(challenge: string, registration: any) {
         const expected = {
             challenge,
-            origin: process.env.WEBAUTHN_ORIGIN,
+            origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3002",
         };
         return await server.verifyRegistration(registration, expected);
     }

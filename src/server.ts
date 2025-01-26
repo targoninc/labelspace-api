@@ -72,7 +72,7 @@ BigInt.prototype.toJSON = function () {
     return int ?? this.toString();
 };
 
-const neededEnvVars = ["SESSION_SECRET", "MARIADB_SESSION_DB", "MARIADB_HOST", "MARIADB_PORT", "MARIADB_USER",
+const neededEnvVars = ["SESSION_SECRET", "SUBMISSION_MAILS", "MARIADB_SESSION_DB", "MARIADB_HOST", "MARIADB_PORT", "MARIADB_USER",
     "MARIADB_PASSWORD", "MARIADB_NAME", "COOKIE_DOMAIN", "CORS_ORIGINS", "MAIL_HOST", "MAIL_PORT", "MAIL_SECURE",
     "MAIL_USER", "MAIL_PASSWORD", "PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"];
 let missingEnvVars = neededEnvVars.filter(varName => !process.env[varName]);

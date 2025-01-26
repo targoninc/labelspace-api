@@ -28,7 +28,7 @@ export class RegisterWebauthnMethodEndpoint extends AuthenticatedPostEndpoint {
 
         try {
             await WebAuthN.verifyChallenge(request.challenge, request.registration);
-        } catch (e) {
+        } catch (e: any) {
             CLI.error(e);
             return res.status(401).send({error: "Invalid challenge"});
         }

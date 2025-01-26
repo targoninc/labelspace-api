@@ -1,4 +1,4 @@
-import type {TriDB} from "../utility/DB/TriDB.ts";
+import {TriDB} from "../utility/DB/TriDB.ts";
 import * as path from "node:path";
 import {importUsers} from "./usersImporter.ts";
 import {importEmails} from "./emailsImporter.ts";
