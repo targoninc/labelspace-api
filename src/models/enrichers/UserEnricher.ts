@@ -36,6 +36,8 @@ export class UserEnricher extends IEnricher {
                 id: t.id,
                 name: t.name,
                 verified: t.verified,
+                created_at: t.created_at,
+                updated_at: t.updated_at,
             }));
         }, []);
 
