@@ -2,6 +2,7 @@ import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/Authen
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Response} from "express";
 import {TOTP} from "../../../utility/MFA/TOTP.ts";
+import {CLI} from "../../../utility/CLI.ts";
 
 export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -37,6 +38,7 @@ export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
         }
 
         if (!TOTP.checkToken(token, totp.secret)) {
+            CLI.debug(`Invalid token for user ${req.user.id}: ${token} (current ${TOTP.generateToken(totp.secret)})`);
             return res.status(400).send({error: "Invalid token"});
         }
         await this.db.deleteTotpMethod(req.user.id, id);
