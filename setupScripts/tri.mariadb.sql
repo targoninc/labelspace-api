@@ -203,12 +203,14 @@ create table if not exists tri.user_settings
 
 create table if not exists tri.user_totp
 (
-    id       bigint auto_increment
+    id         bigint auto_increment
         primary key,
-    user_id  bigint               not null,
-    secret   varchar(128)         null,
-    verified tinyint(1) default 0 not null,
-    name     tinytext             null,
+    user_id    bigint                                 not null,
+    secret     varchar(128)                           null,
+    verified   tinyint(1) default 0                   not null,
+    name       tinytext                               null,
+    created_at datetime   default current_timestamp() not null,
+    updated_at datetime   default current_timestamp() not null on update current_timestamp(),
     constraint user_totp_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete cascade
