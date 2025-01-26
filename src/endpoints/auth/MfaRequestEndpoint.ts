@@ -49,7 +49,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
             const primaryEmail = await this.db.getUserPrimaryEmail(user.id);
             const userTotp = await this.db.getUserTotp(user.id);
             const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
-            const needsMfa = useTotp || (primaryEmail && primaryEmail.verified);
+            const needsMfa = useTotp;
 
             if (!needsMfa) {
                 return res.send({
