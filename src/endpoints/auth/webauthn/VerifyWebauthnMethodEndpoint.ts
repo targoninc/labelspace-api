@@ -36,7 +36,7 @@ export class VerifyWebauthnMethodEndpoint extends PostEndpoint {
         }
 
         return res.status(200).send({
-            message: "Successfully registered WebAuthn method"
+            message: "Successfully registered passkey"
         });
     }
 }

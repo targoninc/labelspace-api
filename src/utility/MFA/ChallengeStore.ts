@@ -36,4 +36,8 @@ export class ChallengeStore {
             c.completed = true;
         }
     }
+
+    hasCompletedChallenge(challenge: string | undefined) {
+        return challenge === undefined || this.store.some(c => c.challenge === challenge && c.completed);
+    }
 }

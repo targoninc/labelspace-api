@@ -6,19 +6,23 @@ import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../../models/db/tri/User.js";
 import {MfaStore} from "../../utility/MFA/MfaStore.ts";
+import {ChallengeStore} from "../../utility/MFA/ChallengeStore.ts";
 
 export class LoginEndpoint extends PostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
     private readonly mfaStore: MfaStore;
+    private readonly challengeStore: ChallengeStore;
 
-    constructor(app: Application, path: string, db: TriDB, mfaStore: MfaStore) {
+    constructor(app: Application, path: string, db: TriDB, mfaStore: MfaStore, challengeStore: ChallengeStore) {
         super(app, path);
         this.db = db;
         this.mfaStore = mfaStore;
+        this.challengeStore = challengeStore;
     }
 
     async run(req: Request, res: Response, next: NextFunction) {
         const cleanUsername = req.body.username.trim().toLowerCase();
+        const challenge = req.body.challenge as string|undefined;
         const existing = await this.db.getUserByUsername(cleanUsername);
 
         if (!existing) {
@@ -47,8 +51,14 @@ export class LoginEndpoint extends PostEndpoint {
             const useWebauthn = userPublicKeys && userPublicKeys.length > 0;
             const needsMfa = useTotp || useWebauthn || (primaryEmail && primaryEmail.verified);
 
-            if (needsMfa && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
-                return res.status(401).send({error: "MFA required"});
+            if (needsMfa) {
+                if (useWebauthn && !this.challengeStore.hasCompletedChallenge(challenge)) {
+                    return res.status(401).send({error: "MFA required"});
+                } else if (useTotp && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
+                    return res.status(401).send({error: "MFA required"});
+                } else {
+                    return res.status(401).send({error: "MFA required"});
+                }
             }
 
             req.logIn(user, async (err) => {

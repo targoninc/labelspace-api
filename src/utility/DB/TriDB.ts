@@ -771,4 +771,8 @@ export class TriDB extends MariaDB {
     async getUserPublicKeys(id: string): Promise<PublicKey[]> {
         return await this.query("SELECT * FROM tri.public_keys WHERE passkey_user_id = ?", [id]);
     }
+
+    async deletePublicKey(key_id: string) {
+        await this.query("DELETE FROM tri.public_keys WHERE key_id = ?", [key_id]);
+    }
 }

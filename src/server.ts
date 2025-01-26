@@ -63,6 +63,7 @@ import {GetWebauthnChallengeEndpoint} from "./endpoints/auth/webauthn/GetWebauth
 import {RegisterWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/RegisterWebauthnMethodEndpoint.ts";
 import {ChallengeStore} from "./utility/MFA/ChallengeStore.ts";
 import {VerifyWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/VerifyWebauthnMethodEndpoint.ts";
+import {DeleteWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/DeleteWebauthnMethodEndpoint.ts";
 
 config();
 
@@ -206,6 +207,7 @@ new DeleteTotpMethodEndpoint(app, "/totp/delete", db).register();
 new GetWebauthnChallengeEndpoint(app, "/webauthn/challenge", challengeStore).register();
 new RegisterWebauthnMethodEndpoint(app, "/webauthn/register", db, challengeStore).register();
 new VerifyWebauthnMethodEndpoint(app, "/webauthn/verify", db, challengeStore).register();
+new DeleteWebauthnMethodEndpoint(app, "/webauthn/delete", db, challengeStore).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {
