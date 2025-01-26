@@ -10,12 +10,27 @@ import {Permissions} from "../../models/enums/Permissions.js";
 import {Application} from "express";
 import {CLI} from "../CLI.js";
 import {importAll} from "../../importers/importAll.ts";
+import {uuidv4} from "uuidv7";
 
 export async function ensureDatabaseConsistency(db: TriDB) {
     await ensurePossibleUsersettings(db);
     await ensurePermissions(db);
     await ensureSessionStore(db);
+    await ensurePassKeyUserIds(db);
     await ensureData(db);
+}
+
+async function ensurePassKeyUserIds(db: TriDB) {
+    CLI.debug("Ensuring passkey user ids");
+    const users = await db.getUsers();
+    for (const user of users) {
+        if (!user.passkey_user_id) {
+            const passkeyUserId = uuidv4();
+            await db.updateUser(user.id, {
+                passkey_user_id: passkeyUserId
+            });
+        }
+    }
 }
 
 async function ensureData(db: TriDB) {

@@ -27,6 +27,7 @@ import type {BandcampReportStatus} from "../Bandcamp/BandcampReportStatus.ts";
 import {Artist} from "../../models/db/tri/Artist.ts";
 import {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
 import {UserTotp} from "../../models/db/tri/UserTotp.ts";
+import {PublicKey} from "../../models/db/tri/PublicKey.ts";
 
 export class TriDB extends MariaDB {
     private lastLogCleanup: number = 0;
@@ -742,5 +743,32 @@ export class TriDB extends MariaDB {
 
     async verifyTotp(userId: number, id: number) {
         await this.query("UPDATE tri.user_totp SET verified = 1 WHERE user_id = ? AND id = ?", [userId, id]);
+    }
+
+    async getPublicKey(keyId: string): Promise<PublicKey|null> {
+        return await this.queryFirst("SELECT * FROM tri.public_keys WHERE key_id = ?", [keyId]);
+    }
+
+    async insertPublicKey(passkeyUserId: string, key: PublicKey) {
+        await this.query("INSERT INTO tri.public_keys (passkey_user_id, public_key, name, transports, algorithm, backed_up, key_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [passkeyUserId, key.public_key, key.name, key.transports, key.algorithm, key.backed_up, key.key_id]);
+    }
+
+    async updatePublicKey(passkeyUserId: string, id: string, key: PublicKey) {
+        await this.query("UPDATE tri.public_keys SET public_key = ?, name = ?, transports = ?, backed_up = ?, algorithm = ? WHERE passkey_user_id = ? AND key_id = ?",
+            [key.public_key, key.name, key.transports, key.backed_up, key.algorithm, passkeyUserId, id]);
+    }
+
+    async createOrUpdatePublicKey(key: PublicKey) {
+        const existingKey = await this.getPublicKey(key.key_id);
+        if (existingKey) {
+            await this.updatePublicKey(key.passkey_user_id, key.key_id, key);
+        } else {
+            await this.insertPublicKey(key.passkey_user_id, key);
+        }
+    }
+
+    async getUserPublicKeys(id: string): Promise<PublicKey[]> {
+        return await this.query("SELECT * FROM tri.public_keys WHERE passkey_user_id = ?", [id]);
     }
 }

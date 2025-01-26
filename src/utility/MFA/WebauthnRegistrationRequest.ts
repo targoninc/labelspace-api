@@ -15,4 +15,5 @@ export interface WebauthnRegistrationRequest {
         clientData: string;
     },
     challenge: string;
+    name: string;
 }

@@ -147,6 +147,7 @@ create table if not exists tri.users
     ip                  varchar(128)                           null,
     password_token      varchar(64)                            null,
     email_mfa_code      tinytext                               null,
+    passkey_user_id     mediumtext                             not null,
     constraint users_id_uindex
         unique (id),
     constraint users_pk
@@ -215,6 +216,27 @@ create table if not exists tri.user_totp
         foreign key (user_id) references tri.users (id)
             on delete cascade
 );
+
+create table if not exists tri.public_keys
+(
+    id              bigint auto_increment
+        primary key,
+    public_key      longtext                               not null,
+    algorithm       tinytext                               not null,
+    passkey_user_id mediumtext                             not null,
+    key_id          tinytext                               not null,
+    backed_up       tinyint(1) default 0                   not null,
+    name            tinytext                               not null,
+    transports      mediumtext                             not null,
+    created_at      datetime   default current_timestamp() not null,
+    updated_at      datetime   default current_timestamp() not null on update current_timestamp(),
+    constraint public_keys_pk
+        unique (passkey_user_id, key_id) using hash
+)
+    comment 'https://developers.google.com/identity/passkeys/developer-guides/server-registration?hl=de#store_the_public_key';
+
+create index if not exists public_keys_passkey_user_id_index
+    on tri.public_keys (passkey_user_id(768));
 
 create table if not exists tri.users_permissions
 (

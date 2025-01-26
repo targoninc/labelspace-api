@@ -30,7 +30,8 @@ export class GetUserEndpoint extends GetEndpoint {
             artists: true,
             emails: true,
             permissions: true,
-            totp: true
+            totp: true,
+            public_keys: true,
         });
         return res.send(user);
     }

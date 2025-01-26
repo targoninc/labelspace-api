@@ -9,6 +9,7 @@ import {Mail} from "../../utility/Mail/Mail.js";
 import {heading, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
 import {User} from "../../models/db/tri/User.js";
 import {MfaStore} from "../../utility/MFA/MfaStore.ts";
+import {CredentialDescriptor} from "@passwordless-id/webauthn/dist/esm/types";
 
 export class MfaRequestEndpoint extends PostEndpoint {
     private db: TriDB;
@@ -48,8 +49,10 @@ export class MfaRequestEndpoint extends PostEndpoint {
             user.settings = await this.db.getUserSettings(user.id);
             const primaryEmail = await this.db.getUserPrimaryEmail(user.id);
             const userTotp = await this.db.getUserTotp(user.id);
+            const userPublicKeys = await this.db.getUserPublicKeys(user.passkey_user_id);
             const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
-            const needsMfa = useTotp;
+            const useWebauthn = userPublicKeys && userPublicKeys.length > 0;
+            const needsMfa = useTotp || useWebauthn;
 
             if (!needsMfa) {
                 return res.send({
@@ -57,10 +60,23 @@ export class MfaRequestEndpoint extends PostEndpoint {
                 });
             }
 
+            if (useWebauthn) {
+                return res.send({
+                    mfa_needed: true,
+                    type: "webauthn",
+                    userId: user.id,
+                    credentialDescriptors: userPublicKeys.map(k => (<CredentialDescriptor>{
+                        id: k.key_id,
+                        transports: k.transports.split(",")
+                    }))
+                });
+            }
+
             const process = this.mfaStore.createMfaProcess(user.id, useTotp ? "totp" : "email");
             if (process.method_type === "totp") {
                 return res.send({
                     mfa_needed: true,
+                    type: "totp",
                     userId: user.id
                 });
             }
@@ -86,6 +102,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
 
             return res.send({
                 mfa_needed: true,
+                type: "email",
                 userId: user.id
             });
         })(req, res, next);

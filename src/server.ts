@@ -46,7 +46,6 @@ import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtis
 import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoint.ts";
 import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
 import {PaypalEventsWebhookEndpoint} from "./endpoints/webhooks/PaypalEventsWebhookEndpoint.ts";
-import {setupNgrok} from "./utility/Ngrok.ts";
 import {UpdateAlbumFullEndpoint} from "./endpoints/albums/actions/UpdateAlbumFullEndpoint.ts";
 import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
@@ -60,9 +59,10 @@ import {AddTotpMethodEndpoint} from "./endpoints/auth/totp/AddTotpMethodEndpoint
 import {VerifyTotpEndpoint} from "./endpoints/auth/totp/VerifyTotpEndpoint.ts";
 import {DeleteTotpMethodEndpoint} from "./endpoints/auth/totp/DeleteTotpMethodEndpoint.ts";
 import {MfaStore} from "./utility/MFA/MfaStore.ts";
-import {AddWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/AddWebauthnMethodEndpoint.ts";
+import {GetWebauthnChallengeEndpoint} from "./endpoints/auth/webauthn/GetWebauthnChallengeEndpoint.ts";
 import {RegisterWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/RegisterWebauthnMethodEndpoint.ts";
 import {ChallengeStore} from "./utility/MFA/ChallengeStore.ts";
+import {VerifyWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/VerifyWebauthnMethodEndpoint.ts";
 
 config();
 
@@ -203,8 +203,9 @@ new AddTotpMethodEndpoint(app, "/totp/add", db).register();
 new VerifyTotpEndpoint(app, "/totp/verify", db, mfaStore).register();
 new DeleteTotpMethodEndpoint(app, "/totp/delete", db).register();
 
-new AddWebauthnMethodEndpoint(app, "/webauthn/add", db, challengeStore).register();
+new GetWebauthnChallengeEndpoint(app, "/webauthn/challenge", challengeStore).register();
 new RegisterWebauthnMethodEndpoint(app, "/webauthn/register", db, challengeStore).register();
+new VerifyWebauthnMethodEndpoint(app, "/webauthn/verify", db, challengeStore).register();
 // endregion
 
 app.get("/security.txt", (req, res) => {

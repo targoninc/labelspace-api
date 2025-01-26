@@ -6,6 +6,7 @@ import {Usersetting} from "../db/tri/Usersetting.js";
 import type {Artist} from "../db/tri/Artist.ts";
 import type {Permission} from "../db/tri/Permission.ts";
 import {UserTotp} from "../db/tri/UserTotp.ts";
+import {PublicKey} from "../db/tri/PublicKey.ts";
 
 export interface UserEnrichmentConfig {
     tracks?: boolean;
@@ -15,6 +16,7 @@ export interface UserEnrichmentConfig {
     artists?: boolean;
     permissions?: boolean;
     totp?: boolean;
+    public_keys?: boolean;
 }
 
 export class UserEnricher extends IEnricher {
@@ -40,6 +42,7 @@ export class UserEnricher extends IEnricher {
                 updated_at: t.updated_at,
             }));
         }, []);
+        user.public_keys = await enrichIfAsync<PublicKey[]>(config.public_keys, () => db.getUserPublicKeys(user.passkey_user_id), []);
 
         return user;
     }
