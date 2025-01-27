@@ -2,6 +2,10 @@ import {authenticator} from 'otplib';
 import qrcode from 'qrcode';
 import {User} from "../../models/db/tri/User.ts";
 
+authenticator.create({
+    window: 2
+});
+
 export class TOTP {
     static newSecret() {
         return authenticator.generateSecret();
