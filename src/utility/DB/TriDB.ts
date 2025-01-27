@@ -7,7 +7,6 @@ import {Track} from "../../models/db/tri/Track.js";
 import {UserPermission} from "../../models/db/tri/UserPermission.js";
 import {Permission} from "../../models/db/tri/Permission.js";
 import {Permissions} from "../../models/enums/Permissions.js";
-import {MariaDB} from "./MariaDB.js";
 import {CLI} from "../CLI.js";
 import {LogLevel} from "../../models/enums/LogLevel.js";
 import {Log} from "../../models/db/tri/Log.js";
@@ -28,12 +27,21 @@ import {Artist} from "../../models/db/tri/Artist.ts";
 import {PaypalBatchPayment} from "../../models/db/finance/PaypalBatchPayment.ts";
 import {UserTotp} from "../../models/db/tri/UserTotp.ts";
 import {PublicKey} from "../../models/db/tri/PublicKey.ts";
+import {CachedDB} from "./Caching/CachedDB.ts";
+import {CacheConfig} from "./Caching/CacheConfig.ts";
 
-export class TriDB extends MariaDB {
+export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
 
     constructor() {
-        super(env("MARIADB_HOST"), parseInt(env("MARIADB_PORT")), env("MARIADB_USER"), env("MARIADB_PASSWORD"), env("MARIADB_NAME"));
+        const cacheConfig: CacheConfig = {
+            host: env("CACHE_HOST"),
+            port: env("CACHE_PORT"),
+            ttl: env("CACHE_TTL"),
+            type: env("CACHE_TYPE"),
+            prefix: "db:"
+        };
+        super(cacheConfig);
 
         setInterval(() => {
             CLI.debug("Pinging database", {
@@ -43,15 +51,15 @@ export class TriDB extends MariaDB {
         }, 1000 * 60 * 5);
     }
 
-    async getUserById(userId: number, followingId: number = -1): Promise<User> {
+    async getUserById(userId: number, followingId: number = -1): Promise<User|null> {
         return await this.queryFirst("SELECT * FROM tri.users WHERE id = ?", [userId]);
     }
 
-    async getUserByEmail(email: string): Promise<User> {
+    async getUserByEmail(email: string): Promise<User|null> {
         return await this.queryFirst("SELECT u.* FROM tri.users u INNER JOIN tri.user_emails ue ON u.id = ue.user_id WHERE ue.email = ?", [email]);
     }
 
-    async getUserByUsername(username: string): Promise<User> {
+    async getUserByUsername(username: string): Promise<User|null> {
         return await this.queryFirst("SELECT * FROM tri.users WHERE username = ?", [username]);
     }
 
@@ -78,7 +86,7 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.user_settings WHERE user_id = ?", [userId]);
     }
 
-    async getTrackById(id: number): Promise<Track> {
+    async getTrackById(id: number): Promise<Track|null> {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE id = ?", [id]);
     }
 
@@ -96,7 +104,7 @@ export class TriDB extends MariaDB {
         return await this.query("SELECT * FROM tri.tracks WHERE id IN (?)", [numbers]);
     }
 
-    async createTrack(track: Partial<Track>): Promise<Track> {
+    async createTrack(track: Partial<Track>): Promise<Track|null> {
         await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, release_date, link_spotify, link_youtube, link_soundcloud, link_applemusic, link_bandcamp, link_lyda)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             track.title,
@@ -112,11 +120,14 @@ export class TriDB extends MariaDB {
             track.link_bandcamp,
             track.link_lyda,
         ]);
-        const id = await this.querySingleValue("SELECT id FROM tri.tracks WHERE title = ? ORDER BY created_at DESC LIMIT 1", [track.title]);
+        const id = await this.querySingleValue<number>("SELECT id FROM tri.tracks WHERE title = ? ORDER BY created_at DESC LIMIT 1", [track.title]);
+        if (!id) {
+            throw new Error("Could not find newly created record for track");
+        }
         return await this.getTrackById(id);
     }
 
-    async createAlbum(album: Album): Promise<Album> {
+    async createAlbum(album: Album): Promise<Album|null> {
         await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists) VALUES (?, ?, ?, ?, ?)", [
             album.title,
             album.upc,
@@ -124,7 +135,10 @@ export class TriDB extends MariaDB {
             album.price,
             album.artists,
         ]);
-        const id = await this.querySingleValue("SELECT id FROM tri.albums WHERE title = ? ORDER BY created_at DESC LIMIT 1", [album.title]);
+        const id = await this.querySingleValue<number>("SELECT id FROM tri.albums WHERE title = ? ORDER BY created_at DESC LIMIT 1", [album.title]);
+        if (!id) {
+            throw new Error("Could not find newly created record for album");
+        }
         return await this.getAlbumById(id);
     }
 

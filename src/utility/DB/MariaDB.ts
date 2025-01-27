@@ -15,8 +15,14 @@ export class MariaDB {
         CLI.debug(`Initializing MariaDB connection to ${host}:${port}/${database}`);
         this.host = host;
         this.port = port || 3306;
-        this.user = user || process.env.MARIADB_USER;
-        this.password = password || process.env.MARIADB_PASSWORD;
+        this.user = (user || process.env.MARIADB_USER)!;
+        if (!this.user) {
+            throw new Error("No MariaDB user specified.");
+        }
+        this.password = (password || process.env.MARIADB_PASSWORD)!;
+        if (!this.password) {
+            throw new Error("No MariaDB password specified.");
+        }
         this.database = database;
         this.connection = null;
         this.connectionPool = null;
@@ -103,19 +109,21 @@ export class MariaDB {
                     }
                 });
             }
-            return out;
-        } catch (e) {
+            return out as T[];
+        } catch (e: any) {
             if (e.toString().includes("ER_CMD_CONNECTION_CLOSED")) {
                 CLI.warning("Reconnecting to database...");
                 conn = await this.connectionPool!.getConnection();
                 return await conn.query({
                     sql,
                     bigIntAsNumber: true
-                }, params);
+                }, params) as T[];
             } else if (e.toString().includes("Can't create database")) {
-                return;
+                return [];
+            } else {
+                CLI.error(e);
+                return [];
             }
-            CLI.error(e);
         }
     }
 
