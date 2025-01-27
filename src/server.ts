@@ -64,6 +64,7 @@ import {RegisterWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/Register
 import {ChallengeStore} from "./utility/MFA/ChallengeStore.ts";
 import {VerifyWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/VerifyWebauthnMethodEndpoint.ts";
 import {DeleteWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/DeleteWebauthnMethodEndpoint.ts";
+import {UpdateTotpMethodEndpoint} from "./endpoints/auth/totp/UpdateTotpMethodEndpoint.ts";
 
 config();
 
@@ -121,7 +122,7 @@ new UpdateArtistEndpoint(app, "/artists/update", db).register();
 
 // region Users
 new MfaRequestEndpoint(app, "/user/actions/mfa-request", db, mfaStore).register();
-new LoginEndpoint(app, "/user/actions/login", db, mfaStore).register();
+new LoginEndpoint(app, "/user/actions/login", db, mfaStore, challengeStore).register();
 new LogoutEndpoint(app, "/user/actions/logout").register();
 new ChangePasswordEndpoint(app, "/user/actions/change-password", db).register();
 new RequestPasswordResetEndpoint(app, "/user/actions/request-password-reset", db).register();
@@ -203,6 +204,7 @@ new PaypalEventsWebhookEndpoint(app, "/webhooks/paypal", db).register();
 new AddTotpMethodEndpoint(app, "/totp/add", db).register();
 new VerifyTotpEndpoint(app, "/totp/verify", db, mfaStore).register();
 new DeleteTotpMethodEndpoint(app, "/totp/delete", db).register();
+new UpdateTotpMethodEndpoint(app, "/totp/update", db).register();
 
 new GetWebauthnChallengeEndpoint(app, "/webauthn/challenge", challengeStore).register();
 new RegisterWebauthnMethodEndpoint(app, "/webauthn/register", db, challengeStore).register();

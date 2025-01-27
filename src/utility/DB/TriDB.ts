@@ -775,4 +775,8 @@ export class TriDB extends MariaDB {
     async deletePublicKey(key_id: string) {
         await this.query("DELETE FROM tri.public_keys WHERE key_id = ?", [key_id]);
     }
+
+    async updateTotpMethodName(id: number, name: string) {
+        await this.query("UPDATE tri.user_totp SET name = ? WHERE id = ?", [name, id]);
+    }
 }

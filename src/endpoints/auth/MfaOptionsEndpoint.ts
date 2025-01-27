@@ -12,8 +12,8 @@ import {MfaStore} from "../../utility/MFA/MfaStore.ts";
 import {CredentialDescriptor} from "@passwordless-id/webauthn/dist/esm/types";
 import {getUserMfa} from "../../utility/MFA/MfaFramework.ts";
 
-export class MfaRequestEndpoint extends PostEndpoint {
-    private db: TriDB;
+export class MfaOptionsEndpoint extends PostEndpoint {
+    private readonly db: TriDB;
     private readonly mfaStore: MfaStore;
 
     constructor(app: Application, path: string, db: TriDB, mfaStore: MfaStore) {
@@ -28,13 +28,6 @@ export class MfaRequestEndpoint extends PostEndpoint {
 
         if (!existing) {
             return res.status(401).send({error: "Invalid username or password"});
-        }
-
-        if (existing && !existing.ip) {
-            const ip = IP.get(req);
-            await this.db.updateUser(existing.id, {
-                ip: ip
-            });
         }
 
         passport.authenticate("local", async (err: Error, user: User) => {

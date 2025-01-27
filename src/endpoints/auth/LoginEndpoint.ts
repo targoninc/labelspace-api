@@ -7,6 +7,7 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../../models/db/tri/User.js";
 import {MfaStore} from "../../utility/MFA/MfaStore.ts";
 import {ChallengeStore} from "../../utility/MFA/ChallengeStore.ts";
+import {getUserMfa} from "../../utility/MFA/MfaFramework.ts";
 
 export class LoginEndpoint extends PostEndpoint {
     private readonly db: TriDB;
@@ -44,17 +45,12 @@ export class LoginEndpoint extends PostEndpoint {
                 return res.status(401).send({error: "MFA required"});
             }
 
-            const primaryEmail = await this.db.getUserPrimaryEmail(user.id);
-            const userTotp = await this.db.getUserTotp(user.id);
-            const userPublicKeys = await this.db.getUserPublicKeys(user.passkey_user_id);
-            const useTotp = userTotp && userTotp.length > 0 && userTotp.some(t => t.verified);
-            const useWebauthn = userPublicKeys && userPublicKeys.length > 0;
-            const needsMfa = useTotp || useWebauthn || (primaryEmail && primaryEmail.verified);
+            const mfa = await getUserMfa(user, this.db);
 
-            if (needsMfa) {
-                if (useWebauthn && !this.challengeStore.hasCompletedChallenge(challenge)) {
+            if (mfa.enabled) {
+                if (mfa.webauthn.enabled && !this.challengeStore.hasCompletedChallenge(challenge)) {
                     return res.status(401).send({error: "MFA required"});
-                } else if (useTotp && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
+                } else if (mfa.totp.enabled && !this.mfaStore.hasCompletedMfaProcess(user.id)) {
                     return res.status(401).send({error: "MFA required"});
                 } else {
                     return res.status(401).send({error: "MFA required"});
