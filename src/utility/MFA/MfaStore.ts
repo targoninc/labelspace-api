@@ -49,6 +49,7 @@ export class MfaStore {
         for (const process of this.store) {
             if (process.user_id === userId) {
                 process.verified = true;
+                process.expires_at = new Date(new Date().getTime() + 1000 * 60 * 5);
             }
         }
     }
