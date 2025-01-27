@@ -46,9 +46,10 @@ export class MfaStore {
     }
 
     completeMfaProcesses(userId: number) {
-        const processes = this.store.filter(p => p.user_id === userId);
-        for (const process of processes) {
-            process.verified = true;
+        for (const process of this.store) {
+            if (process.user_id === userId) {
+                process.verified = true;
+            }
         }
     }
 
