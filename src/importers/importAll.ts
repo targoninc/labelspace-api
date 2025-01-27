@@ -7,6 +7,7 @@ import {importCompilations} from "./compilationsImporter.ts";
 import {importAlbums} from "./albumsImporter.ts";
 import {importPayments} from "./paymentsImporter.ts";
 import {importTracks} from "./tracksImporter.ts";
+import {configDotenv} from "dotenv";
 
 export async function importAll(db: TriDB, srcDir: string|undefined) {
     if (!srcDir) {
@@ -20,4 +21,11 @@ export async function importAll(db: TriDB, srcDir: string|undefined) {
     await importCompilations(db, path.join(srcDir, "compilations.csv"));
     await importAlbums(db, path.join(srcDir, "albums.csv"), path.join(srcDir, "tracks.csv"));
     await importTracks(db, path.join(srcDir, "tracks.csv"));
+}
+
+if (import.meta.main) {
+    configDotenv();
+    importAll(new TriDB(), process.argv[2]).then(() => {
+        console.log("Import finished");
+    });
 }
