@@ -79,7 +79,11 @@ export class CachedDB extends MariaDB {
                 this.cache?.delPrefix(this.tableKey(tableNames));
             }
 
-            return super.query<T>(sql, params);
+            const result = super.query<T>(sql, params);
+            result.metadata = {
+                cached: false
+            };
+            return result;
         }
 
         const cacheKey = this.generateCacheKey(tableNames, sql, params);
@@ -90,7 +94,11 @@ export class CachedDB extends MariaDB {
                 CLI.debug(`Cache hit for query: ${sql}`, {
                     logToDb: false
                 });
-                return JSON.parse(cached);
+                const result = JSON.parse(cached);
+                result.metadata = {
+                    cached: true
+                };
+                return result;
             }
         } catch (error) {
             CLI.error(`Cache error: ${error}`);
@@ -107,6 +115,9 @@ export class CachedDB extends MariaDB {
                 CLI.error(`Error setting cache: ${error}`);
             }
         }
+        results.metadata = {
+            cached: false
+        };
 
         return results;
     }
@@ -116,17 +127,27 @@ export class CachedDB extends MariaDB {
             sql += " LIMIT 1";
         }
         const rows = await this.query<T>(sql, params);
-        return rows && rows.length > 0 ? rows[0] : null;
+        if (rows && rows.length > 0) {
+            const result = rows[0];
+            result.metadata = rows.metadata;
+            return result;
+        }
+        return null;
     }
 
     async querySingleValue<T>(sql: string, params: any[] = []): Promise<T | null> {
         const row = await this.queryFirst<any>(sql, params);
-        return row ? row[Object.keys(row)[0]] : null;
+        if (row) {
+            const result = row[Object.keys(row)[0]];
+            result.metadata = row.metadata;
+            return result;
+        }
+        return null;
     }
 
     // Method to invalidate cache for specific queries
     async invalidateCache(sql: string, params: any[] = []): Promise<void> {
-        const tableNames = this.getTableNamesFromStatement(sql);
+        const tableNames = CachedDB.getTableNamesFromStatement(sql);
         const cacheKey = this.generateCacheKey(tableNames, sql, params);
         await this.cache?.del(cacheKey);
     }
