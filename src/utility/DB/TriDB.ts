@@ -39,7 +39,8 @@ export class TriDB extends CachedDB {
             port: parseInt(env("CACHE_PORT")),
             ttl: env("CACHE_TTL"),
             type: env("CACHE_TYPE"),
-            prefix: "tridb:"
+            prefix: "tridb:",
+            noCacheTables: ["users_permissions"]
         };
         super(cacheConfig);
 

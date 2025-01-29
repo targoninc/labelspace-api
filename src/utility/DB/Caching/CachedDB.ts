@@ -9,6 +9,7 @@ import {MemcachedCache} from "./MemcachedCache.ts";
 export class CachedDB extends MariaDB {
     private readonly cache: ICache|undefined;
     private readonly queryTimeout: number;
+    private readonly config: CacheConfig;
 
     constructor(cacheConfig: CacheConfig) {
         super(
@@ -19,10 +20,12 @@ export class CachedDB extends MariaDB {
             env("MARIADB_NAME")
         );
 
+        this.config = cacheConfig;
         if (cacheConfig.type) {
             this.cache = cacheConfig.type === 'redis'
                 ? new RedisCache(cacheConfig)
                 : new MemcachedCache(cacheConfig);
+            this.cache?.delPrefix("");
         }
 
         this.queryTimeout = parseInt(env("QUERY_CACHE_TTL", "3600"));
@@ -61,6 +64,7 @@ export class CachedDB extends MariaDB {
         const tableNames = this.getTableNamesFromStatement(sql);
         if (!isCacheable) {
             if (tableNames.length > 0) {
+                console.log(`Invalidating cache for ${tableNames.join(',')}`);
                 this.cache?.delPrefix(tableNames.join(','));
             }
 
@@ -85,7 +89,7 @@ export class CachedDB extends MariaDB {
         const results = await super.query<T>(sql, params);
 
         // Cache the results if query was successful
-        if (results && this.cache) {
+        if (results && this.cache && !this.config.noCacheTables?.some(t => sql.includes(t))) {
             try {
                 await this.cache.set(cacheKey, JSON.stringify(results), this.queryTimeout);
             } catch (error) {

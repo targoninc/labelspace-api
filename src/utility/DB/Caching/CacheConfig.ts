@@ -4,4 +4,5 @@ export interface CacheConfig {
     host?: string;
     port?: number;
     prefix?: string;
+    noCacheTables?: string[];
 }
