@@ -12,17 +12,15 @@ export class RedisCache implements ICache {
 
     constructor(config: CacheConfig) {
         try {
-            const redisUrl = `redis://${config.host ?? "localhost"}`;
-            CLI.debug(`Connecting to Redis @ ${redisUrl}`, {
+            CLI.debug(`Connecting to Redis @${config.host}:${config.port}`, {
                 logToDb: false
             });
             this.client = new Redis(<RedisOptions>{
-                url: redisUrl,
+                host: config.host ?? "localhost",
                 port: config.port ?? 6379,
-                db: 0,
                 connectionName: 'TRIARTISTS',
-                username: env("REDIS_USERNAME"),
                 password: env("REDIS_PASSWORD"),
+                retryStrategy: (times) => Math.min(times * 50, 2000)
             });
             this.client.on("error", (err) => {
                 console.error("Redis error:", err);
