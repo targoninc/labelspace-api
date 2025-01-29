@@ -36,10 +36,10 @@ export class TriDB extends CachedDB {
     constructor() {
         const cacheConfig: CacheConfig = {
             host: env("CACHE_HOST"),
-            port: env("CACHE_PORT"),
+            port: parseInt(env("CACHE_PORT")),
             ttl: env("CACHE_TTL"),
             type: env("CACHE_TYPE"),
-            prefix: "db:"
+            prefix: "tridb:"
         };
         super(cacheConfig);
 

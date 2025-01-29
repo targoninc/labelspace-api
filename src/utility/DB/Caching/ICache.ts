@@ -5,5 +5,7 @@ export interface ICache {
 
     del(key: string): Promise<void>;
 
+    delPrefix(prefix: string): Promise<void>;
+
     clear(): Promise<void>;
 }

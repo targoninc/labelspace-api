@@ -30,7 +30,6 @@ export class UpdateUserEndpoint extends AuthenticatedPostEndpoint {
         }
 
         const updatedUser: Partial<User> = {
-            description: user.description ?? req.user.description,
             legal_name: user.legal_name ?? req.user.legal_name,
             country: user.country ?? req.user.country,
             state: user.state ?? req.user.state,

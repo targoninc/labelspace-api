@@ -11,11 +11,15 @@ export class RedisCache implements ICache {
 
     constructor(config: CacheConfig) {
         try {
-            CLI.debug("Connecting to Redis", {
+            const redisUrl = `redis://${config.host ?? "localhost"}`;
+            CLI.debug(`Connecting to Redis @ ${redisUrl}`, {
                 logToDb: false
             });
             this.client = new Redis(<RedisOptions>{
-                url: `redis://${config.host ?? "localhost"}:${config.port ?? 6379}`
+                url: redisUrl,
+                port: config.port ?? 6379,
+                db: 0,
+                connectionName: 'TRIARTISTS',
             });
             CLI.success("Connected to Redis", {
                 logToDb: false
@@ -49,6 +53,14 @@ export class RedisCache implements ICache {
 
     async del(key: string): Promise<void> {
         await this.client.del(this.getKey(key));
+    }
+
+    async delPrefix(prefix: string): Promise<void> {
+        const keys = await this.client.keys(this.getKey(`${prefix}*`));
+        if (keys.length > 0) {
+            console.log(`Deleting ${keys.length} cache keys with prefix ${prefix}`);
+            await this.client.del(...keys);
+        }
     }
 
     async clear(): Promise<void> {

@@ -36,18 +36,38 @@ export class CachedDB extends MariaDB {
         }, 1000 * 60 * 5);
     }
 
-    private generateCacheKey(sql: string, params: any[]): string {
-        return Buffer.from(`${sql}:${JSON.stringify(params)}`).toString('base64');
+    private generateCacheKey(tableNames: string[], sql: string, params: any[]): string {
+        return Buffer.from(`${tableNames.join(',')}:${sql}:${JSON.stringify(params)}`).toString('base64');
+    }
+
+    private getTableNamesFromStatement(sql: string): string[] {
+        // Define a regex pattern to capture table names after specific keywords
+        const regex = /(?:from|join|update|into)\s+([`"]?[\w.]+[`"]?)/gi;
+        const tableNames: string[] = [];
+
+        let match: RegExpExecArray | null;
+        // Use regex to find all matches in the SQL statement
+        while ((match = regex.exec(sql)) !== null) {
+            // Push the captured table name (first group) into the tableNames array
+            tableNames.push(match[1].replace(/[`"]/g, ""));
+        }
+
+        return tableNames;
     }
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
         const isCacheable = sql.trim().toLowerCase().startsWith('select');
 
+        const tableNames = this.getTableNamesFromStatement(sql);
         if (!isCacheable) {
+            if (tableNames.length > 0) {
+                this.cache?.delPrefix(tableNames.join(','));
+            }
+
             return super.query<T>(sql, params);
         }
 
-        const cacheKey = this.generateCacheKey(sql, params);
+        const cacheKey = this.generateCacheKey(tableNames, sql, params);
 
         try {
             const cached = await this.cache?.get(cacheKey);
@@ -91,7 +111,8 @@ export class CachedDB extends MariaDB {
 
     // Method to invalidate cache for specific queries
     async invalidateCache(sql: string, params: any[] = []): Promise<void> {
-        const cacheKey = this.generateCacheKey(sql, params);
+        const tableNames = this.getTableNamesFromStatement(sql);
+        const cacheKey = this.generateCacheKey(tableNames, sql, params);
         await this.cache?.del(cacheKey);
     }
 
