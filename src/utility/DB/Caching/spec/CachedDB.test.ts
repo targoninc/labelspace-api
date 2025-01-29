@@ -16,33 +16,26 @@ test("gets table names from statement", () => {
 
 test("correctly caches record", async () => {
     const db = new TriDB();
-    await db.invalidateCache("SELECT 1");
-    const result = await db.query("SELECT 1");
-    expect(result.metadata).toEqual({
-        cached: false
-    });
+    const sql = "SELECT 1";
+    await db.invalidateCache(sql);
+    const result = await db.query(sql);
+    expect(result.metadata.cached).toBeFalse();
     expect(result.length).toEqual(1);
-    const secondResult = await db.query("SELECT 1");
-    expect(secondResult.metadata).toEqual({
-        cached: true
-    });
+    const secondResult = await db.query(sql);
+    expect(secondResult.metadata.cached).toBeTrue();
     expect(secondResult.length).toEqual(1);
 })
 
-
 test("doesn't cache deactivated cache write", async () => {
     const db = new TriDB();
-    await db.invalidateCache("SELECT 1");
-    const result = await db.query("SELECT 1", [], {
+    const sql = "SELECT 1";
+    await db.invalidateCache(sql);
+    const result = await db.query(sql, [], {
         disableCacheWrite: true
     });
-    expect(result.metadata).toEqual({
-        cached: false
-    });
+    expect(result.metadata.cached).toBeFalse();
     expect(result.length).toEqual(1);
-    const secondResult = await db.query("SELECT 1");
-    expect(secondResult.metadata).toEqual({
-        cached: false
-    });
+    const secondResult = await db.query(sql);
+    expect(secondResult.metadata.cached).toBeFalse();
     expect(secondResult.length).toEqual(1);
 })

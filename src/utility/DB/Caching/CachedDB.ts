@@ -6,6 +6,7 @@ import {CacheConfig} from "./CacheConfig.ts";
 import {RedisCache} from "./RedisCache.ts";
 import {MemcachedCache} from "./MemcachedCache.ts";
 import {DbOptions} from "./Models/DbOptions.ts";
+import {DbResponse} from "./Models/DbResponse.ts";
 
 export class CachedDB extends MariaDB {
     private readonly cache: ICache | undefined;
@@ -70,7 +71,7 @@ export class CachedDB extends MariaDB {
         return tableNames;
     }
 
-    async query<T>(sql: string, params: any[] = [], options: DbOptions = {}): Promise<T[]> {
+    async query<T>(sql: string, params: any[] = [], options: DbOptions = {}): Promise<T[] & DbResponse> {
         const isCacheable = sql.trim().toLowerCase().startsWith('select');
 
         const tableNames = CachedDB.getTableNamesFromStatement(sql);
