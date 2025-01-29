@@ -3,6 +3,7 @@ import {CacheConfig} from "./CacheConfig.ts";
 import Redis from "ioredis";
 import {CLI} from "../../CLI.ts";
 import {RedisOptions} from "ioredis/built/redis/RedisOptions";
+import {env} from "../../Environment.ts";
 
 export class RedisCache implements ICache {
     private client: Redis;
@@ -20,6 +21,8 @@ export class RedisCache implements ICache {
                 port: config.port ?? 6379,
                 db: 0,
                 connectionName: 'TRIARTISTS',
+                username: env("REDIS_USERNAME"),
+                password: env("REDIS_PASSWORD"),
             });
             CLI.success("Connected to Redis", {
                 logToDb: false
