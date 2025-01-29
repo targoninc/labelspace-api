@@ -24,6 +24,9 @@ export class RedisCache implements ICache {
                 username: env("REDIS_USERNAME"),
                 password: env("REDIS_PASSWORD"),
             });
+            this.client.on("error", (err) => {
+                console.error("Redis error:", err);
+            });
             CLI.success("Connected to Redis", {
                 logToDb: false
             });
