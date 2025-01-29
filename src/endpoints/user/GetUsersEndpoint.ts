@@ -25,7 +25,10 @@ export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
             for (let user of users) {
                 user = await UserEnricher.enrichAsync(this.db, user, {
                     artists: true,
-                    permissions: true
+                    permissions: true,
+                    public_keys: true,
+                    totp: true,
+                    emails: true
                 });
             }
 
