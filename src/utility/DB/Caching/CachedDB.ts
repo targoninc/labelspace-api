@@ -40,10 +40,21 @@ export class CachedDB extends MariaDB {
     }
 
     private generateCacheKey(tableNames: string[], sql: string, params: any[]): string {
-        return Buffer.from(`${tableNames.join(',')}:${sql}:${JSON.stringify(params)}`).toString('base64');
+        const tableKey = this.tableKey(tableNames);
+        const sqlKey = this.toKey(sql);
+        const paramsKey = this.toKey(JSON.stringify(params));
+        return `${tableKey}:${sqlKey}:${paramsKey}`;
     }
 
-    private getTableNamesFromStatement(sql: string): string[] {
+    private tableKey(tableNames: string[]) {
+        return this.toKey(tableNames.join(','));
+    }
+
+    private toKey(input: string) {
+        return Buffer.from(input).toString('base64');
+    }
+
+    public static getTableNamesFromStatement(sql: string): string[] {
         // Define a regex pattern to capture table names after specific keywords
         const regex = /(?:from|join|update|into)\s+([`"]?[\w.]+[`"]?)/gi;
         const tableNames: string[] = [];
@@ -61,11 +72,11 @@ export class CachedDB extends MariaDB {
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
         const isCacheable = sql.trim().toLowerCase().startsWith('select');
 
-        const tableNames = this.getTableNamesFromStatement(sql);
+        const tableNames = CachedDB.getTableNamesFromStatement(sql);
         if (!isCacheable) {
             if (tableNames.length > 0) {
                 console.log(`Invalidating cache for ${tableNames.join(',')}`);
-                this.cache?.delPrefix(tableNames.join(','));
+                this.cache?.delPrefix(this.tableKey(tableNames));
             }
 
             return super.query<T>(sql, params);
