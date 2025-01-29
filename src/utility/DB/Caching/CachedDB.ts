@@ -5,9 +5,10 @@ import {ICache} from "./ICache.ts";
 import {CacheConfig} from "./CacheConfig.ts";
 import {RedisCache} from "./RedisCache.ts";
 import {MemcachedCache} from "./MemcachedCache.ts";
+import {DbOptions} from "./Models/DbOptions.ts";
 
 export class CachedDB extends MariaDB {
-    private readonly cache: ICache|undefined;
+    private readonly cache: ICache | undefined;
     private readonly queryTimeout: number;
     private readonly config: CacheConfig;
 
@@ -69,17 +70,17 @@ export class CachedDB extends MariaDB {
         return tableNames;
     }
 
-    async query<T>(sql: string, params: any[] = []): Promise<T[]> {
+    async query<T>(sql: string, params: any[] = [], options: DbOptions = {}): Promise<T[]> {
         const isCacheable = sql.trim().toLowerCase().startsWith('select');
 
         const tableNames = CachedDB.getTableNamesFromStatement(sql);
-        if (!isCacheable) {
+        if (!isCacheable || options.disableCacheWrite) {
             if (tableNames.length > 0) {
                 console.log(`Invalidating cache for ${tableNames.join(',')}`);
                 this.cache?.delPrefix(this.tableKey(tableNames));
             }
 
-            const result = super.query<T>(sql, params);
+            const result = await super.query<T>(sql, params);
             result.metadata = {
                 cached: false
             };

@@ -28,3 +28,21 @@ test("correctly caches record", async () => {
     });
     expect(secondResult.length).toEqual(1);
 })
+
+
+test("doesn't cache deactivated cache write", async () => {
+    const db = new TriDB();
+    await db.invalidateCache("SELECT 1");
+    const result = await db.query("SELECT 1", [], {
+        disableCacheWrite: true
+    });
+    expect(result.metadata).toEqual({
+        cached: false
+    });
+    expect(result.length).toEqual(1);
+    const secondResult = await db.query("SELECT 1");
+    expect(secondResult.metadata).toEqual({
+        cached: false
+    });
+    expect(secondResult.length).toEqual(1);
+})
