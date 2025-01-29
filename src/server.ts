@@ -65,6 +65,7 @@ import {ChallengeStore} from "./utility/MFA/ChallengeStore.ts";
 import {VerifyWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/VerifyWebauthnMethodEndpoint.ts";
 import {DeleteWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/DeleteWebauthnMethodEndpoint.ts";
 import {UpdateTotpMethodEndpoint} from "./endpoints/auth/totp/UpdateTotpMethodEndpoint.ts";
+import {MfaOptionsEndpoint} from "./endpoints/auth/MfaOptionsEndpoint.ts";
 
 config();
 
@@ -121,7 +122,8 @@ new UpdateArtistEndpoint(app, "/artists/update", db).register();
 // endregion
 
 // region Users
-new MfaRequestEndpoint(app, "/user/actions/mfa-request", db, mfaStore).register();
+new MfaOptionsEndpoint(app, "/mfa/options", db, mfaStore).register();
+new MfaRequestEndpoint(app, "/mfa/request", db, mfaStore).register();
 new LoginEndpoint(app, "/user/actions/login", db, mfaStore, challengeStore).register();
 new LogoutEndpoint(app, "/user/actions/logout").register();
 new ChangePasswordEndpoint(app, "/user/actions/change-password", db).register();

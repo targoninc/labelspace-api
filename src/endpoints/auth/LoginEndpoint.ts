@@ -48,7 +48,9 @@ export class LoginEndpoint extends PostEndpoint {
             const mfa = await getUserMfa(user, this.db);
 
             if (mfa.enabled) {
-                if (!this.mfaStore.hasCompletedMfaProcess(user.id) || !this.challengeStore.hasCompletedChallenge(challenge)) {
+                if (!this.mfaStore.hasCompletedMfaProcess(user.id) ||
+                    !this.challengeStore.hasCompletedChallenge(challenge))
+                {
                     CLI.debug(`MFA not completed ${!this.mfaStore.hasCompletedMfaProcess(user.id)} ${!this.challengeStore.hasCompletedChallenge(challenge)}`);
                     return res.status(401).send({error: "MFA required"});
                 }

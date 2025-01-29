@@ -20,6 +20,11 @@ export class MfaStore {
         }, 1000 * 60);
     }
 
+    /**
+     * Is used to create a new MFA process for TOTP or email.
+     * @param user_id The user ID
+     * @param method_type The method type (totp or email)
+     */
     createMfaProcess(user_id: number, method_type: "totp" | "email") {
         const process: MfaProcess = {
             id: Math.random(),
@@ -33,6 +38,10 @@ export class MfaStore {
         return process;
     }
 
+    /**
+     * Checks if there are any uncompleted MFA processes for the given user ID.
+     * @param id The user ID
+     */
     hasUncompletedMfaProcess(id: number) {
         const userProcesses = this.store.filter(p => p.user_id === id);
 
@@ -45,6 +54,10 @@ export class MfaStore {
         return false;
     }
 
+    /**
+     * Completes all MFA processes for the given user ID.
+     * @param userId The user ID
+     */
     completeMfaProcesses(userId: number) {
         for (const process of this.store) {
             if (process.user_id === userId) {
@@ -54,7 +67,12 @@ export class MfaStore {
         }
     }
 
+    /**
+     * Checks if there is a recently completed MFA process for the given user ID.
+     * @param userId The user ID
+     */
     hasCompletedMfaProcess(userId: number) {
-        return this.store.some(p => p.user_id === userId && p.verified);
+        const userProcesses = this.store.filter(p => p.user_id === userId);
+        return userProcesses.filter(p => !p.verified).length === 0;
     }
 }

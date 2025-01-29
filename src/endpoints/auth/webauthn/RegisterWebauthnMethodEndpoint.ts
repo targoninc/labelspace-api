@@ -4,7 +4,7 @@ import {Application, NextFunction, Response} from "express";
 import {WebAuthN} from "../../../utility/MFA/WebAuthN.ts";
 import {ChallengeStore} from "../../../utility/MFA/ChallengeStore.ts";
 import {CLI} from "../../../utility/CLI.ts";
-import {WebauthnRegistrationRequest} from "../../../utility/MFA/WebauthnRegistrationRequest.ts";
+import {WebauthnRegistrationRequest} from "../../../utility/MFA/Models/WebauthnRegistrationRequest.ts";
 import {PublicKey} from "../../../models/db/tri/PublicKey.ts";
 
 export class RegisterWebauthnMethodEndpoint extends AuthenticatedPostEndpoint {

@@ -1,5 +1,7 @@
 import {User} from "../../models/db/tri/User.ts";
 import {TriDB} from "../DB/TriDB.ts";
+import {CredentialDescriptor} from "@passwordless-id/webauthn/dist/esm/types";
+import {MfaOption} from "./Enums/MfaOption.ts";
 
 export async function getUserMfa(user: User, db: TriDB) {
     const primaryEmail = await db.getUserPrimaryEmail(user.id);
@@ -22,4 +24,34 @@ export async function getUserMfa(user: User, db: TriDB) {
             methods: [primaryEmail]
         }
     };
+}
+
+export async function getMfaOptions(user: User, db: TriDB) {
+    const mfa = await getUserMfa(user, db);
+    const options = [];
+    if (mfa.enabled) {
+        if (mfa.webauthn.enabled) {
+            options.push({
+                type: MfaOption.webauthn,
+                credentialDescriptors: mfa.webauthn.methods.map(k => (<CredentialDescriptor>{
+                    id: k.key_id,
+                    transports: k.transports.split(",")
+                }))
+            });
+        }
+
+        if (mfa.totp.enabled) {
+            options.push({
+                type: MfaOption.totp
+            });
+        }
+
+        if (mfa.email.enabled) {
+            options.push({
+                type: MfaOption.email,
+                email: mfa.email.methods[0].email
+            });
+        }
+    }
+    return options;
 }
