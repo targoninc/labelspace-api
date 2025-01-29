@@ -50,10 +50,11 @@ export class CachedDB extends MariaDB {
         const cacheKey = this.generateCacheKey(sql, params);
 
         try {
-            // Try to get from cache
             const cached = await this.cache?.get(cacheKey);
             if (cached) {
-                CLI.debug(`Cache hit for query: ${sql}`);
+                CLI.debug(`Cache hit for query: ${sql}`, {
+                    logToDb: false
+                });
                 return JSON.parse(cached);
             }
         } catch (error) {
