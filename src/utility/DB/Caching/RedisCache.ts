@@ -12,7 +12,7 @@ export class RedisCache implements ICache {
 
     constructor(config: CacheConfig) {
         try {
-            const redisUrl = `redis://${config.host ?? "localhost"}`;
+            const redisUrl = `redis://${env("REDIS_USERNAME")}@${config.host ?? "localhost"}`;
             CLI.debug(`Connecting to Redis @ ${redisUrl}`, {
                 logToDb: false
             });
