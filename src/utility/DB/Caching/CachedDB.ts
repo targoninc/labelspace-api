@@ -57,13 +57,16 @@ export class CachedDB extends MariaDB {
     }
 
     public static getTableNamesFromStatement(sql: string): string[] {
+        // Ignore everything after "ON DUPLICATE KEY UPDATE"
+        const sanitizedSql = sql.split(/on duplicate key update/i)[0];
+
         // Define a regex pattern to capture table names after specific keywords
         const regex = /(?:from|join|update|into)\s+([`"]?[\w.]+[`"]?)/gi;
         const tableNames: string[] = [];
 
         let match: RegExpExecArray | null;
-        // Use regex to find all matches in the SQL statement
-        while ((match = regex.exec(sql)) !== null) {
+        // Use regex to find all matches in the sanitized SQL statement
+        while ((match = regex.exec(sanitizedSql)) !== null) {
             // Push the captured table name (first group) into the tableNames array
             tableNames.push(match[1].replace(/[`"]/g, ""));
         }
