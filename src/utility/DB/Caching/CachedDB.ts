@@ -144,7 +144,9 @@ export class CachedDB extends MariaDB {
         const row = await this.queryFirst<any>(sql, params);
         if (row) {
             const result = row[Object.keys(row)[0]];
-            result.metadata = row.metadata;
+            try {
+                result.metadata = row.metadata;
+            } catch (e) {}
             return result;
         }
         return null;
