@@ -134,7 +134,11 @@ export class CachedDB extends MariaDB {
         const rows = await this.query<T>(sql, params);
         if (rows && rows.length > 0) {
             const result = rows[0];
-            result.metadata = rows.metadata;
+            try {
+                result.metadata = rows.metadata;
+            } catch (e) {
+                // ignore
+            }
             return result;
         }
         return null;
