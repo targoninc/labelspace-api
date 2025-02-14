@@ -26,6 +26,9 @@ export class PaypalWebhookHandler {
             case "PAYMENT.PAYOUTSBATCH.SUCCESS":
                 await this.handlePayoutBatchSuccess(event as PaypalPayoutBatchEvent);
                 break;
+            case "PAYMENT.PAYOUTSBATCH.DENIED":
+                await this.handlePayoutBatchDenied(event as PaypalPayoutBatchEvent);
+                break;
         }
     }
 
@@ -35,6 +38,10 @@ export class PaypalWebhookHandler {
 
     private async handlePayoutBatchSuccess(event: PaypalPayoutBatchEvent) {
         await this.handlePayoutBatchUpdate(event, PaymentStatus.paid);
+    }
+
+    private async handlePayoutBatchDenied(event: PaypalPayoutBatchEvent) {
+        await this.handlePayoutBatchUpdate(event, PaymentStatus.failed);
     }
 
     private async handlePayoutBatchUpdate(event: PaypalPayoutBatchEvent, newStatus: PaymentStatus) {
