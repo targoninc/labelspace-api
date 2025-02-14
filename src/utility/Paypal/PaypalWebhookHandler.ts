@@ -1,7 +1,7 @@
 import {PaypalWebhookEvent} from "./models/PaypalWebhookEvent.js";
 import {TriDB} from "../DB/TriDB.js";
 import {CLI} from "../CLI.js";
-import type {PaypalPayoutBatchEvent} from "./PaypalPayoutBatchEvent.ts";
+import type {PaypalPayoutBatchEvent} from "./models/PaypalPayoutBatchEvent.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 
 export class PaypalWebhookHandler {

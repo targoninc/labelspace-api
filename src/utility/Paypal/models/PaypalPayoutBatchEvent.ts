@@ -1,5 +1,5 @@
 import type {PaypalPayoutBatchHeader} from "./PaypalPayoutBatchHeader.ts";
-import type {PaypalResourceLink} from "./models/PaypalResourceLink.ts";
+import type {PaypalResourceLink} from "./PaypalResourceLink.ts";
 
 export interface PaypalPayoutBatchEvent {
     id: string;

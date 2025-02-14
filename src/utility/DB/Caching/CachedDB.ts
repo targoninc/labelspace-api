@@ -96,9 +96,6 @@ export class CachedDB extends MariaDB {
         try {
             const cached = await this.cache?.get(cacheKey);
             if (cached) {
-                CLI.debug(`Cache hit for query: ${sql}`, {
-                    logToDb: false
-                });
                 const result = JSON.parse(cached);
                 result.metadata = {
                     cached: true

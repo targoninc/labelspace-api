@@ -1,5 +1,5 @@
-import type {PaypalBatchStatus} from "./models/PaypalBatchStatus.ts";
-import type {PaypalPayoutAmount} from "./models/PaypalPayoutAmount.ts";
+import type {PaypalBatchStatus} from "./PaypalBatchStatus.ts";
+import type {PaypalPayoutAmount} from "./PaypalPayoutAmount.ts";
 
 export interface PaypalPayoutBatchHeader {
     payout_batch_id: string;
