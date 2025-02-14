@@ -465,7 +465,7 @@ export class TriDB extends CachedDB {
     async getArtistRoyalty(artistNames: string[]) {
         const artistConditions = this.getArtistEqual(artistNames);
 
-        return await this.querySingleValue("SELECT SUM(r.royalty) FROM finance.royalties r WHERE " + artistConditions, [...artistNames]);
+        return (await this.querySingleValue<number>("SELECT SUM(r.royalty) FROM finance.royalties r WHERE " + artistConditions, [...artistNames])) ?? 0;
     }
 
     async getArtistSplitSum(artistNames: string[]) {
@@ -494,7 +494,7 @@ export class TriDB extends CachedDB {
     }
 
     async getUserPaidAmount(id: number) {
-        return await this.querySingleValue("SELECT SUM(amount) FROM finance.payments WHERE user_id = ?", [id]);
+        return (await this.querySingleValue<number>(`SELECT SUM(amount) FROM finance.payments WHERE user_id = ? AND status IS NOT ${PaymentStatus.failed}`, [id])) ?? 0;
     }
 
     async getAvailablePaymentAmount(id: number, artistNames: string[]) {
