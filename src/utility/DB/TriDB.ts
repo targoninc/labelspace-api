@@ -494,7 +494,7 @@ export class TriDB extends CachedDB {
     }
 
     async getUserPaidAmount(id: number) {
-        return (await this.querySingleValue<number>(`SELECT SUM(amount) FROM finance.payments WHERE user_id = ? AND status IS NOT ${PaymentStatus.failed}`, [id])) ?? 0;
+        return (await this.querySingleValue<number>(`SELECT SUM(amount) FROM finance.payments WHERE user_id = ? AND status != ${PaymentStatus.failed}`, [id])) ?? 0;
     }
 
     async getAvailablePaymentAmount(id: number, artistNames: string[]) {
