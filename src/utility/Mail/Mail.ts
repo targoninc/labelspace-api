@@ -33,7 +33,7 @@ export class Mail {
             to: email.trim(),
             subject: mailBuild.subject,
             replyTo: "administration@targoninc.com",
-            priority: "high",
+            priority: "normal",
             text: mailBuild.text,
             html: mailBuild.html,
         })
