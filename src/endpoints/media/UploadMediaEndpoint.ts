@@ -57,7 +57,12 @@ export class UploadMediaEndpoint extends AuthenticatedPostEndpoint {
 
             const originalExtension = req.file.originalname.split(".").pop()?.replace("/", "") ?? ".mp3";
 
-            const fileName = `source.${originalExtension.toLowerCase()}`;
+            let fileName;
+            if (fileType === MediaFileType.file) {
+                fileName = req.file.originalname;
+            } else {
+                fileName = `source.${originalExtension.toLowerCase()}`;
+            }
             const startTime = performance.now();
             try {
                 await MediaClient.uploadMedia(this.db, fileType, referenceId, fileName, req.file);

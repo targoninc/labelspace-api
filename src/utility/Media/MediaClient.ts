@@ -90,6 +90,8 @@ export class MediaClient {
 
         if (type === MediaFileType.audio) {
             await MediaClient.postProcessAudio(referenceId, type, db, sourceFile);
+        } else if (type === MediaFileType.file) {
+            return;
         } else if (MediaClient.isImageType(type)) {
             await MediaClient.postProcessImage(referenceId, type, db, sourceFile);
         }
