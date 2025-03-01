@@ -185,6 +185,19 @@ export class TriDB extends CachedDB {
             [...artistNamesLike, limit]);
     }
 
+    async getRoyaltiesByCountry(artistNames: string[], limit: number): Promise<Statistic[]> {
+        const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
+
+        return await this.query(`SELECT r.territory    as id,
+                                        r.territory    as label,
+                                        SUM(r.royalty) as value
+                                 FROM finance.royalties r
+                                 WHERE ${artistConditions}
+                                 GROUP BY r.territory
+                                 ORDER BY SUM(r.royalty) DESC`,
+            [...artistNamesLike, limit]);
+    }
+
     async getRoyaltiesByArtist(artistNames: string[], limit: number): Promise<Statistic[]> {
         const rows = [];
         for (const artistName of artistNames) {

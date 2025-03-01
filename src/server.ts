@@ -66,6 +66,7 @@ import {VerifyWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/VerifyWeba
 import {DeleteWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/DeleteWebauthnMethodEndpoint.ts";
 import {UpdateTotpMethodEndpoint} from "./endpoints/auth/totp/UpdateTotpMethodEndpoint.ts";
 import {MfaOptionsEndpoint} from "./endpoints/auth/MfaOptionsEndpoint.ts";
+import {RoyaltiesByCountryEndpoint} from "./endpoints/statistics/RoyaltiesByCountryEndpoint.ts";
 
 config();
 
@@ -171,6 +172,7 @@ new RoyaltiesByYearEndpoint(app, "/statistics/royaltiesByYear", db).register();
 new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register();
 new RoyaltiesByArtistEndpoint(app, "/statistics/royaltiesByArtist", db).register();
 new RoyaltiesByServiceEndpoint(app, "/statistics/royaltiesByService", db).register();
+new RoyaltiesByCountryEndpoint(app, "/statistics/royaltiesByCountry", db).register();
 // endregion
 
 // region Payments
