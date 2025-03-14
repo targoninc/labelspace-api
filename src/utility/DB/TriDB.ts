@@ -361,7 +361,11 @@ export class TriDB extends CachedDB {
     }
 
     async updateTrack(request: Track) {
-        await this.query("UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ?, length = ?, credits = ? WHERE id = ?", [
+        await this.query(`
+            UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ?, length = ?, credits = ?,
+                                  link_spotify = ?, link_youtube = ?, link_soundcloud = ?, link_applemusic = ?, link_bandcamp = ?, link_lyda = ?
+                              WHERE id = ?
+        `, [
             request.title,
             request.isrc,
             request.artists,
@@ -370,6 +374,12 @@ export class TriDB extends CachedDB {
             request.price,
             request.length,
             request.credits,
+            request.link_spotify,
+            request.link_youtube,
+            request.link_soundcloud,
+            request.link_applemusic,
+            request.link_bandcamp,
+            request.link_lyda,
             request.id
         ]);
     }
