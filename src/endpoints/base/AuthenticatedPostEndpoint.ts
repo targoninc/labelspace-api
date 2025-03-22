@@ -1,4 +1,4 @@
-import {Application, NextFunction, Request, Response} from "express";
+import {Application, NextFunction, Request, RequestHandler, Response} from "express";
 import {PostEndpoint} from "./PostEndpoint.js";
 import {User} from "../../models/db/tri/User.js";
 
@@ -7,10 +7,10 @@ export class AuthenticatedPostEndpoint extends PostEndpoint {
         super(app, path);
     }
 
-    register(interceptors = []) {
+    register(interceptors: (NextFunction | RequestHandler)[] = []) {
         super.register([
             this.intercept.bind(this) as NextFunction,
-            ...interceptors
+            ...(interceptors as NextFunction[])
         ]);
     }
 

@@ -5,9 +5,12 @@ import {GetEndpoint} from "../base/GetEndpoint.js";
 import * as fs from "node:fs";
 import {FileStorage} from "../../utility/Storage/FileStorage.js";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
+import {Authenticator} from "../../models/Authenticator.ts";
+import {Permissions} from "../../models/enums/Permissions.ts";
+import {AuthenticatedGetEndpoint} from "../base/AuthenticatedGetEndpoint.ts";
 
-export class GetImageEndpoint extends GetEndpoint {
-    db: TriDB;
+export class GetFileEndpoint extends AuthenticatedGetEndpoint {
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -22,34 +25,49 @@ export class GetImageEndpoint extends GetEndpoint {
                 return res.status(400).send("No id provided.");
             }
             const referenceId = parseInt(id);
-
             if (!mediaFileType) {
                 return res.status(400).send("No mediaFileType provided.");
             } else if (!Object.values(MediaFileType).includes(mediaFileType)) {
                 return res.status(400).send(`Invalid mediaFileType provided (${mediaFileType}), must be one of ` + Object.values(MediaFileType).join(", "));
             }
 
-            const quality = req.query.quality as string;
-            await this.getImage(res, mediaFileType, referenceId, quality);
+            const album = await this.db.getAlbumById(referenceId);
+            if (!album) {
+                return {
+                    code: 404,
+                    error: "Album not found."
+                };
+            }
+
+            const artistNames = album.artists.split(",").map(a => a.trim());
+            const userArtists = await this.db.getUserArtists(req.user.id);
+            if (!userArtists.every(a => artistNames.includes(a.name))) {
+                if (!await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db)) {
+                    return {
+                        code: 403,
+                        error: "You do not have permission to view this file."
+                    };
+                }
+            }
+
+            const fileName = req.query.fileName as string;
+            if (!fileName || fileName.trim().length === 0) {
+                return res.status(400).send("No fileName provided.");
+            }
+            await this.getFile(res, mediaFileType, referenceId, fileName);
         } catch (error) {
             console.error("Error during file request:", error);
             res.status(500).send("Internal server error.");
         }
     }
 
-    async getImage(res: Response, mediaFileType: MediaFileType, referenceId: number, requestedQuality: string) {
-        const validQualities = ["50", "100", "500"];
-        const quality = requestedQuality ?? validQualities.at(-1);
-        if (!validQualities.includes(quality)) {
-            return res.status(400).send("Invalid quality provided, must be one of " + validQualities.join(", "));
-        }
-
-        const filePath = FileStorage.filePath(mediaFileType, referenceId, `${quality}.webp`);
+    async getFile(res: Response, mediaFileType: MediaFileType, referenceId: number, fileName: string) {
+        const filePath = FileStorage.filePath(mediaFileType, referenceId, fileName);
         if (!fs.existsSync(filePath)) {
             return res.status(404).send("File not found.");
         }
 
-        res.header("Content-Type", "image/webp");
+        res.header("Content-Type", "application/octet-stream");
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
         return new Promise<void>((resolve, reject) => {

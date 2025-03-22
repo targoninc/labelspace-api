@@ -17,10 +17,10 @@ export class AudioProcessor {
             const process = exec(command);
 
             let lines = "";
-            process.stdout.on("data", data => {
+            process.stdout?.on("data", data => {
                 lines += data;
             });
-            process.stderr.on("data", data => {
+            process.stderr?.on("data", data => {
                 lines += data;
             });
             process.on("close", code => {
@@ -56,13 +56,13 @@ export class AudioProcessor {
             });
 
             return true;
-        } catch (error) {
+        } catch (error: any) {
             CLI.error(error);
             return false;
         }
     }
 
-    static modifyLoudnessDataForDB(data) {
+    static modifyLoudnessDataForDB(data: number[]) {
         let reducedData = [];
         const count = 150;
         const min = Math.min(...data);
@@ -90,9 +90,8 @@ export class AudioProcessor {
      * @param bitrate The new bitrate in kbps
      * @param callback The callback to call when the process is finished
      * @param errorCallback The callback to call when the process runs into an error
-     * @returns {boolean} True if successful, false otherwise
      */
-    static copyWithNewBitrate(source: string, target: string, bitrate: number, callback: Function, errorCallback: Function): boolean {
+    static copyWithNewBitrate(source: string, target: string, bitrate: number, callback: Function, errorCallback: Function) {
         try {
             const isWindows = process.platform === "win32";
             const nullDevice = isWindows ? "nul" : "/dev/null";
@@ -105,13 +104,12 @@ export class AudioProcessor {
                     callback();
                 }
             });
-        } catch (error) {
+        } catch (error: any) {
             CLI.error(error);
-            return false;
         }
     }
 
-    static getLength(targetFile: string, callback: (length) => Promise<void>) {
+    static getLength(targetFile: string, callback: (length: number) => Promise<void>) {
         exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${targetFile}`, async (error, stdout, stderr) => {
             if (error) {
                 console.error(`ffprobe error: ${error.message}`);
@@ -121,7 +119,7 @@ export class AudioProcessor {
                 console.error(`ffprobe stderr: ${stderr}`);
                 return;
             }
-            await callback(stdout);
+            await callback(parseFloat(stdout));
         });
     }
 }

@@ -14,6 +14,8 @@ const storage = new FileStorage();
 export class MediaClient {
     static async validateMedia(db: TriDB, type: MediaFileType, referenceId: number, fileName: string,
                                requestingUser: User, file: Express.Multer.File) {
+        const userArtists = await db.getUserArtists(requestingUser.id);
+
         switch (type) {
             case MediaFileType.audio:
                 const track = await db.getTrackById(referenceId);
@@ -49,12 +51,31 @@ export class MediaClient {
                     };
                 }
 
-                const userArtists = await db.getUserArtists(requestingUser.id);
                 if (!userArtists.some(a => a.id === artist.id)) {
                     return {
                         code: 403,
                         error: "You do not have permission to upload this logo."
                     };
+                }
+
+                break;
+            case MediaFileType.albumFile:
+                const album = await db.getAlbumById(referenceId);
+                if (!album) {
+                    return {
+                        code: 404,
+                        error: "Album not found."
+                    };
+                }
+
+                const artistNames = album.artists.split(",").map(a => a.trim());
+                if (!userArtists.every(a => artistNames.includes(a.name))) {
+                    if (!await Authenticator.userHasPermission(requestingUser, Permissions.fileManagement, db)) {
+                        return {
+                            code: 403,
+                            error: "You do not have permission to upload this file."
+                        };
+                    }
                 }
 
                 break;
@@ -90,7 +111,7 @@ export class MediaClient {
 
         if (type === MediaFileType.audio) {
             await MediaClient.postProcessAudio(referenceId, type, db, sourceFile);
-        } else if (type === MediaFileType.file) {
+        } else if (type === MediaFileType.albumFile) {
             return;
         } else if (MediaClient.isImageType(type)) {
             await MediaClient.postProcessImage(referenceId, type, db, sourceFile);
@@ -128,7 +149,7 @@ export class MediaClient {
         const heights = [50, 100, 500];
         let widths = [50, 100, 500];
 
-        const promise = new Promise<void>((resolve, reject) => {
+        const promise = new Promise<void>((resolve, _) => {
             let done = 0;
             const updateProgress = () => {
                 done++;
@@ -181,7 +202,7 @@ export class MediaClient {
                         await db.setTrackLength(referenceId, length);
                     });
 
-                    AudioProcessor.getLoudnessData(targetFileHQ, async data => {
+                    AudioProcessor.getLoudnessData(targetFileHQ, async (data: any) => {
                         await db.setTrackLoudnessData(referenceId, JSON.stringify(data));
 
                         resolve();
