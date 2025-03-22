@@ -356,7 +356,7 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE tri.tracks SET length = ? WHERE id = ?", [length, id]);
     }
 
-    async getAlbumById(id: number): Promise<Album> {
+    async getAlbumById(id: number): Promise<Album|null> {
         return await this.queryFirst("SELECT * FROM tri.albums WHERE id = ?", [id]);
     }
 

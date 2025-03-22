@@ -8,10 +8,12 @@ export class MariaDB {
     private readonly user: string;
     private readonly password: string;
     private readonly database: string;
-    connectionPool: dbInterface.Pool | null = null;
-    private connection: dbInterface.Connection | null = null;
+    private connectionPool: dbInterface.Pool | null = null;
+    private maxRetries: number = 3;
+    private retryDelay: number = 2000; // ms
+    private connectionTimeout: number = 30000; // ms
 
-    constructor(host: string, port: number|null = null, user: string|null = null, password: string|null = null, database = "tri") {
+    constructor(host: string, port: number | null = null, user: string | null = null, password: string | null = null, database = "tri") {
         CLI.debug(`Initializing MariaDB connection to ${host}:${port}/${database}`);
         this.host = host;
         this.port = port || 3306;
@@ -24,11 +26,10 @@ export class MariaDB {
             throw new Error("No MariaDB password specified.");
         }
         this.database = database;
-        this.connection = null;
         this.connectionPool = null;
     }
 
-    async connect(tryReconnection = true) {
+    async initialize(): Promise<boolean> {
         try {
             this.connectionPool = dbInterface.createPool({
                 host: this.host,
@@ -37,68 +38,108 @@ export class MariaDB {
                 password: this.password,
                 database: this.database,
                 connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
+                acquireTimeout: this.connectionTimeout,
+                connectTimeout: this.connectionTimeout,
+                idleTimeout: 60000,
+                minimumIdle: 1,
+                resetAfterUse: true,
             });
-            this.connection = await this.connectionPool.getConnection();
-        } catch (e: any) {
-            if (tryReconnection) {
-                await this.tryToReConnect();
-            } else {
-                CLI.debug(e);
-                return false;
-            }
-        }
 
-        if (!this.connection) {
+            // Test the connection
+            const testConn = await this.connectionPool.getConnection();
+            await testConn.query("SET NAMES utf8mb4");
+            await testConn.release();
+
+            CLI.success(`DB pool initialized and connected.`);
+            return true;
+        } catch (e: any) {
+            CLI.error(`Failed to initialize DB pool: ${e.message}`);
             return false;
         }
-        await this.connection.query("SET NAMES utf8mb4");
-        CLI.success(`DB connected.`);
-        return true;
     }
 
-    async tryToReConnect(reconnectTimeout = 10) {
-        let connected = false;
-        let tryCount = 0;
-        reconnectTimeout *= 1000;
-
-        while (!connected) {
-            tryCount++;
-            CLI.debug(`Attempting to reconnect to DB... (try ${tryCount})`);
-
-            connected = await this.connect(false);
-            if (!connected) {
-                CLI.debug(`Failed to connect to DB.`);
+    private async getConnectionFromPool(): Promise<dbInterface.Connection> {
+        if (!this.connectionPool) {
+            const initialized = await this.initialize();
+            if (!initialized) {
+                throw new Error("Unable to initialize database connection pool.");
             }
-            await new Promise((res, rej) => {
-                setTimeout(() => {
-                    res();
-                }, reconnectTimeout);
-            });
+        }
+
+        try {
+            return await this.connectionPool!.getConnection();
+        } catch (e: any) {
+            CLI.error(`Failed to get connection from pool: ${e.message}`);
+            throw e;
         }
     }
 
-    async close() {
-        await this.connection?.end();
+    private async withConnection<T>(operation: (conn: dbInterface.Connection) => Promise<T>): Promise<T> {
+        let retries = 0;
+        let lastError: any;
+
+        while (retries <= this.maxRetries) {
+            let conn: dbInterface.Connection | null = null;
+
+            try {
+                const connStart = performance.now();
+                conn = await this.getConnectionFromPool();
+                const connTime = performance.now() - connStart;
+
+                if (connTime > 200) {
+                    CLI.debug(`Connection acquisition took ${connTime.toFixed(2)}ms`);
+                }
+
+                return await operation(conn);
+            } catch (error: any) {
+                lastError = error;
+
+                if (error.code === 'ER_GET_CONNECTION_TIMEOUT' ||
+                    error.code === 'ER_CMD_CONNECTION_CLOSED' ||
+                    error.code === 'PROTOCOL_CONNECTION_LOST' ||
+                    error.toString().includes('Connection timeout')) {
+
+                    retries++;
+                    CLI.warning(`Database connection error (${error.code || 'unknown'}). Retry ${retries}/${this.maxRetries}`);
+
+                    // For connection pool issues, try to recreate the pool
+                    if (retries > 1) {
+                        try {
+                            await this.closePool();
+                            await this.initialize();
+                        } catch (poolError) {
+                            CLI.error(`Failed to recreate connection pool: ${poolError}`);
+                        }
+                    }
+
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                } else {
+                    // Non-connection related errors, rethrow
+                    throw error;
+                }
+            } finally {
+                if (conn) {
+                    try {
+                        await conn.end();
+                    } catch (releaseError) {
+                        CLI.debug(`Error releasing connection: ${releaseError}`);
+                    }
+                }
+            }
+        }
+
+        throw lastError || new Error("Max connection retries exceeded");
     }
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
-        if (!this.connectionPool) {
-            CLI.warning(`Connecting to database @${this.host}...`);
-            await this.connect();
-        }
-        let conn = this.connection;
-        const connStart = performance.now();
-        if (!conn || !conn.isValid()) {
-            conn = await this.connectionPool!.getConnection();
-            const connTime = performance.now() - connStart;
-            CLI.debug(`Connection acquisition took ${connTime.toFixed(2)}ms`);
-        }
-        try {
+        return this.withConnection(async (conn) => {
             const start = performance.now();
-            const out = await conn.query({
+            const result = await conn.query({
                 sql,
                 bigIntAsNumber: true
-            }, params);
+            }, params) as T[];
+
             const diff = performance.now() - start;
             if (diff > 200) {
                 CLI.debug(`Query took ${diff.toFixed(2)}ms: ${sql}`, {
@@ -109,26 +150,13 @@ export class MariaDB {
                     }
                 });
             }
-            return out as T[];
-        } catch (e: any) {
-            if (e.toString().includes("ER_CMD_CONNECTION_CLOSED")) {
-                CLI.warning("Reconnecting to database...");
-                conn = await this.connectionPool!.getConnection();
-                return await conn.query({
-                    sql,
-                    bigIntAsNumber: true
-                }, params) as T[];
-            } else if (e.toString().includes("Can't create database")) {
-                return [];
-            } else {
-                CLI.error(e);
-                return [];
-            }
-        }
+
+            return result;
+        });
     }
 
     async queryFirst(sql: string, params: any[] = []): Promise<any> {
-        if (!sql.includes("LIMIT 1")) {
+        if (!sql.toLowerCase().includes("limit 1")) {
             sql += " LIMIT 1";
         }
         const rows = await this.query(sql, params);
@@ -138,5 +166,27 @@ export class MariaDB {
     async querySingleValue(sql: string, params: any[] = []): Promise<any> {
         const row = await this.queryFirst(sql, params);
         return row ? row[Object.keys(row)[0]] : null;
+    }
+
+    async closePool(): Promise<void> {
+        if (this.connectionPool) {
+            try {
+                await this.connectionPool.end();
+                this.connectionPool = null;
+                CLI.debug("Database connection pool closed");
+            } catch (error) {
+                CLI.error(`Error closing connection pool: ${error}`);
+            }
+        }
+    }
+
+    async healthCheck(): Promise<boolean> {
+        try {
+            await this.query("SELECT 1");
+            return true;
+        } catch (error) {
+            CLI.error(`Database health check failed: ${error}`);
+            return false;
+        }
     }
 }
