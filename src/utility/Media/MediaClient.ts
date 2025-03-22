@@ -68,14 +68,11 @@ export class MediaClient {
                     };
                 }
 
-                const artistNames = album.artists.split(",").map(a => a.trim());
-                if (!userArtists.every(a => artistNames.includes(a.name))) {
-                    if (!await Authenticator.userHasPermission(requestingUser, Permissions.fileManagement, db)) {
-                        return {
-                            code: 403,
-                            error: "You do not have permission to upload this file."
-                        };
-                    }
+                if (!await Authenticator.userHasPermission(requestingUser, Permissions.fileManagement, db)) {
+                    return {
+                        code: 403,
+                        error: "You do not have permission to upload this file."
+                    };
                 }
 
                 break;

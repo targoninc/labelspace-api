@@ -1,10 +1,12 @@
-import { Application, Response } from "express";
+import {Application, Response} from "express";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {AlbumEnricher} from "../../models/enrichers/AlbumEnricher.js";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
+import {FileStorage} from "../../utility/Storage/FileStorage.ts";
+import {MediaFileType} from "../../models/enums/MediaFileType.ts";
 
 export class GetAlbumEndpoint extends GetEndpoint {
     db: TriDB;
@@ -38,7 +40,8 @@ export class GetAlbumEndpoint extends GetEndpoint {
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
         });
-        album.earnings = await this.db.getReleaseTotalRoyalty(album.upc);
+        album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
+        album.files = await FileStorage.getEntityFiles(MediaFileType.albumFile, album.id);
 
         return res.send(album);
     }

@@ -67,7 +67,14 @@ export class GetFileEndpoint extends AuthenticatedGetEndpoint {
             return res.status(404).send("File not found.");
         }
 
-        res.header("Content-Type", "application/octet-stream");
+        switch (fileName.split(".").pop()?.toLowerCase()) {
+            case "pdf":
+                res.header("Content-Type", "application/pdf");
+                break;
+            default:
+                res.header("Content-Type", "application/octet-stream");
+                break;
+        }
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
         return new Promise<void>((resolve, reject) => {

@@ -59,7 +59,7 @@ export class UploadMediaEndpoint extends AuthenticatedPostEndpoint {
 
             let fileName;
             if (fileType === MediaFileType.albumFile) {
-                fileName = req.file.originalname;
+                fileName = req.body.fileName ?? req.file.originalname;
             } else {
                 fileName = `source.${originalExtension.toLowerCase()}`;
             }

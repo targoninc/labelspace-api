@@ -751,7 +751,7 @@ export class TriDB extends CachedDB {
             [isrc, limit]);
     }
 
-    async getReleaseTotalRoyalty(upc: string) {
+    async getReleaseTotalRoyalty(upc: string): Promise<number|null> {
         return await this.querySingleValue(`SELECT SUM(r.royalty) FROM finance.royalties r WHERE r.upc = ?`, [upc]);
     }
 

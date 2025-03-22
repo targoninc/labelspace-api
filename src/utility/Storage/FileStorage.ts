@@ -1,4 +1,4 @@
-import {mkdir, readdir, rm} from "node:fs/promises";
+import {exists, mkdir, readdir, rm} from "node:fs/promises";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
 import type {IStorage} from "./IStorage.js";
 import * as Bun from "bun";
@@ -49,8 +49,11 @@ export class FileStorage implements IStorage {
         await Bun.write(filePath, data);
     }
 
-    async getEntityFiles(fileType: MediaFileType, entityId: number) {
+    static async getEntityFiles(fileType: MediaFileType, entityId: number) {
         const entityPath = FileStorage.entityPath(fileType, entityId);
+        if (!await exists(entityPath)) {
+            return [];
+        }
         const files = await readdir(entityPath);
         return files.filter(file => file !== "." && file !== "..");
     }

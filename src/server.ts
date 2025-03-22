@@ -67,6 +67,7 @@ import {DeleteWebauthnMethodEndpoint} from "./endpoints/auth/webauthn/DeleteWeba
 import {UpdateTotpMethodEndpoint} from "./endpoints/auth/totp/UpdateTotpMethodEndpoint.ts";
 import {MfaOptionsEndpoint} from "./endpoints/auth/MfaOptionsEndpoint.ts";
 import {RoyaltiesByCountryEndpoint} from "./endpoints/statistics/RoyaltiesByCountryEndpoint.ts";
+import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
 
 config();
 
@@ -164,6 +165,7 @@ new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();
 new UploadMediaEndpoint(app, "/media/upload", db).register();
 new GetImageEndpoint(app, "/media/image", db).register();
 new DeleteMediaEndpoint(app, "/media/delete", db).register();
+new GetFileEndpoint(app, "/media/file", db).register();
 // endregion
 
 // region Statistics
