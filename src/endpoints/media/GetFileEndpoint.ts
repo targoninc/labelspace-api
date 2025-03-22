@@ -38,7 +38,7 @@ export class GetFileEndpoint extends AuthenticatedGetEndpoint {
 
             const artistNames = album.artists.split(",").map(a => a.trim());
             const userArtists = await this.db.getUserArtists(req.user.id);
-            if (!userArtists.every(a => artistNames.includes(a.name))) {
+            if (!userArtists.some(a => artistNames.includes(a.name))) {
                 if (!await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db)) {
                     return res.status(403).send("You do not have permission to view this file.");
                 }
