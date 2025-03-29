@@ -31,14 +31,6 @@ export class CachedDB extends MariaDB {
         }
 
         this.queryTimeout = parseInt(env("QUERY_CACHE_TTL", "3600"));
-
-        // Keep the database connection alive
-        setInterval(() => {
-            CLI.debug("Pinging database", {
-                logToDb: false
-            });
-            this.query("SELECT 1").then();
-        }, 1000 * 60 * 5);
     }
 
     private generateCacheKey(tableNames: string[], sql: string, params: any[]): string {

@@ -4,6 +4,7 @@ import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import type {CreateAlbumRequestBody} from "../../../models/interfaces/UpdateAlbumRequestBody.ts";
+import {CLI} from "../../../utility/CLI.ts";
 
 export class UpdateAlbumFullEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;
@@ -33,6 +34,7 @@ export class UpdateAlbumFullEndpoint extends AuthenticatedPostEndpoint {
             return res.status(404).send("Album not found.");
         }
 
+        CLI.debug("Updating album...");
         await this.db.updateAlbum({
             ...album,
             ...request,
