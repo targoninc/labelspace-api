@@ -102,7 +102,7 @@ app.use(passport.initialize());
 app.use(passport.session(<SessionOptions>{}));
 app.use((req, res, next) => {
     if (req.method === "POST") {
-        req.body = JSON.parse(req.body ?? "{}");
+        req.body = JSON.parse(req.body);
     }
     next();
 });
