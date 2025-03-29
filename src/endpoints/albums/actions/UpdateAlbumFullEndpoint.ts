@@ -7,7 +7,7 @@ import type {CreateAlbumRequestBody} from "../../../models/interfaces/UpdateAlbu
 import {CLI} from "../../../utility/CLI.ts";
 
 export class UpdateAlbumFullEndpoint extends AuthenticatedPostEndpoint {
-    private readonly db: TriDB;
+    db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
