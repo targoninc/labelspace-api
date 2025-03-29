@@ -1,5 +1,5 @@
 import {config} from 'dotenv';
-import express, {json} from 'express';
+import express from 'express';
 import cors from 'cors';
 import {GetUserEndpoint} from "./endpoints/user/GetUserEndpoint.js";
 import {LoginEndpoint} from "./endpoints/auth/LoginEndpoint.js";
@@ -100,9 +100,12 @@ setupPassport(app, db);
 
 app.use(passport.initialize());
 app.use(passport.session(<SessionOptions>{}));
-app.use(json({
-    limit: "100mb",
-}));
+app.use((req, res, next) => {
+    if (req.method === "POST") {
+        req.body = JSON.parse(req.body ?? "{}");
+    }
+    next();
+});
 
 const rateLimitWindowInMin = 1;
 app.use(rateLimit({
