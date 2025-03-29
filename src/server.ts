@@ -92,6 +92,10 @@ configureDBLogging(db);
 
 const app = express();
 const corsOrigins = process.env.CORS_ORIGINS?.split(",") ?? [];
+app.use((req, res, next) => {
+    console.log(req.method, req.url);
+    next();
+});
 app.use(cors({
     origin: corsOrigins,
     credentials: true
