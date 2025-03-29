@@ -92,21 +92,33 @@ configureDBLogging(db);
 
 const app = express();
 const corsOrigins = process.env.CORS_ORIGINS?.split(",") ?? [];
-app.use((req, res, next) => {
-    console.log(req.method, req.url);
-    next();
-});
 app.use(cors({
     origin: corsOrigins,
     credentials: true
 }));
+app.use((req, res, next) => {
+    console.log("cors done", req.method, req.url);
+    next();
+});
 setupPassport(app, db);
 
 app.use(passport.initialize());
+app.use((req, res, next) => {
+    console.log("passport init done", req.method, req.url);
+    next();
+});
 app.use(passport.session(<SessionOptions>{}));
+app.use((req, res, next) => {
+    console.log("passport done", req.method, req.url);
+    next();
+});
 app.use(express.json({
     limit: "100mb"
 }));
+app.use((req, res, next) => {
+    console.log("json done", req.method, req.url);
+    next();
+});
 
 const rateLimitWindowInMin = 1;
 app.use(rateLimit({
