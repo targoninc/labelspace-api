@@ -8,8 +8,7 @@ export class MariaDB {
     private readonly user: string;
     private readonly password: string;
     private readonly database: string;
-    connectionPool: dbInterface.Pool | null = null;
-    private connection: dbInterface.Connection | null = null;
+    private connectionPool: dbInterface.Pool | null = null;
 
     constructor(host: string, port: number|null = null, user: string|null = null, password: string|null = null, database = "tri") {
         CLI.debug(`Initializing MariaDB connection to ${host}:${port}/${database}`);
@@ -24,7 +23,6 @@ export class MariaDB {
             throw new Error("No MariaDB password specified.");
         }
         this.database = database;
-        this.connection = null;
         this.connectionPool = null;
     }
 
@@ -38,7 +36,6 @@ export class MariaDB {
                 database: this.database,
                 connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
             });
-            this.connection = await this.connectionPool.getConnection();
         } catch (e: any) {
             if (tryReconnection) {
                 await this.tryToReConnect();
@@ -48,10 +45,7 @@ export class MariaDB {
             }
         }
 
-        if (!this.connection) {
-            return false;
-        }
-        await this.connection.query("SET NAMES utf8mb4");
+        await this.query("SET NAMES utf8mb4");
         CLI.success(`DB connected.`);
         return true;
     }
@@ -77,8 +71,16 @@ export class MariaDB {
         }
     }
 
-    async close() {
-        await this.connection?.end();
+    async getConnection(): Promise<dbInterface.PoolConnection> {
+        if (!this.connectionPool) {
+            CLI.warning(`Connecting to database @${this.host}...`);
+            await this.connect();
+        }
+        const conn = await this.connectionPool?.getConnection();
+        if (!conn) {
+            throw new Error("Connection to database lost.");
+        }
+        return conn;
     }
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
@@ -86,13 +88,7 @@ export class MariaDB {
             CLI.warning(`Connecting to database @${this.host}...`);
             await this.connect();
         }
-        let conn = this.connection;
-        const connStart = performance.now();
-        if (!conn || !conn.isValid()) {
-            conn = await this.connectionPool!.getConnection();
-            const connTime = performance.now() - connStart;
-            CLI.debug(`Connection acquisition took ${connTime.toFixed(2)}ms`);
-        }
+        let conn = await this.getConnection();
         try {
             const start = performance.now();
             const out = await conn.query({
@@ -111,14 +107,7 @@ export class MariaDB {
             }
             return out as T[];
         } catch (e: any) {
-            if (e.toString().includes("ER_CMD_CONNECTION_CLOSED")) {
-                CLI.warning("Reconnecting to database...");
-                conn = await this.connectionPool!.getConnection();
-                return await conn.query({
-                    sql,
-                    bigIntAsNumber: true
-                }, params) as T[];
-            } else if (e.toString().includes("Can't create database")) {
+            if (e.toString().includes("Can't create database")) {
                 return [];
             } else {
                 CLI.error(e);
