@@ -71,27 +71,14 @@ export class MariaDB {
         }
     }
 
-    async getConnection(): Promise<dbInterface.PoolConnection> {
-        if (!this.connectionPool) {
-            CLI.warning(`Connecting to database @${this.host}...`);
-            await this.connect();
-        }
-        const conn = await this.connectionPool?.getConnection();
-        if (!conn) {
-            throw new Error("Connection to database lost.");
-        }
-        return conn;
-    }
-
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
         if (!this.connectionPool) {
             CLI.warning(`Connecting to database @${this.host}...`);
             await this.connect();
         }
-        let conn = await this.getConnection();
         try {
             const start = performance.now();
-            const out = await conn.query({
+            const out = await this.connectionPool?.query({
                 sql,
                 bigIntAsNumber: true
             }, params);
