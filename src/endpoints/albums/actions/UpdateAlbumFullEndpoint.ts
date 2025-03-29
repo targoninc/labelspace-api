@@ -20,18 +20,15 @@ export class UpdateAlbumFullEndpoint extends AuthenticatedPostEndpoint {
             return res.status(401).send({error: "Not authenticated"});
         }
 
-        CLI.debug("Getting permissions...");
         if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
             return res.status(403).send("You are not allowed to update albums.");
         }
-        CLI.debug("Got permission!");
 
         const request = req.body as CreateAlbumRequestBody;
         if (!request.id) {
             return res.status(400).send("No album id provided.");
         }
 
-        CLI.debug("Getting album for update...");
         const album = await this.db.getAlbumById(request.id);
         if (!album) {
             return res.status(404).send("Album not found.");
