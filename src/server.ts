@@ -96,27 +96,14 @@ app.use(cors({
     origin: corsOrigins,
     credentials: true
 }));
-app.use((req, res, next) => {
-    console.log("cors done", req.method, req.url);
-    next();
-});
 setupPassport(app, db);
 
 app.use(passport.initialize());
-app.use((req, res, next) => {
-    console.log("passport init done", req.method, req.url);
-    next();
-});
 app.use(passport.session(<SessionOptions>{}));
 app.use((req, res, next) => {
-    console.log("passport done", req.method, req.url);
-    next();
-});
-app.use(express.json({
-    limit: "100mb"
-}));
-app.use((req, res, next) => {
-    console.log("json done", req.method, req.url);
+    if (req.method === "POST") {
+        req.body = JSON.parse(req.body);
+    }
     next();
 });
 
