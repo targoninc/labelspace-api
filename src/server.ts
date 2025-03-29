@@ -100,14 +100,9 @@ setupPassport(app, db);
 
 app.use(passport.initialize());
 app.use(passport.session(<SessionOptions>{}));
-app.use(function (req, res, next) {
-    let str = '';
-    req.on('data', (c) => str += c.toString())
-    res.on('end', () => {
-        req.body = JSON.parse(str)
-        next()
-    })
-})
+app.use(json({
+    limit: "100mb",
+}));
 
 const rateLimitWindowInMin = 1;
 app.use(rateLimit({
