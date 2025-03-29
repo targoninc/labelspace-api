@@ -8,7 +8,7 @@ export class MariaDB {
     private readonly user: string;
     private readonly password: string;
     private readonly database: string;
-    private connectionPool: dbInterface.Pool | null = null;
+    private readonly connectionPool: dbInterface.Pool;
 
     constructor(host: string, port: number|null = null, user: string|null = null, password: string|null = null, database = "tri") {
         CLI.debug(`Initializing MariaDB connection to ${host}:${port}/${database}`);
@@ -23,62 +23,20 @@ export class MariaDB {
             throw new Error("No MariaDB password specified.");
         }
         this.database = database;
-        this.connectionPool = null;
-    }
-
-    async connect(tryReconnection = true) {
-        try {
-            this.connectionPool = dbInterface.createPool({
-                host: this.host,
-                port: this.port,
-                user: this.user,
-                password: this.password,
-                database: this.database,
-                connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
-            });
-        } catch (e: any) {
-            if (tryReconnection) {
-                await this.tryToReConnect();
-            } else {
-                CLI.debug(e);
-                return false;
-            }
-        }
-
-        await this.query("SET NAMES utf8mb4");
-        CLI.success(`DB connected.`);
-        return true;
-    }
-
-    async tryToReConnect(reconnectTimeout = 10) {
-        let connected = false;
-        let tryCount = 0;
-        reconnectTimeout *= 1000;
-
-        while (!connected) {
-            tryCount++;
-            CLI.debug(`Attempting to reconnect to DB... (try ${tryCount})`);
-
-            connected = await this.connect(false);
-            if (!connected) {
-                CLI.debug(`Failed to connect to DB.`);
-            }
-            await new Promise((res, rej) => {
-                setTimeout(() => {
-                    res();
-                }, reconnectTimeout);
-            });
-        }
+        this.connectionPool = dbInterface.createPool({
+            host: this.host,
+            port: this.port,
+            user: this.user,
+            password: this.password,
+            database: this.database,
+            connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
+        });
     }
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
-        if (!this.connectionPool) {
-            CLI.warning(`Connecting to database @${this.host}...`);
-            await this.connect();
-        }
         try {
             const start = performance.now();
-            const out = await this.connectionPool?.query({
+            const out = await this.connectionPool.query({
                 sql,
                 bigIntAsNumber: true
             }, params);
