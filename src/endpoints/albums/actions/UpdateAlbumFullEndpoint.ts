@@ -27,6 +27,7 @@ export class UpdateAlbumFullEndpoint extends AuthenticatedPostEndpoint {
         CLI.debug("Got permission!");
 
         const request = req.body as CreateAlbumRequestBody;
+        CLI.debug("Got body!");
         if (!request.id) {
             return res.status(400).send("No album id provided.");
         }
