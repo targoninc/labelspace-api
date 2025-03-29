@@ -1,4 +1,4 @@
-import dbInterface from "mariadb";
+import dbInterface, {PoolConnection} from "mariadb";
 import {CLI} from "../CLI.js";
 import {env} from "../Environment.js";
 
@@ -58,7 +58,7 @@ export class MariaDB {
         }
     }
 
-    private async getConnectionFromPool(): Promise<dbInterface.Connection> {
+    private async getConnectionFromPool(): Promise<PoolConnection> {
         if (!this.connectionPool) {
             const initialized = await this.initialize();
             if (!initialized) {
@@ -74,12 +74,12 @@ export class MariaDB {
         }
     }
 
-    private async withConnection<T>(operation: (conn: dbInterface.Connection) => Promise<T>): Promise<T> {
+    private async withConnection<T>(operation: (conn: PoolConnection) => Promise<T>): Promise<T> {
         let retries = 0;
         let lastError: any;
 
         while (retries <= this.maxRetries) {
-            let conn: dbInterface.Connection | null = null;
+            let conn: PoolConnection | null = null;
 
             try {
                 const connStart = performance.now();
@@ -121,7 +121,7 @@ export class MariaDB {
             } finally {
                 if (conn) {
                     try {
-                        await conn.end();
+                        await conn.release();
                     } catch (releaseError) {
                         CLI.debug(`Error releasing connection: ${releaseError}`);
                     }
