@@ -7,7 +7,6 @@ export interface UploadTrackRequestBody {
     release_date: string,
     price: number,
     credits: string,
-    length: number,
     link_spotify: string,
     link_youtube: string,
     link_soundcloud: string,

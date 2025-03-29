@@ -37,7 +37,6 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
         const price = body.price ?? 1;
         const artists = body.artists ?? "";
         const credits = body.credits ?? "";
-        const length = body.length ?? 0;
         const link_spotify = body.link_spotify ?? "";
         const link_youtube = body.link_youtube ?? "";
         const link_soundcloud = body.link_soundcloud ?? "";
@@ -54,7 +53,6 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
             price,
             artists,
             credits,
-            length,
             link_spotify,
             link_youtube,
             link_soundcloud,
