@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.5-debian AS base
+FROM oven/bun:1.2.6-debian AS base
 
 # Set the working directory
 WORKDIR /usr/src/app
