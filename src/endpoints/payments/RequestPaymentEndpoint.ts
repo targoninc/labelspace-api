@@ -26,12 +26,13 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const artistNames = artists.map(a => a.name);
 
         const available = await this.db.getAvailablePaymentAmount(user.id, artistNames);
-        if (available.available <= 0) {
+        const av = parseFloat(available.available);
+        if (av <= 0) {
             return res.status(400).send({error: "Not enough money available"});
         }
 
         const minimum = 0.01;
-        if (available.available < minimum) {
+        if (av < minimum) {
             return res.status(400).send({error: `Money is available, but below minimum (minimum ${minimum})`});
         }
 
@@ -41,9 +42,9 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "No valid paypal mail found"});
         }
 
-        CLI.info(`Requesting payment for ${user.id} for ${available.available}`);
+        CLI.info(`Requesting payment for ${user.id} for ${av}`);
         const batchId = uuidv4();
-        await this.db.createPayment(user.id, available.available, PaymentStatus.requested, batchId);
+        await this.db.createPayment(user.id, av, PaymentStatus.requested, batchId);
 
         const mailContent = MailBuilder.default()
             .subject("Tri Artist payment requested")
