@@ -3,8 +3,7 @@ import {Application, Response} from "express";
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import {Paypal} from "../../utility/Paypal/Paypal.ts";
-import {Mail} from "../../utility/Mail/Mail.ts";
-import {MailBuilder} from "../../utility/Mail/MailBuilder.ts";
+import {Mail, MailBuilder} from "@targoninc/ts-mail";
 import {CLI} from "@targoninc/ts-logging";
 import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHeader.ts";
 import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
@@ -46,12 +45,12 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const batchId = uuidv4();
         await this.db.createPayment(user.id, av, PaymentStatus.requested, batchId);
 
-        const mailContent = MailBuilder.default()
+        const mailContent = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
             .subject("Tri Artist payment requested")
             .heading("Tri Artist payment requested")
             .paragraph(`You have requested a payment for your Tri Artist account (${user.username}) for ${available.available} USD.`)
             .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature()
+            .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
         for (const mail of userMails) {

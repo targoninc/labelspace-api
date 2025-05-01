@@ -1,5 +1,4 @@
-import {link, MailBuilder, paragraph} from "./MailBuilder.js";
-import {Mail} from "./Mail.js";
+import {link, MailBuilder, paragraph, Mail} from "@targoninc/ts-mail";
 import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {User} from "../../models/db/tri/User.js";
 
@@ -9,7 +8,7 @@ export class AccountMailer {
 
         const uiUrl = process.env.CORS_ORIGIN;
         for (const email of toVerify) {
-            const mail = MailBuilder.default()
+            const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
                 .subject("Your email address was just associated with a Tri Artist account")
                 .heading("Your email address was just associated with a Tri Artist account")
                 .paragraph(`Your email address was just associated with a Tri Artist account (${uiUrl}/profile/${user.username}).`)
@@ -18,7 +17,7 @@ export class AccountMailer {
                     link(`${uiUrl}/verify-email?code=${email.verification_code}`)
                 ])
                 .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-                .signature()
+                .signature("the Tri Records Team", "Targon Industries UG")
                 .get();
 
             Mail.sendDefault(email.email, mail);

@@ -3,10 +3,9 @@ import {Application, Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {SubmissionRequest} from "../../models/interfaces/SubmissionRequest.ts";
 import {CLI} from "@targoninc/ts-logging";
-import {Mail} from "../../utility/Mail/Mail.ts";
-import {heading, link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.ts";
+import {heading, link, MailBuilder, paragraph, Mail} from "@targoninc/ts-mail";
 
-const mails = process.env.SUBMISSION_MAILS.split(",");
+const mails = process.env.SUBMISSION_MAILS?.split(",") ?? [];
 
 export class SubmitReleaseEndpoint extends PostEndpoint {
     constructor(app: Application, path: string) {
@@ -26,7 +25,7 @@ export class SubmitReleaseEndpoint extends PostEndpoint {
             }
         });
 
-        const mailContent = MailBuilder.default()
+        const mailContent = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
             .subject("Tri Records submission")
             .heading("Tri Records submission")
             .paragraph(`New release submission from ${request.artistName} for ${request.desiredReleaseDate}`)
@@ -38,7 +37,7 @@ export class SubmitReleaseEndpoint extends PostEndpoint {
                 heading("Link", 2),
                 link(request.link),
             ])
-            .signature()
+            .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
         for (const mail of mails) {

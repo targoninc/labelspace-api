@@ -4,8 +4,7 @@ import {CLI, IP} from "@targoninc/ts-logging";
 import passport from "passport";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {Mail} from "../../utility/Mail/Mail.js";
-import {heading, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
+import {Mail, heading, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {User} from "../../models/db/tri/User.js";
 import {MfaStore} from "../../utility/MFA/MfaStore.ts";
 import {getMfaOptions} from "../../utility/MFA/MfaFramework.ts";
@@ -97,7 +96,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
         const code = Math.random().toString(36).substring(7);
         CLI.info(`MFA code for ${existing.username}: ${code}`);
 
-        const mail = MailBuilder.default()
+        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
             .subject("Your Tri Artist code")
             .heading("Your Tri Artist code")
             .paragraph("You have requested logging into your Tri Artist account.")
@@ -106,7 +105,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
                 heading(code, 2)
             ])
             .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature()
+            .signature("the Tri Records Team", "Targon Industries UG")
             .get();
         const emailOption = availableOptions.find(k => k.type === MfaOption.email);
         Mail.sendDefault(emailOption.email, mail);

@@ -1,9 +1,8 @@
 import {Application, NextFunction, Request, Response} from "express";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {Mail} from "../../utility/Mail/Mail.js";
+import {Mail, link, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {v4 as uuidv4} from "uuid";
 import {PostEndpoint} from "../base/PostEndpoint.js";
-import {link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
 import {CLI} from "@targoninc/ts-logging";
 
 export class RequestPasswordResetEndpoint extends PostEndpoint {
@@ -30,7 +29,7 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
             password_token: token
         });
 
-        const mail = MailBuilder.default()
+        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
             .subject("Tri Artist password reset requested")
             .heading("Tri Artist password reset requested")
             .paragraph(`You have requested a password reset for your Tri Artist account (${user.username}).`)
@@ -39,7 +38,7 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
                 link(`https://artists.trirecords.eu/password-reset?token=${token}`)
             ])
             .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature()
+            .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
         const emails = await this.db.getUserEmails(user.id);
