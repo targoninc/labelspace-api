@@ -1,10 +1,9 @@
 import {Application, Response} from "express";
-import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {TriDB} from "../../utility/DB/TriDB.js";
-import {GetEndpoint} from "../base/GetEndpoint.js";
+import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
+import {TriDB} from "../../utility/DB/TriDB.ts";
 import * as fs from "node:fs";
-import {FileStorage} from "../../utility/Storage/FileStorage.js";
-import {MediaFileType} from "../../models/enums/MediaFileType.js";
+import {FileStorage} from "../../utility/Storage/FileStorage.ts";
+import {MediaFileType} from "../../models/enums/MediaFileType.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {AuthenticatedGetEndpoint} from "../base/AuthenticatedGetEndpoint.ts";

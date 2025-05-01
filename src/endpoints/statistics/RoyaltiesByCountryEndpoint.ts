@@ -3,7 +3,6 @@ import {Application} from "express";
 import {Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import { Statistic } from "../../models/interfaces/Statistic.js";
 
 export class RoyaltiesByCountryEndpoint extends AuthenticatedGetEndpoint {
     db: TriDB;

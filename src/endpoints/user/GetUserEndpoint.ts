@@ -1,11 +1,7 @@
 import {Application} from "express";
 import {Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {ProtectionSchemas} from "../../models/enums/ProtectionSchema.js";
-import {ColumnProtector} from "../../models/ColumnProtector.js";
-import {getUser, getUserByUsername} from "../../models/enums/ExtendedUser.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {User} from "../../models/db/tri/User.js";
 import {UserEnricher} from "../../models/enrichers/UserEnricher.js";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 
