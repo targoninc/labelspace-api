@@ -1,7 +1,7 @@
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {Application, Request, Response} from "express";
 import {PaypalWebhookEvent} from "../../utility/Paypal/models/PaypalWebhookEvent.js";
-import {CLI} from "../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {verifyPaypalWebhookEvent} from "../../utility/Paypal/PaypalHelpers.js";
 import {PaypalWebhookHandler} from "../../utility/Paypal/PaypalWebhookHandler.js";
 import type {TriDB} from "../../utility/DB/TriDB.ts";

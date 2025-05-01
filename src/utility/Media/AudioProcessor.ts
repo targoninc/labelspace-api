@@ -1,6 +1,6 @@
 import {exec} from "child_process";
 import * as fs from "node:fs";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 export class AudioProcessor {
     /**

@@ -4,7 +4,7 @@ import {Application, Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {UserEnricher} from "../../models/enrichers/UserEnricher.ts";
 
 export class GetUsersEndpoint extends AuthenticatedGetEndpoint {

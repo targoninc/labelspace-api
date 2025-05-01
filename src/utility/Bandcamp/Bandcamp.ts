@@ -1,7 +1,7 @@
 import type {BandcampAuthorizationResponse,} from "./BandcampAuthorizationResponse.ts";
 import {BandcampCredentialType} from "./BandcampCredentialType.ts";
 import type {SalesReport} from "./SalesReport.ts";
-import {CLI} from "../CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 let auth: BandcampAuthorizationResponse|null = null;
 let lastAuth = 0;

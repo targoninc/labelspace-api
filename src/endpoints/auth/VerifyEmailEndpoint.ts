@@ -1,7 +1,7 @@
 import {Application, NextFunction, Response} from "express";
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
-import {CLI} from "../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 export class VerifyEmailEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;

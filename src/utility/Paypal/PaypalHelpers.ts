@@ -1,4 +1,4 @@
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {Request} from "express";
 import {Paypal} from "./Paypal.js";
 import {PaypalWebhookEvent} from "./models/PaypalWebhookEvent.js";

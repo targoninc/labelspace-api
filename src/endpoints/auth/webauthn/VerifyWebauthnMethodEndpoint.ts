@@ -2,7 +2,7 @@ import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Request, Response} from "express";
 import {WebAuthN} from "../../../utility/MFA/WebAuthN.ts";
 import {ChallengeStore} from "../../../utility/MFA/ChallengeStore.ts";
-import {CLI} from "../../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {WebauthnVerificationRequest} from "../../../utility/MFA/Models/WebauthnVerificationRequest.ts";
 import {PostEndpoint} from "../../base/PostEndpoint.ts";
 

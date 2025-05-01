@@ -3,7 +3,7 @@ import {Response} from "express";
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../utility/DB/TriDB.ts";
 import {Authenticator} from "../../models/Authenticator.ts";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {Artist} from "../../models/db/tri/Artist.ts";
 
 export class UpdateArtistEndpoint extends AuthenticatedPostEndpoint {

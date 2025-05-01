@@ -1,5 +1,5 @@
 import dbInterface from "mariadb";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {env} from "../Environment.js";
 
 export class MariaDB {

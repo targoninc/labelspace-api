@@ -2,7 +2,7 @@ import {PostEndpoint} from "../base/PostEndpoint.ts";
 import {Application, Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {SubmissionRequest} from "../../models/interfaces/SubmissionRequest.ts";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {Mail} from "../../utility/Mail/Mail.ts";
 import {heading, link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.ts";
 

@@ -1,6 +1,6 @@
 import * as Minio from 'minio'
 import {BucketItem} from "minio";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 export class MinioClient {
     private client: Minio.Client;

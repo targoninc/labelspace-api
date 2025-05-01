@@ -1,7 +1,6 @@
 import passport from "passport";
 import {Application, NextFunction, Request, Response} from "express";
-import {CLI} from "../../utility/CLI.js";
-import {IP} from "../../utility/IP.js";
+import {CLI, IP} from "@targoninc/ts-logging";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../../models/db/tri/User.js";

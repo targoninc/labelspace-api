@@ -3,7 +3,7 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import {Mail} from "../../utility/Mail/Mail.js";
 import {Password} from "../../utility/Password.js";
 import {PostEndpoint} from "../base/PostEndpoint.js";
-import {CLI} from "../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import bcrypt from "bcryptjs";
 import {MailBuilder} from "../../utility/Mail/MailBuilder.js";
 

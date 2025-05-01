@@ -8,7 +8,7 @@ import passport from "passport";
 import {PassportDeserializeUser, PassportSerializeUser, PassportStrategy} from "../PassportStrategy.js";
 import {Permissions} from "../../models/enums/Permissions.js";
 import {Application} from "express";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {importAll} from "../../importers/importAll.ts";
 import {uuidv4} from "uuidv7";
 

@@ -3,7 +3,7 @@ import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {CreateAlbumRequestBody} from "../../../models/interfaces/CreateAlbumRequestBody.js";
-import {CLI} from "../../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {Album} from "../../../models/db/tri/Album.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 

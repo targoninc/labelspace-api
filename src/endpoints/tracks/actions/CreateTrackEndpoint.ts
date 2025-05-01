@@ -2,7 +2,7 @@ import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/Authen
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {TriDB} from "../../../utility/DB/TriDB.js";
-import {CLI} from "../../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {UploadTrackRequestBody} from "../../../models/interfaces/UploadTrackRequestBody.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 

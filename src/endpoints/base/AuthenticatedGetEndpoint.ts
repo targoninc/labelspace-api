@@ -1,6 +1,6 @@
 import {GetEndpoint} from "./GetEndpoint.js";
 import {Application, NextFunction, Request, Response} from "express";
-import {CLI} from "../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 export class AuthenticatedGetEndpoint extends GetEndpoint {
     constructor(app: Application, path: string) {

@@ -1,6 +1,6 @@
 import {MariaDB} from "../MariaDB.ts";
 import {env} from "../../Environment.ts";
-import {CLI} from "../../CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {ICache} from "./ICache.ts";
 import {CacheConfig} from "./CacheConfig.ts";
 import {RedisCache} from "./RedisCache.ts";

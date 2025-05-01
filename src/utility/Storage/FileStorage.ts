@@ -2,7 +2,7 @@ import {exists, mkdir, readdir, rm} from "node:fs/promises";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
 import type {IStorage} from "./IStorage.js";
 import * as Bun from "bun";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 const STORAGE_DRIVES = 1;
 const DEFAULT_BASE_PATH = "mock/storage";

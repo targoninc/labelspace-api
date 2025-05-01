@@ -1,5 +1,5 @@
 import ngrok from '@ngrok/ngrok';
-import {CLI} from "./CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {Paypal} from "./Paypal/Paypal.ts";
 
 export async function setupNgrok(port: number) {

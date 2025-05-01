@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import {Options} from "nodemailer/lib/mailer";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {MailBuild} from "./MailBuild.js";
 
 export type Email = Options;

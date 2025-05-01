@@ -1,7 +1,7 @@
 import {ICache} from "./ICache.ts";
 import {CacheConfig} from "./CacheConfig.ts";
 import Redis from "ioredis";
-import {CLI} from "../../CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import {RedisOptions} from "ioredis/built/redis/RedisOptions";
 import {env} from "../../Environment.ts";
 

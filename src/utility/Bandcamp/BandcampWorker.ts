@@ -5,7 +5,7 @@ import {BandcampReportStatus} from "./BandcampReportStatus.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {BandcampSale} from "./BandcampSale.ts";
 import type {Track} from "../../models/db/tri/Track.ts";
-import {CLI} from "../CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class BandcampWorker {
     private readonly db: TriDB;

@@ -1,6 +1,6 @@
 import {PaypalWebhookEvent} from "./models/PaypalWebhookEvent.js";
 import {TriDB} from "../DB/TriDB.js";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import type {PaypalPayoutBatchEvent} from "./models/PaypalPayoutBatchEvent.ts";
 import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 

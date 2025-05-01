@@ -5,7 +5,7 @@ import {PaymentStatus} from "../../models/enums/PaymentStatus.ts";
 import {Paypal} from "../../utility/Paypal/Paypal.ts";
 import {Mail} from "../../utility/Mail/Mail.ts";
 import {MailBuilder} from "../../utility/Mail/MailBuilder.ts";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHeader.ts";
 import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";

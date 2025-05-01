@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { CLI } from '../CLI.js';
+import {CLI} from "@targoninc/ts-logging";
 import * as fs from "node:fs";
 
 sharp.cache(false);
@@ -46,8 +46,12 @@ export class ImageProcessor {
         }
     }
 
-    static async cropToCenter(sourceFile: string, aspectRatio: number, currentDimensions: { width: number, height: number, aspectRatio: number }) {
-        const { width, height } = currentDimensions;
+    static async cropToCenter(sourceFile: string, aspectRatio: number, currentDimensions: {
+        width: number,
+        height: number,
+        aspectRatio: number
+    }) {
+        const {width, height} = currentDimensions;
 
         let newWidth: number, newHeight: number;
         if (width / height > aspectRatio) {
@@ -66,7 +70,7 @@ export class ImageProcessor {
             CLI.debug(`Cropping image to center with dimensions ${newWidth}x${newHeight} @ ${x}:${y}`);
             await sharp(sourceFile)
                 .rotate()
-                .extract({ left: x, top: y, width: newWidth, height: newHeight })
+                .extract({left: x, top: y, width: newWidth, height: newHeight})
                 .toFile(tmpFileName);
             fs.renameSync(tmpFileName, sourceFile);
             CLI.debug(`Image cropped to center with dimensions ${newWidth}x${newHeight} and saved over ${sourceFile}`);

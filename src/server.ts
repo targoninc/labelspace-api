@@ -27,7 +27,7 @@ import {GetAlbumEndpoint} from "./endpoints/albums/GetAlbumEndpoint.js";
 import {RemoveTrackFromAlbumEndpoint} from "./endpoints/albums/actions/RemoveTrackFromAlbumEndpoint.js";
 import {DeleteMediaEndpoint} from "./endpoints/media/DeleteMediaEndpoint.js";
 import {UpdateTrackFullEndpoint} from "./endpoints/tracks/actions/UpdateTrackFullEndpoint.js";
-import {CLI, configureDBLogging} from "./utility/CLI.js";
+import {CLI, configureDBLogging} from "@targoninc/ts-logging";
 import {GetLogsEndpoint} from "./endpoints/logs/GetLogsEndpoint.js";
 import {SearchTracksEndpoint} from "./endpoints/search/SearchTracksEndpoint.js";
 import {SearchAlbumsEndpoint} from "./endpoints/search/SearchAlbumsEndpoint.js";

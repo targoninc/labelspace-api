@@ -4,7 +4,7 @@ import {Application, Response} from "express";
 import {Authenticator} from "../../models/Authenticator.ts";
 import {Permissions} from "../../models/enums/Permissions.ts";
 import {readCsvAsync} from "../../utility/CsvReader.ts";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 import type {SymphonicRoyalty} from "./SymphonicRoyalty.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
 

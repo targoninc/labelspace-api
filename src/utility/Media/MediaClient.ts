@@ -2,7 +2,7 @@ import {TriDB} from "../DB/TriDB.js";
 import {FileStorage} from "../Storage/FileStorage.js";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
 import {User} from "../../models/db/tri/User.js";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {AudioProcessor} from "./AudioProcessor.js";
 import {ImageProcessor} from "./ImageProcessor.js";
 import * as fs from "node:fs";

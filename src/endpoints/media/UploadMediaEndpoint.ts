@@ -6,7 +6,7 @@ import { TriDB } from "../../utility/DB/TriDB.js";
 import multer from "multer";
 import {MediaClient} from "../../utility/Media/MediaClient.js";
 import {MediaFileType} from "../../models/enums/MediaFileType.js";
-import {CLI} from "../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

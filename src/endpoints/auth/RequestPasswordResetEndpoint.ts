@@ -4,7 +4,7 @@ import {Mail} from "../../utility/Mail/Mail.js";
 import {v4 as uuidv4} from "uuid";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {link, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
-import {CLI} from "../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class RequestPasswordResetEndpoint extends PostEndpoint {
     db: TriDB;

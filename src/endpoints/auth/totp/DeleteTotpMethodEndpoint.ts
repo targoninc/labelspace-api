@@ -2,7 +2,7 @@ import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/Authen
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, NextFunction, Response} from "express";
 import {TOTP} from "../../../utility/MFA/TOTP.ts";
-import {CLI} from "../../../utility/CLI.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class DeleteTotpMethodEndpoint extends AuthenticatedPostEndpoint {
     db: TriDB;

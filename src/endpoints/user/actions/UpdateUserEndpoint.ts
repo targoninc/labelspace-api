@@ -3,7 +3,7 @@ import {Response} from "express";
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.js";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {TriDB} from "../../../utility/DB/TriDB.js";
-import {CLI} from "../../../utility/CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 import {User} from "../../../models/db/tri/User.js";
 import {uuidv4} from "uuidv7";
 import {AccountMailer} from "../../../utility/Mail/AccountMailer.js";

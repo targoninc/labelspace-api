@@ -1,7 +1,6 @@
 import {Application, NextFunction, Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.js";
-import {CLI} from "../../utility/CLI.js";
-import {IP} from "../../utility/IP.js";
+import {CLI, IP} from "@targoninc/ts-logging";
 import passport from "passport";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
@@ -9,12 +8,11 @@ import {Mail} from "../../utility/Mail/Mail.js";
 import {heading, MailBuilder, paragraph} from "../../utility/Mail/MailBuilder.js";
 import {User} from "../../models/db/tri/User.js";
 import {MfaStore} from "../../utility/MFA/MfaStore.ts";
-import {CredentialDescriptor} from "@passwordless-id/webauthn/dist/esm/types";
-import {getMfaOptions, getUserMfa} from "../../utility/MFA/MfaFramework.ts";
+import {getMfaOptions} from "../../utility/MFA/MfaFramework.ts";
 import {MfaOption} from "../../utility/MFA/Enums/MfaOption.ts";
 
 export class MfaRequestEndpoint extends PostEndpoint {
-    private db: TriDB;
+    private readonly db: TriDB;
     private readonly mfaStore: MfaStore;
 
     constructor(app: Application, path: string, db: TriDB, mfaStore: MfaStore) {
@@ -67,7 +65,7 @@ export class MfaRequestEndpoint extends PostEndpoint {
                             mfa_needed: true,
                             type: MfaOption.webauthn,
                             userId: user.id,
-                            credentialDescriptors: availableOptions.find(k => k.type === MfaOption.webauthn).credentialDescriptors
+                            credentialDescriptors: availableOptions.find(k => k.type === MfaOption.webauthn)?.credentialDescriptors
                         });
                     case MfaOption.totp:
                         this.mfaStore.createMfaProcess(user.id, MfaOption.totp);

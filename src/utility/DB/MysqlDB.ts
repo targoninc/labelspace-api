@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import {Connection} from "mysql2";
-import {CLI} from "../CLI.js";
+import {CLI} from "@targoninc/ts-logging";
 
 export class MysqlDB {
     private readonly host: string;
