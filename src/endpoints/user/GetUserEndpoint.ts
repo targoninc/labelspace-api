@@ -6,7 +6,7 @@ import {UserEnricher} from "../../models/enrichers/UserEnricher.js";
 import {GetEndpoint} from "../base/GetEndpoint.js";
 
 export class GetUserEndpoint extends GetEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -20,6 +20,9 @@ export class GetUserEndpoint extends GetEndpoint {
         }
 
         let user = await this.db.getUserById(selfUser.id);
+        if (!user) {
+            return res.status(404).send({error: "User not found"});
+        }
 
         user = await UserEnricher.enrichAsync(this.db, user, {
             settings: true,
