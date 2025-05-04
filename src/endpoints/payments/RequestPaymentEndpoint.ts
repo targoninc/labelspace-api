@@ -9,6 +9,7 @@ import type {PaypalBatchHeader} from "../../utility/Paypal/models/PaypalBatchHea
 import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutItem.ts";
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
 import {uuidv4} from "uuidv7";
+import {env} from "../../utility/Environment.ts";
 
 export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -53,6 +54,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
+        Mail.sendDefault(env("SUBMISSION_MAILS"), mailContent);
         for (const mail of userMails) {
             if (mail.verified || mail.primary) {
                 Mail.sendDefault(mail.email, mailContent);
