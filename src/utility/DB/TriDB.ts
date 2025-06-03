@@ -52,15 +52,15 @@ export class TriDB extends CachedDB {
         }, 1000 * 60 * 5);
     }
 
-    async getUserById(userId: number, followingId: number = -1): Promise<User|null> {
+    async getUserById(userId: number, followingId: number = -1): Promise<User | null> {
         return await this.queryFirst("SELECT * FROM tri.users WHERE id = ?", [userId]);
     }
 
-    async getUserByEmail(email: string): Promise<User|null> {
+    async getUserByEmail(email: string): Promise<User | null> {
         return await this.queryFirst("SELECT u.* FROM tri.users u INNER JOIN tri.user_emails ue ON u.id = ue.user_id WHERE ue.email = ?", [email]);
     }
 
-    async getUserByUsername(username: string): Promise<User|null> {
+    async getUserByUsername(username: string): Promise<User | null> {
         return await this.queryFirst("SELECT * FROM tri.users WHERE username = ?", [username]);
     }
 
@@ -87,7 +87,7 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.user_settings WHERE user_id = ?", [userId]);
     }
 
-    async getTrackById(id: number): Promise<Track|null> {
+    async getTrackById(id: number): Promise<Track | null> {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE id = ?", [id]);
     }
 
@@ -105,8 +105,10 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.tracks WHERE id IN (?)", [numbers]);
     }
 
-    async createTrack(track: Partial<Track>): Promise<Track|null> {
-        await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, release_date, link_spotify, link_youtube, link_soundcloud, link_applemusic, link_bandcamp, link_lyda)
+    async createTrack(track: Partial<Track>): Promise<Track | null> {
+        await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, release_date, link_spotify,
+                                                  link_youtube, link_soundcloud, link_applemusic, link_bandcamp,
+                                                  link_lyda)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             track.title,
             track.artists,
@@ -128,7 +130,7 @@ export class TriDB extends CachedDB {
         return await this.getTrackById(id);
     }
 
-    async createAlbum(album: Album): Promise<Album|null> {
+    async createAlbum(album: Album): Promise<Album | null> {
         await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists) VALUES (?, ?, ?, ?, ?)", [
             album.title,
             album.upc,
@@ -356,15 +358,28 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE tri.tracks SET length = ? WHERE id = ?", [length, id]);
     }
 
-    async getAlbumById(id: number): Promise<Album|null> {
+    async getAlbumById(id: number): Promise<Album | null> {
         return await this.queryFirst("SELECT * FROM tri.albums WHERE id = ?", [id]);
     }
 
     async updateTrack(request: Track) {
         await this.query(`
-            UPDATE tri.tracks SET title = ?, isrc = ?, artists = ?, genre = ?, release_date = ?, price = ?, length = ?, credits = ?,
-                                  link_spotify = ?, link_youtube = ?, link_soundcloud = ?, link_applemusic = ?, link_bandcamp = ?, link_lyda = ?
-                              WHERE id = ?
+            UPDATE tri.tracks
+            SET title           = ?,
+                isrc            = ?,
+                artists         = ?,
+                genre           = ?,
+                release_date    = ?,
+                price           = ?,
+                length          = ?,
+                credits         = ?,
+                link_spotify    = ?,
+                link_youtube    = ?,
+                link_soundcloud = ?,
+                link_applemusic = ?,
+                link_bandcamp   = ?,
+                link_lyda       = ?
+            WHERE id = ?
         `, [
             request.title,
             request.isrc,
@@ -517,7 +532,10 @@ export class TriDB extends CachedDB {
     }
 
     async getUserPaidAmount(id: number) {
-        return (await this.querySingleValue<number>(`SELECT SUM(amount) FROM finance.payments WHERE user_id = ? AND status != '${PaymentStatus.failed}'`, [id])) ?? 0;
+        return (await this.querySingleValue<number>(`SELECT SUM(amount)
+                                                     FROM finance.payments
+                                                     WHERE user_id = ?
+                                                       AND status != '${PaymentStatus.failed}'`, [id])) ?? 0;
     }
 
     async getAvailablePaymentAmount(id: number, artistNames: string[]) {
@@ -572,7 +590,7 @@ export class TriDB extends CachedDB {
     async insertRoyalty(row: Royalty) {
         await this.query(`INSERT INTO finance.royalties
                           (period1, label, releasename, releaseartists, upc, catalogue, title, mixver, isrc,
-                           trackartists, provider, period2, territory, delivery, type, salevoid, count, 
+                           trackartists, provider, period2, territory, delivery, type, salevoid, count,
                            royalty, dataprovider, id)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             row.period1,
@@ -600,12 +618,15 @@ export class TriDB extends CachedDB {
 
     async insertPaypalWebhookEvent(dbEntry: PaypalWebhook) {
         await this.query(`INSERT INTO finance.paypal_webhooks (id, type, content, paypal_user_id)
-                          VALUES (?, ?, ?, ?) ON DUPLICATE KEY
-                UPDATE type = ?, content = ?, paypal_user_id = ?`,
+                          VALUES (?, ?, ?, ?)
+                          ON DUPLICATE KEY
+                              UPDATE type = ?,
+                                     content = ?,
+                                     paypal_user_id = ?`,
             [dbEntry.id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id, dbEntry.type, dbEntry.content, dbEntry.paypal_user_id]);
     }
 
-    async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment|null> {
+    async getPaypalBatchPayment(ownBatchId: string): Promise<PaypalBatchPayment | null> {
         return await this.queryFirst("SELECT * FROM finance.paypal_batch_payments WHERE paypal_batch_id = ?", [ownBatchId]);
     }
 
@@ -614,7 +635,7 @@ export class TriDB extends CachedDB {
             [batch_status, ownBatchId]);
     }
 
-    async getPaymentByBatchId(ownBatchId: string): Promise<PaymentRequest|null> {
+    async getPaymentByBatchId(ownBatchId: string): Promise<PaymentRequest | null> {
         return await this.queryFirst("SELECT * FROM finance.payments WHERE payout_batch_id = ?", [ownBatchId]);
     }
 
@@ -655,11 +676,11 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE finance.bandcamp_sync SET status = ? WHERE id = ?", [received, id]);
     }
 
-    async getAlbumByUpc(upc: string): Promise<Album|null> {
+    async getAlbumByUpc(upc: string): Promise<Album | null> {
         return await this.queryFirst("SELECT * FROM tri.albums WHERE upc = ?", [upc]);
     }
 
-    async getTrackByIsrc(isrc: string): Promise<Track|null> {
+    async getTrackByIsrc(isrc: string): Promise<Track | null> {
         return await this.queryFirst("SELECT * FROM tri.tracks WHERE isrc = ?", [isrc]);
     }
 
@@ -671,16 +692,20 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE tri.artists SET has_logo = ? WHERE id = ?", [hasImage, referenceId]);
     }
 
-    async getArtistById(referenceId: number): Promise<Artist|null> {
+    async getArtistById(referenceId: number): Promise<Artist | null> {
         return await this.queryFirst("SELECT * FROM tri.artists WHERE id = ?", [referenceId]);
     }
 
-    async getArtistByName(name: string): Promise<Artist|null> {
+    async getArtistByName(name: string): Promise<Artist | null> {
         return await this.queryFirst("SELECT * FROM tri.artists WHERE name = ?", [name]);
     }
 
     async getArtists(): Promise<Artist[]> {
         return await this.query("SELECT id, name, has_logo FROM tri.artists");
+    }
+
+    async getArtistsFull(): Promise<Artist[]> {
+        return await this.query("SELECT * FROM tri.artists");
     }
 
     async getTracksByArtists(artistNames: string[]) {
@@ -690,7 +715,10 @@ export class TriDB extends CachedDB {
         const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT * FROM tri.tracks WHERE ${likeQuery} ORDER BY release_date DESC`, [...artistNamesLike]);
+        return await this.query(`SELECT *
+                                 FROM tri.tracks
+                                 WHERE ${likeQuery}
+                                 ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 
     async getAlbumsByArtists(artistNames: string[]) {
@@ -700,7 +728,10 @@ export class TriDB extends CachedDB {
         const likeQuery = artistNames.map(() => "artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT * FROM tri.albums WHERE ${likeQuery} ORDER BY release_date DESC`, [...artistNamesLike]);
+        return await this.query(`SELECT *
+                                 FROM tri.albums
+                                 WHERE ${likeQuery}
+                                 ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 
     async updateArtist(artistName: string, updatedArtist: Partial<Artist>) {
@@ -716,8 +747,8 @@ export class TriDB extends CachedDB {
         const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
-        return await this.query(`SELECT r.provider as id,
-                                        r.provider as label,
+        return await this.query(`SELECT r.provider     as id,
+                                        r.provider     as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
                                  WHERE ${artistConditions}
@@ -728,8 +759,8 @@ export class TriDB extends CachedDB {
     }
 
     async getRoyaltiesByServiceForUPC(upc: string, limit: number): Promise<Statistic[]> {
-        return await this.query(`SELECT r.provider as id,
-                                        r.provider as label,
+        return await this.query(`SELECT r.provider     as id,
+                                        r.provider     as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
                                  WHERE r.upc = ?
@@ -740,8 +771,8 @@ export class TriDB extends CachedDB {
     }
 
     async getRoyaltiesByServiceForISRC(isrc: string, limit: number): Promise<Statistic[]> {
-        return await this.query(`SELECT r.provider as id,
-                                        r.provider as label,
+        return await this.query(`SELECT r.provider     as id,
+                                        r.provider     as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
                                  WHERE r.isrc = ?
@@ -751,16 +782,22 @@ export class TriDB extends CachedDB {
             [isrc, limit]);
     }
 
-    async getReleaseTotalRoyalty(upc: string): Promise<number|null> {
-        return await this.querySingleValue(`SELECT SUM(r.royalty) FROM finance.royalties r WHERE r.upc = ?`, [upc]);
+    async getReleaseTotalRoyalty(upc: string): Promise<number | null> {
+        return await this.querySingleValue(`SELECT SUM(r.royalty)
+                                            FROM finance.royalties r
+                                            WHERE r.upc = ?`, [upc]);
     }
 
     async getTrackTotalRoyalty(isrc: string) {
-        return await this.querySingleValue(`SELECT SUM(r.royalty) FROM finance.royalties r WHERE r.isrc = ?`, [isrc]);
+        return await this.querySingleValue(`SELECT SUM(r.royalty)
+                                            FROM finance.royalties r
+                                            WHERE r.isrc = ?`, [isrc]);
     }
 
     async getTrackCountByAlbumIds(ids: number[]): Promise<{ id: number, count: number }[]> {
-        return await this.query(`SELECT album_id AS id, COUNT(*) AS count FROM tri.tracks GROUP BY album_id`, ids);
+        return await this.query(`SELECT album_id AS id, COUNT(*) AS count
+                                 FROM tri.tracks
+                                 GROUP BY album_id`, ids);
     }
 
     async addTotpMethod(userId: number, methodName: string, secret: string) {
@@ -775,7 +812,7 @@ export class TriDB extends CachedDB {
         await this.query("DELETE FROM tri.user_totp WHERE user_id = ? AND id = ?", [userId, id]);
     }
 
-    async getTotp(userId: number, id: number): Promise<UserTotp|null> {
+    async getTotp(userId: number, id: number): Promise<UserTotp | null> {
         return await this.queryFirst("SELECT * FROM tri.user_totp WHERE user_id = ? AND id = ?", [userId, id]);
     }
 
@@ -783,7 +820,7 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE tri.user_totp SET verified = 1 WHERE user_id = ? AND id = ?", [userId, id]);
     }
 
-    async getPublicKey(keyId: string): Promise<PublicKey|null> {
+    async getPublicKey(keyId: string): Promise<PublicKey | null> {
         return await this.queryFirst("SELECT * FROM tri.public_keys WHERE key_id = ?", [keyId]);
     }
 
@@ -816,5 +853,17 @@ export class TriDB extends CachedDB {
 
     async updateTotpMethodName(id: number, name: string) {
         await this.query("UPDATE tri.user_totp SET name = ? WHERE id = ?", [name, id]);
+    }
+
+    async getRoyaltiesByArtistAndTimeframe(name: string, months: string): Promise<number> {
+        return await this.querySingleValue(`SELECT SUM(r.royalty * IFNULL(s.split, 1))
+                                            FROM finance.royalties r
+                                                     LEFT JOIN finance.splits s ON r.isrc = s.isrc
+                                            WHERE r.releaseartists LIKE ?
+                                              AND r.period2 IN (${months})`, [`%${name}%`]) ?? 0;
+    }
+
+    async getUserPaidAmountByTimeframe(user_id: number, startDate: string, endDate: string): Promise<number> {
+        return await this.querySingleValue(`SELECT SUM(amount) FROM finance.payments WHERE user_id = ? AND created_at > ? AND created_at < ?`, [user_id, startDate, endDate]) ?? 0;
     }
 }

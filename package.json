@@ -29,6 +29,7 @@
   "dependencies": {
     "@ngrok/ngrok": "^1.4.1",
     "@passwordless-id/webauthn": "^2.1.2",
+    "@targoninc/data-exporter": "^0.0.6",
     "@targoninc/ts-logging": "^0.0.9",
     "@targoninc/ts-mail": "^0.0.6",
     "@types/memjs": "^1.3.3",

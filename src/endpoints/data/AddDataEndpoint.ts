@@ -9,7 +9,7 @@ import type {SymphonicRoyalty} from "./SymphonicRoyalty.ts";
 import type {Royalty} from "../../models/db/finance/Royalty.ts";
 
 export class AddDataEndpoint extends AuthenticatedPostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);

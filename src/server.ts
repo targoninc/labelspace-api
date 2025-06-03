@@ -68,6 +68,7 @@ import {UpdateTotpMethodEndpoint} from "./endpoints/auth/totp/UpdateTotpMethodEn
 import {MfaOptionsEndpoint} from "./endpoints/auth/MfaOptionsEndpoint.ts";
 import {RoyaltiesByCountryEndpoint} from "./endpoints/statistics/RoyaltiesByCountryEndpoint.ts";
 import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
+import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEndpoint.ts";
 
 config();
 
@@ -175,6 +176,7 @@ new RoyaltiesByTrackEndpoint(app, "/statistics/royaltiesByTrack", db).register()
 new RoyaltiesByArtistEndpoint(app, "/statistics/royaltiesByArtist", db).register();
 new RoyaltiesByServiceEndpoint(app, "/statistics/royaltiesByService", db).register();
 new RoyaltiesByCountryEndpoint(app, "/statistics/royaltiesByCountry", db).register();
+new QuarterlyReportEndpoint(app, "/statistics/quarterlyReport", db).register();
 // endregion
 
 // region Payments

@@ -8,7 +8,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 
 export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
