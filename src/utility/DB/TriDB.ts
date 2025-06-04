@@ -860,7 +860,7 @@ export class TriDB extends CachedDB {
                                             FROM finance.royalties r
                                                      LEFT JOIN finance.splits s ON r.isrc = s.isrc
                                             WHERE r.releaseartists LIKE ?
-                                              AND r.period2 IN (${months})`, [`%${name}%`]) ?? 0;
+                                              AND r.period1 IN (${months})`, [`%${name}%`]) ?? 0;
     }
 
     async getUserPaidAmountByTimeframe(user_id: number, startDate: string, endDate: string): Promise<number> {
