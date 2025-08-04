@@ -664,7 +664,11 @@ export class TriDB extends CachedDB {
     }
 
     async getLastBandcampReportTime(): Promise<string|null> {
-        return await this.querySingleValue("SELECT created_at FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1");
+        return await this.querySingleValue(`SELECT created_at
+                                            FROM finance.bandcamp_sync
+                                            WHERE status != 'error'
+                                            ORDER BY created_at DESC
+                                            LIMIT 1`);
     }
 
     async insertBandcampReport(report: SalesReport): Promise<number> {
