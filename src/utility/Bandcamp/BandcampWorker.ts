@@ -120,9 +120,11 @@ export class BandcampWorker {
     }
 
     private async mapSaleByIsrc(sale: BandcampSale, estimatedPaypalFee: number) {
-        const track = await this.db.getTrackByIsrc(sale.isrc);
+        const targetIsrc = sale.isrc.replaceAll("-", "");
+
+        const track = await this.db.getTrackByIsrc(targetIsrc);
         if (!track) {
-            throw new Error("No track found for isrc: " + sale.isrc);
+            throw new Error("No track found for isrc: " + targetIsrc);
         }
         const album = await this.db.getAlbumById(track.album_id ?? 0);
         if (!album) {
