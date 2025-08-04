@@ -11,7 +11,7 @@ COPY ./bun.lockb .
 # Install the project dependencies
 RUN bun install
 
-RUN apt update && apt install ffmpeg -y
+RUN apt update && apt install ffmpeg curl -y
 
 # Make the app's ports available to the outside world
 EXPOSE 8081
