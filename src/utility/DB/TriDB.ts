@@ -663,13 +663,13 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE tri.tracks SET album_id = ? WHERE id = ?", [album_id, track_id]);
     }
 
-    async getLastBandcampReportTime(): Promise<Date> {
+    async getLastBandcampReportTime(): Promise<string|null> {
         return await this.querySingleValue("SELECT created_at FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1");
     }
 
     async insertBandcampReport(report: SalesReport): Promise<number> {
         await this.query("INSERT INTO finance.bandcamp_sync (report) VALUES (?)", [JSON.stringify(report)]);
-        return await this.querySingleValue("SELECT id FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1");
+        return (await this.querySingleValue("SELECT id FROM finance.bandcamp_sync ORDER BY created_at DESC LIMIT 1"))!;
     }
 
     async updateBandcampReportStatus(id: number, received: BandcampReportStatus) {

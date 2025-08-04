@@ -6,6 +6,8 @@ import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {BandcampSale} from "./BandcampSale.ts";
 import type {Track} from "../../models/db/tri/Track.ts";
 import {CLI} from "@targoninc/ts-logging";
+import {heading, Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
+import {env} from "../Environment.ts";
 
 export class BandcampWorker {
     private readonly db: TriDB;
@@ -23,11 +25,10 @@ export class BandcampWorker {
     }
 
     private async getReport() {
-        let lastReportTime = await this.db.getLastBandcampReportTime();
-        if (!lastReportTime) {
-            lastReportTime = new Date(2025, 0, 1);
-        }
+        const lastReportDateAsString = (await this.db.getLastBandcampReportTime());
+        let lastReportTime = lastReportDateAsString ? new Date(lastReportDateAsString) : new Date(2025, 0, 1);
         const report = await Bandcamp.getSalesReport(lastReportTime, new Date());
+
         if (report.sales.length === 0) {
             CLI.debug("No sales found", {
                 logToDb: true,
@@ -37,6 +38,7 @@ export class BandcampWorker {
             });
             return;
         }
+
         const id = await this.db.insertBandcampReport(report);
         await this.mapAndInsertReport(id, report);
         return report;
@@ -44,8 +46,8 @@ export class BandcampWorker {
 
     private async mapAndInsertReport(id: number, report: SalesReport) {
         const sales = report.sales;
+        const royalties: Royalty[] = [];
 
-        const royalties = [];
         for (let i = 0; i < sales.length; i++) {
             const sale = sales[i];
             CLI.debug(`Processing sale ${i}/${sales.length}`, {
@@ -55,17 +57,20 @@ export class BandcampWorker {
                 }
             });
             try {
-                const royalties = await this.mapSale(sale);
-                royalties.forEach(r => royalties.push(r));
-            } catch (e) {
+                const royaltiesInner = await this.mapSale(sale);
+                royaltiesInner.forEach(r => royalties.push(r));
+            } catch (e: any) {
                 CLI.error(e);
                 await this.db.updateBandcampReportStatus(id, BandcampReportStatus.error);
+                this.sendFailureMail(e);
                 return;
             }
         }
+
         for (const r of royalties) {
             await this.db.insertRoyalty(r);
         }
+
         await this.db.updateBandcampReportStatus(id, BandcampReportStatus.received);
     }
 
@@ -205,6 +210,25 @@ export class BandcampWorker {
             }
         }
         return version;
+    }
+
+    private sendFailureMail(e: any) {
+        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
+            .subject("Bandcamp Sync failed")
+            .heading("Bandcamp Sync failed")
+            .paragraph("You have requested logging into your Tri Artist account.")
+            .card([
+                paragraph("Your code"),
+                paragraph("Your code"),
+            ])
+            .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
+            .signature("the Tri Records Team", "Targon Industries UG")
+            .get();
+
+        const mails = env("SUBMISSION_MAILS", "").split(",");
+        for (const address of mails) {
+            Mail.sendDefault(address, mail);
+        }
     }
 }
 

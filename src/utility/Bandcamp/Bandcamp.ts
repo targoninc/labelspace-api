@@ -128,6 +128,7 @@ export class Bandcamp {
             throw new Error("BANDCAMP_BAND_ID must be set");
         }
 
+        CLI.debug(`Getting sales from ${from} to ${to}`);
         return Bandcamp.mapSalesReport(await Bandcamp.callBandcampApi("https://bandcamp.com/api/sales/2/sales_report", {
             band_id: parseInt(process.env.BANDCAMP_BAND_ID),
             start_time: from.toISOString().replace("T", " ").substring(0, 19),
