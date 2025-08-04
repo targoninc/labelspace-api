@@ -219,7 +219,6 @@ export class BandcampWorker {
             .subject("Bandcamp Sync failed")
             .heading("Bandcamp Sync failed")
             .card([
-                paragraph("Error:"),
                 paragraph(e.toString()),
             ])
             .get();
