@@ -216,13 +216,10 @@ export class BandcampWorker {
         const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
             .subject("Bandcamp Sync failed")
             .heading("Bandcamp Sync failed")
-            .paragraph("You have requested logging into your Tri Artist account.")
             .card([
-                paragraph("Your code"),
-                paragraph("Your code"),
+                paragraph("Error:"),
+                paragraph(e.toString()),
             ])
-            .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
         const mails = env("SUBMISSION_MAILS", "").split(",");
