@@ -71,11 +71,16 @@ export class LoginEndpoint extends PostEndpoint {
                 const ip = IP.get(req);
                 const now = new Date();
                 const utcNow = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-                await this.db.updateUser(user.id, {
-                    secondlastlogin: new Date(user.lastlogin),
+                const update: Partial<User> = {
                     lastlogin: utcNow,
                     ip: ip
-                });
+                };
+
+                if (user.lastlogin) {
+                    update.secondlastlogin = new Date(user.lastlogin);
+                }
+
+                await this.db.updateUser(user.id, update);
 
                 return res.send({
                     user: outUser
