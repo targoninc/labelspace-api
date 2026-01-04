@@ -305,12 +305,13 @@ export class TriDB extends CachedDB {
             return 0;
         }
 
-        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistConditions = artistNames.map(() => "t.artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
         const qMarks = isrcs.map(() => "?").join(", ");
         let sql = `SELECT SUM(r.royalty) as value
                    FROM finance.royalties r
+                            INNER JOIN tri.tracks t on r.isrc = t.isrc
                    WHERE r.isrc NOT IN (${qMarks})
                      AND ${artistConditions}`;
         return await this.querySingleValue(sql, [...artistNamesLike, ...isrcs]);
@@ -762,13 +763,14 @@ export class TriDB extends CachedDB {
             return [];
         }
 
-        const artistConditions = artistNames.map(() => "r.trackartists LIKE ?").join(" OR ");
+        const artistConditions = artistNames.map(() => "t.artists LIKE ?").join(" OR ");
         const artistNamesLike = artistNames.map(name => `%${name}%`);
 
         return await this.query(`SELECT r.provider     as id,
                                         r.provider     as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
+                                          INNER JOIN tri.tracks t on r.isrc = t.isrc
                                  WHERE ${artistConditions}
                                  GROUP BY r.provider
                                  ORDER BY SUM(r.royalty) DESC
