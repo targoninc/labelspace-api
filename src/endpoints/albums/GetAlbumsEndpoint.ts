@@ -5,6 +5,7 @@ import {Permissions} from "../../models/enums/Permissions.ts";
 import type {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {GetEndpoint} from "../base/GetEndpoint.ts";
 import {Track} from "../../models/db/tri/Track.ts";
+import {Album} from "../../models/db/tri/Album.ts";
 
 export class GetAlbumsEndpoint extends GetEndpoint {
     db: TriDB;
@@ -15,10 +16,17 @@ export class GetAlbumsEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db));
+        const user = req.user;
+        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db)) || !req.user;
 
         const onlyReleased = req.query.onlyReleased === "true";
-        let albums = await this.db.getAlbums(notAuthenticated || onlyReleased);
+        let albums: Album[] = [];
+        if (user) {
+            const artists = await this.db.getUserArtists(user.id);
+            albums = await this.db.getAlbumsVisibleToArtists(artists.map(a => a.name), notAuthenticated || onlyReleased);
+        } else {
+            albums = await this.db.getAlbums(notAuthenticated || onlyReleased);
+        }
         const trackCounts = await this.db.getTrackCountByAlbumIds(albums.map(a => a.id));
         albums = albums.map(a => {
             const count = trackCounts.find(c => c.id === a.id)?.count ?? 0;

@@ -529,7 +529,7 @@ export class TriDB extends CachedDB {
                          INNER JOIN tri.tracks t on r.isrc = t.isrc
                 WHERE s.artist = ?
                   AND t.artists LIKE ?
-                  AND NOT t.artists = ?`,
+                  AND t.artists != ?`,
                 [artistName, `%${artistName}%`, artistName]);
 
             for (const row of addRows) {
@@ -891,5 +891,16 @@ export class TriDB extends CachedDB {
                                             WHERE user_id = ?
                                               AND created_at > ?
                                               AND created_at < ?`, [user_id, startDate, endDate]) ?? 0;
+    }
+
+    async getAlbumsVisibleToArtists(artists: string[], onlyReleased: boolean) {
+        const likeQuery = artists.map(() => "artists LIKE ?").join(" OR ");
+        const artistNamesLike = artists.map(name => `%${name}%`);
+        const dateQuery = onlyReleased ? "AND release_date < CURRENT_TIMESTAMP" : "";
+
+        return await this.query<Album>(`SELECT *
+                                 FROM tri.albums
+                                 WHERE ${likeQuery} ${dateQuery}
+                                 ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 }
