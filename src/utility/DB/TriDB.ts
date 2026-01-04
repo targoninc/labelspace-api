@@ -863,7 +863,8 @@ export class TriDB extends CachedDB {
         return await this.querySingleValue(`SELECT SUM(r.royalty * IFNULL(s.split, 1))
                                             FROM finance.royalties r
                                                      LEFT JOIN finance.splits s ON r.isrc = s.isrc
-                                            WHERE r.releaseartists LIKE ?
+                                                     INNER JOIN tri.tracks t ON t.isrc = r.isrc
+                                            WHERE t.artists LIKE ?
                                               AND r.period1 IN (${months})`, [`%${name}%`]) ?? 0;
     }
 
