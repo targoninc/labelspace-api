@@ -180,6 +180,7 @@ export class TriDB extends CachedDB {
                                         r.title        as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
+                                    INNER JOIN tri.tracks t on r.isrc = t.isrc
                                  WHERE ${artistConditions}
                                  GROUP BY r.isrc
                                  ORDER BY SUM(r.royalty) DESC
@@ -194,6 +195,7 @@ export class TriDB extends CachedDB {
                                         r.territory    as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
+                                          INNER JOIN tri.tracks t on r.isrc = t.isrc
                                  WHERE ${artistConditions}
                                  GROUP BY r.territory
                                  ORDER BY SUM(r.royalty) DESC`,
@@ -210,6 +212,7 @@ export class TriDB extends CachedDB {
                                ?              as label,
                                SUM(r.royalty) as value
                         FROM finance.royalties r
+                                 INNER JOIN tri.tracks t on r.isrc = t.isrc
                         WHERE r.trackartists LIKE ?
                         LIMIT 1`,
                 [artistName, artistName, likeCondition]);
@@ -287,6 +290,7 @@ export class TriDB extends CachedDB {
                     SUBSTR(r.period1, 5) as label,
                     SUM(royalty)         as value
              FROM finance.royalties r
+                      INNER JOIN tri.tracks t on r.isrc = t.isrc
              WHERE ${artistConditions}
              GROUP BY SUBSTR(r.period1, 5)
              ORDER BY STR_TO_DATE(CONCAT('01-', r.period1), '%d-%b-%Y') DESC
