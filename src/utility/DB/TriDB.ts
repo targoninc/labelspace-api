@@ -213,7 +213,7 @@ export class TriDB extends CachedDB {
                                SUM(r.royalty) as value
                         FROM finance.royalties r
                                  INNER JOIN tri.tracks t on r.isrc = t.isrc
-                        WHERE r.trackartists LIKE ?
+                        WHERE t.artists LIKE ?
                         LIMIT 1`,
                 [artistName, artistName, likeCondition]);
             if (row) {
@@ -245,6 +245,7 @@ export class TriDB extends CachedDB {
                     r.period1    as label,
                     SUM(royalty) as value
              FROM finance.royalties r
+                      INNER JOIN tri.tracks t on r.isrc = t.isrc
              WHERE ${artistConditions}
              GROUP BY r.period1
              ORDER BY STR_TO_DATE(CONCAT('01-', r.period1), '%d-%b-%Y') DESC
