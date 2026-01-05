@@ -17,15 +17,15 @@ export class GetTracksEndpoint extends GetEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         const user = req.user;
-        const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db)) || !req.user;
+        const canManage = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
 
         const onlyReleased = req.query.onlyReleased === "true";
         let tracks: Track[];
-        if (user) {
+        if (user && !canManage) {
             const artists = await this.db.getUserArtists(user.id);
-            tracks = await this.db.getTracksVisibleToArtists(artists.map(a => a.name), notAuthenticated || onlyReleased);
+            tracks = await this.db.getTracksVisibleToArtists(artists.map(a => a.name), !canManage || onlyReleased);
         } else {
-            tracks = await this.db.getTracks(notAuthenticated || onlyReleased);
+            tracks = await this.db.getTracks(!user || onlyReleased);
         }
 
         tracks = await TrackEnricher.enrichManyAsync(this.db, tracks, {
