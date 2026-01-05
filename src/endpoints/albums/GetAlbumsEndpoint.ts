@@ -20,7 +20,7 @@ export class GetAlbumsEndpoint extends GetEndpoint {
         const notAuthenticated = !(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db)) || !req.user;
 
         const onlyReleased = req.query.onlyReleased === "true";
-        let albums: Album[] = [];
+        let albums: Album[];
         if (user) {
             const artists = await this.db.getUserArtists(user.id);
             albums = await this.db.getAlbumsVisibleToArtists(artists.map(a => a.name), notAuthenticated || onlyReleased);

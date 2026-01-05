@@ -903,4 +903,15 @@ export class TriDB extends CachedDB {
                                  WHERE ${likeQuery} ${dateQuery}
                                  ORDER BY release_date DESC`, [...artistNamesLike]);
     }
+
+    async getTracksVisibleToArtists(artists: string[], onlyReleased: boolean) {
+        const likeQuery = artists.map(() => "artists LIKE ?").join(" OR ");
+        const artistNamesLike = artists.map(name => `%${name}%`);
+        const dateQuery = onlyReleased ? "AND release_date < CURRENT_TIMESTAMP" : "";
+
+        return await this.query<Track>(`SELECT *
+                                 FROM tri.tracks
+                                 WHERE ${likeQuery} ${dateQuery}
+                                 ORDER BY release_date DESC`, [...artistNamesLike]);
+    }
 }
