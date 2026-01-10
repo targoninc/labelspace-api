@@ -22,7 +22,7 @@ export async function migrateAttachments(db: TriDB) {
         }
 
         const filesInDir = await readdir(`${dir}/${albumIdStr}`);
-        if (filesInDir.length !== 0) {
+        if (filesInDir.length !== 1) {
             console.log(`  - No matching count of files found (${filesInDir.length}), skipping.`);
             continue;
         }
