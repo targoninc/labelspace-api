@@ -22,6 +22,10 @@ export class GetLatestAlbumEndpoint extends GetEndpoint {
             return res.status(404).send({error: "Album not found"});
         }
 
+        album = await AlbumEnricher.enrichAsync(this.db, album, {
+            tracks: true,
+        });
+
         return res.send(album);
     }
 }
