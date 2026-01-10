@@ -30,6 +30,7 @@ export class GetTracksEndpoint extends GetEndpoint {
 
         tracks = await TrackEnricher.enrichManyAsync(this.db, tracks, {
             album: true,
+            albumEarnings: !!req.user,
         }, req.user);
 
         return res.send(tracks);

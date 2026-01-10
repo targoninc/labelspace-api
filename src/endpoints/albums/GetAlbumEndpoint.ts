@@ -39,6 +39,7 @@ export class GetAlbumEndpoint extends GetEndpoint {
 
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
+            trackEarnings: !!req.user
         });
         album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
         album.files = await FileStorage.getEntityFiles(MediaFileType.albumFile, album.id);

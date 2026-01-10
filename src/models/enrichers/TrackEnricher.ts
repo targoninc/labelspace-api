@@ -5,7 +5,8 @@ import {Track} from "../db/tri/Track.js";
 import type {Album} from "../db/tri/Album.ts";
 
 export interface TrackEnrichmentConfig {
-    album?: boolean
+    album?: boolean;
+    albumEarnings?: boolean;
 }
 
 export class TrackEnricher extends IEnricher {
@@ -15,7 +16,10 @@ export class TrackEnricher extends IEnricher {
             if (!album) {
                 return null;
             }
-            album.earnings = await db.getReleaseTotalRoyalty(album.upc);
+
+            if (config.albumEarnings) {
+                album.earnings = await db.getReleaseTotalRoyalty(album.upc);
+            }
 
             return album;
         }, {} as Album);

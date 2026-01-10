@@ -18,8 +18,8 @@ export class GetAlbumsEndpoint extends GetEndpoint {
     async run(req: AuthenticatedRequest, res: Response) {
         const user = req.user;
         const canManage = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
-
         const onlyReleased = req.query.onlyReleased === "true";
+
         let albums: Album[];
         if (user && !canManage) {
             const artists = await this.db.getUserArtists(user.id);
@@ -27,10 +27,13 @@ export class GetAlbumsEndpoint extends GetEndpoint {
         } else {
             albums = await this.db.getAlbums(!user || onlyReleased);
         }
+
         const trackCounts = await this.db.getTrackCountByAlbumIds(albums.map(a => a.id));
+
         albums = albums.map(a => {
             const count = trackCounts.find(c => c.id === a.id)?.count ?? 0;
             a.tracks = Array.from({ length: count }, () => ({} as Track));
+
             return a;
         });
 

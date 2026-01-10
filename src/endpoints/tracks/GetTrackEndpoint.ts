@@ -37,8 +37,12 @@ export class GetTrackEndpoint extends GetEndpoint {
 
         track = await TrackEnricher.enrichAsync(this.db, track, {
             album: true,
+            albumEarnings: !!req.user,
         }, req.user);
-        track.earnings = await this.db.getTrackTotalRoyalty(track.isrc);
+
+        if (!!req.user) {
+            track.earnings = await this.db.getTrackTotalRoyalty(track.isrc);
+        }
 
         return res.send({
             ...track,
