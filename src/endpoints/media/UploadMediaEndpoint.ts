@@ -60,6 +60,10 @@ export class UploadMediaEndpoint extends AuthenticatedPostEndpoint {
             let fileName;
             if (fileType === MediaFileType.albumFile) {
                 fileName = req.body.fileName ?? req.file.originalname;
+                const attachment = await this.db.getAlbumAttachmentById(referenceId);
+                if (!attachment) {
+                    return res.status(404).send("Album attachment not found.");
+                }
             } else {
                 fileName = `source.${originalExtension.toLowerCase()}`;
             }

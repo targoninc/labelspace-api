@@ -71,6 +71,7 @@ import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
 import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEndpoint.ts";
 import {CreateUserEndpoint} from "./endpoints/user/actions/CreateUserEndpoint.ts";
 import {GetLatestAlbumEndpoint} from "./endpoints/albums/GetLatestAlbumEndpoint.ts";
+import {migrateAttachments} from "./utility/migrateAttachments.ts";
 
 config();
 
@@ -245,3 +246,5 @@ app.listen(port, () => {
 
 const bandcampWorker = new BandcampWorker(db);
 bandcampWorker.run();
+
+migrateAttachments();

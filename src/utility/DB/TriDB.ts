@@ -29,6 +29,7 @@ import {UserTotp} from "../../models/db/tri/UserTotp.ts";
 import {PublicKey} from "../../models/db/tri/PublicKey.ts";
 import {CachedDB} from "./Caching/CachedDB.ts";
 import {CacheConfig} from "./Caching/CacheConfig.ts";
+import {AlbumAttachment} from "../../models/db/tri/AlbumAttachment.ts";
 
 export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
@@ -926,5 +927,13 @@ export class TriDB extends CachedDB {
                                             WHERE a.release_date <= curdate()
                                             ORDER BY a.release_date DESC
                                             LIMIT 1`);
+    }
+
+    async createAlbumAttachment(albumId: number, name: string) {
+        return await this.querySingleValue<number>("INSERT INTO tri.album_attachments (album_id, name) VALUES (?, ?) RETURNING id", [albumId, name]);
+    }
+
+    async getAlbumAttachmentById(referenceId: number) {
+        return await this.queryFirst<AlbumAttachment>("SELECT * FROM tri.album_attachments WHERE id = ?", [referenceId]);
     }
 }
