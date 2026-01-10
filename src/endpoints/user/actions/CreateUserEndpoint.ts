@@ -93,7 +93,7 @@ export class CreateUserEndpoint extends AuthenticatedPostEndpoint {
             .subject("New Tri Artist account created")
             .heading("A new Tri Artist account was just created")
             .card([
-                paragraph(`Username: ${user.username}`),
+                paragraph(`Username: ${body.username}`),
                 paragraph(`Temporary Password: ${body.temp_password}`),
                 paragraph(`Email: ${body.email}`),
                 paragraph(`Country: ${body.country}`),
