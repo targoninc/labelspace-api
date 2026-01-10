@@ -930,7 +930,8 @@ export class TriDB extends CachedDB {
     }
 
     async createAlbumAttachment(albumId: number, name: string) {
-        return await this.querySingleValue<number>("INSERT INTO tri.album_attachments (album_id, name) VALUES (?, ?) RETURNING id", [albumId, name]);
+        await this.querySingleValue<number>("INSERT INTO tri.album_attachments (album_id, name) VALUES (?, ?)", [albumId, name]);
+        return await this.querySingleValue<number>("SELECT id FROM tri.album_attachments WHERE album_id = ? AND name = ?", [albumId, name]);
     }
 
     async getAlbumAttachmentById(referenceId: number) {
