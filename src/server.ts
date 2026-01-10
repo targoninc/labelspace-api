@@ -246,5 +246,3 @@ app.listen(port, () => {
 
 const bandcampWorker = new BandcampWorker(db);
 bandcampWorker.run();
-
-migrateAttachments(db);
