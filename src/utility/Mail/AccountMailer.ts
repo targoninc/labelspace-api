@@ -1,8 +1,9 @@
 import {link, MailBuilder, paragraph, Mail, heading} from "@targoninc/ts-mail";
 import {UserEmail} from "../../models/db/tri/UserEmail.js";
 import {User} from "../../models/db/tri/User.js";
+import {env} from "../Environment.ts";
 
-const uiUrl = process.env.CORS_ORIGIN;
+const uiUrl = env<string>("CORS_ORIGINS").split(",").at(0);
 
 export class AccountMailer {
     static sendActivationEmails(emails: UserEmail[], user: User) {
