@@ -1,4 +1,4 @@
-import {readdir} from "node:fs/promises";
+import {mkdir, readdir} from "node:fs/promises";
 import {env} from "./Environment.ts";
 import {MediaFileType} from "../models/enums/MediaFileType.ts";
 import {TriDB} from "./DB/TriDB.ts";
@@ -7,6 +7,8 @@ import * as fs from "node:fs";
 export async function migrateAttachments(db: TriDB) {
     const dir = env<string>("ARTIST_SPACE_STORAGE_PATH") + `/tridrive-1/${MediaFileType.albumFile}`;
     const tmpDir = env<string>("ARTIST_SPACE_STORAGE_PATH") + `/tmp/${MediaFileType.albumFile}/migration`;
+    await mkdir(tmpDir, {recursive: true});
+
     const existingAttachments = await readdir(dir);
     console.log(`Found ${existingAttachments.length} attachments in storage.`);
 
