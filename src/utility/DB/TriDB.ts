@@ -919,4 +919,12 @@ export class TriDB extends CachedDB {
         await this.query(`INSERT INTO tri.users (username, legal_name, passkey_user_id, password_hash, country, state) VALUES (?, ?, ?, ?, ?, ?)`, [username, legal_name, passKeyUserId, passwordHash, country, state]);
         return await this.querySingleValue<number>("SELECT id FROM tri.users WHERE username = ?", [username]);
     }
+
+    async getLatestAlbum() {
+        return await this.queryFirst<Album>(`SELECT *
+                                            FROM tri.albums a
+                                            WHERE a.release_date <= curdate()
+                                            ORDER BY a.release_date DESC
+                                            LIMIT 1`);
+    }
 }

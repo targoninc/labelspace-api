@@ -70,6 +70,7 @@ import {RoyaltiesByCountryEndpoint} from "./endpoints/statistics/RoyaltiesByCoun
 import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
 import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEndpoint.ts";
 import {CreateUserEndpoint} from "./endpoints/user/actions/CreateUserEndpoint.ts";
+import {GetLatestAlbumEndpoint} from "./endpoints/albums/GetLatestAlbumEndpoint.ts";
 
 config();
 
@@ -162,6 +163,7 @@ new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
 new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
 new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();
+new GetLatestAlbumEndpoint(app, "/albums/latest", db).register();
 // endregion
 
 // region Media
