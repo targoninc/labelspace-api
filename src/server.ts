@@ -69,6 +69,7 @@ import {MfaOptionsEndpoint} from "./endpoints/auth/MfaOptionsEndpoint.ts";
 import {RoyaltiesByCountryEndpoint} from "./endpoints/statistics/RoyaltiesByCountryEndpoint.ts";
 import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
 import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEndpoint.ts";
+import {CreateUserEndpoint} from "./endpoints/user/actions/CreateUserEndpoint.ts";
 
 config();
 
@@ -139,6 +140,7 @@ new UpdateSettingEndpoint(app, "/user/actions/update-setting", db).register();
 new VerifyEmailEndpoint(app, "/user/actions/verify-email", db).register();
 new ExportUserDataEndpoint(app, "/user/export", db).register();
 new SendActivationEmailEndpoint(app, "/user/actions/send-activation-email", db).register();
+new CreateUserEndpoint(app, "/user/actions/create", db).register();
 // endregion
 
 // region Permissions

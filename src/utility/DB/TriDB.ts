@@ -914,4 +914,9 @@ export class TriDB extends CachedDB {
                                  WHERE ${likeQuery} ${dateQuery}
                                  ORDER BY release_date DESC`, [...artistNamesLike]);
     }
+
+    async createUser(username: string, legal_name: string, passKeyUserId: string, passwordHash: string, country: string, state: string | undefined) {
+        await this.query(`INSERT INTO tri.users (username, legal_name, passkey_user_id, password_hash, country, state) VALUES (?, ?, ?, ?, ?, ?)`, [username, legal_name, passKeyUserId, passwordHash, country, state]);
+        return await this.querySingleValue<number>("SELECT LAST_INSERT_ID()");
+    }
 }

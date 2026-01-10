@@ -54,7 +54,11 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
-        Mail.sendDefault(env("SUBMISSION_MAILS"), mailContent);
+        const subMails = env<string>("SUBMISSION_MAILS").split(",");
+        for (const mail of subMails) {
+            Mail.sendDefault(mail, mailContent);
+        }
+
         for (const mail of userMails) {
             if (mail.verified || mail.primary) {
                 Mail.sendDefault(mail.email, mailContent);
