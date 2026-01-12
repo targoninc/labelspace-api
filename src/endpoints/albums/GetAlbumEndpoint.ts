@@ -37,9 +37,11 @@ export class GetAlbumEndpoint extends GetEndpoint {
             return res.status(404).send({error: "Album not found"});
         }
 
+        const addAdditionalData = !!req.user;
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
-            trackEarnings: !!req.user
+            trackEarnings: addAdditionalData,
+            attachments: addAdditionalData,
         });
         album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
         album.files = await FileStorage.getEntityFiles(MediaFileType.albumFile, album.id);

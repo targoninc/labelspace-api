@@ -1,7 +1,9 @@
 import {User} from "./User.js";
 import type {Track} from "./Track.ts";
+import {AlbumAttachment} from "./AlbumAttachment.ts";
 
 export interface Album {
+    attachments?: AlbumAttachment[];
     files?: string[];
     earnings?: number;
     tracks?: Track[];

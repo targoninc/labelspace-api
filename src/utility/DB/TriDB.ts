@@ -937,4 +937,8 @@ export class TriDB extends CachedDB {
     async getAlbumAttachmentById(referenceId: number) {
         return await this.queryFirst<AlbumAttachment>("SELECT * FROM tri.album_attachments WHERE id = ?", [referenceId]);
     }
+
+    async getAlbumAttachmentsByAlbumId(id: number) {
+        return await this.query<AlbumAttachment>("SELECT * FROM tri.album_attachments WHERE album_id = ?", [id]);
+    }
 }
