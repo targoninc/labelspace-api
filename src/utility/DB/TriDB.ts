@@ -941,4 +941,12 @@ export class TriDB extends CachedDB {
     async getAlbumAttachmentsByAlbumId(id: number) {
         return await this.query<AlbumAttachment>("SELECT * FROM tri.album_attachments WHERE album_id = ?", [id]);
     }
+
+    async deleteAlbumAttachment(id: number) {
+        await this.query("DELETE FROM tri.album_attachments WHERE id = ?", [id]);
+    }
+
+    async updateAlbumAttachment(id: number, artists: string) {
+        await this.query("UPDATE tri.album_attachments SET visible_to_artists = ? WHERE id = ?", [artists, id]);
+    }
 }

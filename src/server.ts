@@ -72,6 +72,9 @@ import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEnd
 import {CreateUserEndpoint} from "./endpoints/user/actions/CreateUserEndpoint.ts";
 import {GetLatestAlbumEndpoint} from "./endpoints/albums/GetLatestAlbumEndpoint.ts";
 import {migrateAttachments} from "./utility/migrateAttachments.ts";
+import {CreateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/CreateAlbumAttachmentEndpoint.ts";
+import {DeleteAlbumAttachmentEndpoint} from "./endpoints/albums/actions/DeleteAlbumAttachmentEndpoint.ts";
+import {UpdateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/UpdateAlbumAttachmentEndpoint.ts";
 
 config();
 
@@ -165,6 +168,9 @@ new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
 new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();
 new GetLatestAlbumEndpoint(app, "/albums/latest", db).register();
+new CreateAlbumAttachmentEndpoint(app, "/albums/actions/createAttachment", db).register();
+new DeleteAlbumAttachmentEndpoint(app, "/albums/actions/deleteAttachment", db).register();
+new UpdateAlbumAttachmentEndpoint(app, "/albums/actions/updateAttachment", db).register();
 // endregion
 
 // region Media

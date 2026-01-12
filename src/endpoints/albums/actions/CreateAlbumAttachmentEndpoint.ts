@@ -1,6 +1,8 @@
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.ts";
 import {TriDB} from "../../../utility/DB/TriDB.ts";
 import {Application, Response} from "express";
+import {Authenticator} from "../../../models/Authenticator.ts";
+import {Permissions} from "../../../models/enums/Permissions.ts";
 
 export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -14,6 +16,10 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
         const {albumId, name, artists} = req.body;
         if (!albumId || !name || !artists) {
             return res.status(400).send({error: "Missing albumId, name or artists"});
+        }
+
+        if (!(await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db))) {
+            return res.status(403).send("You are not allowed to create attachments.");
         }
 
         const album = await this.db.getAlbumById(albumId);

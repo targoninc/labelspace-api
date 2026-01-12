@@ -36,8 +36,8 @@ export class GetFileEndpoint extends AuthenticatedGetEndpoint {
             }
 
             let artistNames: string[] = [];
-            if (attachment.visible_to_artist) {
-                artistNames = attachment.visible_to_artist.split(",").map(a => a.trim());
+            if (attachment.visible_to_artists) {
+                artistNames = attachment.visible_to_artists.split(",").map(a => a.trim());
             } else {
                 const album = await this.db.getAlbumById(attachment.album_id);
                 if (!album) {
