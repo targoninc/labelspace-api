@@ -4,7 +4,6 @@ import {AlbumAttachment} from "./AlbumAttachment.ts";
 
 export interface Album {
     attachments?: AlbumAttachment[];
-    files?: string[];
     earnings?: number;
     tracks?: Track[];
     user?: User;

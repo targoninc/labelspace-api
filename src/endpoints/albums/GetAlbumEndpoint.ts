@@ -9,7 +9,7 @@ import {FileStorage} from "../../utility/Storage/FileStorage.ts";
 import {MediaFileType} from "../../models/enums/MediaFileType.ts";
 
 export class GetAlbumEndpoint extends GetEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -43,8 +43,10 @@ export class GetAlbumEndpoint extends GetEndpoint {
             trackEarnings: addAdditionalData,
             attachments: addAdditionalData,
         });
-        album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
-        album.files = await FileStorage.getEntityFiles(MediaFileType.albumFile, album.id);
+
+        if (addAdditionalData) {
+            album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
+        }
 
         return res.send(album);
     }
