@@ -30,12 +30,23 @@ export class GetFileEndpoint extends AuthenticatedGetEndpoint {
                 return res.status(400).send(`Invalid mediaFileType provided (${mediaFileType}), must be one of ` + Object.values(MediaFileType).join(", "));
             }
 
-            const album = await this.db.getAlbumById(referenceId);
-            if (!album) {
+            const attachment = await this.db.getAlbumAttachmentById(referenceId);
+            if (!attachment) {
                 return res.status(404).send("Album not found.");
             }
 
-            const artistNames = album.artists.split(",").map(a => a.trim());
+            let artistNames: string[] = [];
+            if (attachment.visible_to_artist) {
+                artistNames = attachment.visible_to_artist.split(",").map(a => a.trim());
+            } else {
+                const album = await this.db.getAlbumById(attachment.album_id);
+                if (!album) {
+                    return res.status(404).send("Album not found.");
+                }
+
+                artistNames = album.artists.split(",").map(a => a.trim());
+            }
+
             const userArtists = await this.db.getUserArtists(req.user.id);
             if (!userArtists.some(a => artistNames.includes(a.name))) {
                 if (!await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db)) {
@@ -43,11 +54,7 @@ export class GetFileEndpoint extends AuthenticatedGetEndpoint {
                 }
             }
 
-            const fileName = req.query.fileName as string;
-            if (!fileName || fileName.trim().length === 0) {
-                return res.status(400).send("No fileName provided.");
-            }
-            await this.getFile(res, mediaFileType, referenceId, fileName);
+            await this.getFile(res, mediaFileType, referenceId, attachment.name);
         } catch (error) {
             console.error("Error during file request:", error);
             res.status(500).send("Internal server error.");
