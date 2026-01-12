@@ -7,7 +7,6 @@ import {AlbumAttachment} from "../db/tri/AlbumAttachment.ts";
 export interface AlbumEnrichmentConfig {
     tracks?: boolean;
     trackEarnings?: boolean;
-    attachments?: boolean;
 }
 
 export class AlbumEnricher extends IEnricher {
@@ -19,7 +18,6 @@ export class AlbumEnricher extends IEnricher {
         base.tracks = await enrichIfAsync<Track[]>(config.tracks, async () => {
             return await db.getTracksByAlbumIds([base.id]);
         }, []);
-        base.attachments = await enrichIfAsync<AlbumAttachment[]>(config.attachments, async () => await db.getAlbumAttachmentsByAlbumId(base.id), []);
 
         if (config.trackEarnings) {
             for (const t of base.tracks) {

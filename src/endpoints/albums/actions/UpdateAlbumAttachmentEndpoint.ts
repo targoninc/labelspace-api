@@ -16,7 +16,7 @@ export class UpdateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         const {attachmentId, visible_to_artists} = req.body;
-        if (!attachmentId || !visible_to_artists) {
+        if (!attachmentId) {
             return res.status(400).send({error: "Missing attachmentId or visible_to_artists"});
         }
 
@@ -29,7 +29,7 @@ export class UpdateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
             return res.status(404).send({error: "Attachment not found"});
         }
 
-        await this.db.updateAlbumAttachment(attachmentId, visible_to_artists);
+        await this.db.updateAlbumAttachment(attachmentId, visible_to_artists ?? "");
         return res.send("OK");
     }
 }

@@ -41,11 +41,24 @@ export class GetAlbumEndpoint extends GetEndpoint {
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
             trackEarnings: addAdditionalData,
-            attachments: addAdditionalData,
         });
 
         if (addAdditionalData) {
             album.earnings = await this.db.getReleaseTotalRoyalty(album.upc) ?? 0;
+            album.attachments = await this.db.getAlbumAttachmentsByAlbumId(album.id);
+
+            const userCanManageFiles = await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db);
+            const userArtists = (await this.db.getUserArtists(req.user.id)).map(a => a.name);
+            if (!userCanManageFiles) {
+                album.attachments = album.attachments.filter(a => {
+                    if (!a.visible_to_artists || a.visible_to_artists.trim() === "") {
+                        return false;
+                    }
+
+                    const visibleTo = a.visible_to_artists.split(",").map(v => v.trim());
+                    return visibleTo.some(v => userArtists.includes(v));
+                });
+            }
         }
 
         return res.send(album);
