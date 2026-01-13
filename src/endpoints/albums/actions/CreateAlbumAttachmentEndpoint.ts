@@ -14,8 +14,8 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
 
     async run(req: AuthenticatedRequest, res: Response) {
         const {albumId, name, artists} = req.body;
-        if (!albumId || !name || !artists) {
-            return res.status(400).send({error: "Missing albumId, name or artists"});
+        if (!albumId || !name) {
+            return res.status(400).send({error: "Missing albumId"});
         }
 
         if (!(await Authenticator.userHasPermission(req.user, Permissions.fileManagement, this.db))) {
@@ -44,7 +44,6 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
         }
 
         const attachmentId = await this.db.createAlbumAttachment(albumId, name);
-
         return res.send({attachmentId});
     }
 }

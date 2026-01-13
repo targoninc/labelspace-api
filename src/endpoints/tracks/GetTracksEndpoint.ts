@@ -8,7 +8,7 @@ import {Permissions} from "../../models/enums/Permissions.ts";
 import {Track} from "../../models/db/tri/Track.ts";
 
 export class GetTracksEndpoint extends GetEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
