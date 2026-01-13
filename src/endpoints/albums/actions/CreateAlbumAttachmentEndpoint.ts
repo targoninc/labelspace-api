@@ -13,7 +13,7 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const {albumId, name, artists} = req.body;
+        let {albumId, name, artists} = req.body;
         if (!albumId || !name) {
             return res.status(400).send({error: "Missing albumId"});
         }
@@ -27,6 +27,7 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
             return res.status(404).send({error: "Album not found"});
         }
 
+        artists ??= "";
         const artistsList = artists.split(",").map((a: string) => a.trim());
         const tracks = await this.db.getTracksByAlbumIds([albumId]);
 
@@ -43,7 +44,7 @@ export class CreateAlbumAttachmentEndpoint extends AuthenticatedPostEndpoint {
             }
         }
 
-        const attachmentId = await this.db.createAlbumAttachment(albumId, name);
+        const attachmentId = await this.db.createAlbumAttachment(albumId, name, artists);
         return res.send({attachmentId});
     }
 }
