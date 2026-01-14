@@ -31,16 +31,20 @@ export class GetTrackEndpoint extends GetEndpoint {
 
         const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
         const trackReleaseTime = new Date(track.release_date).getTime();
-        if (trackReleaseTime > new Date().getTime() && !hasReleaseManagementPermission) {
+        const userArtists = await this.db.getUserArtists(id);
+        const trackArtists = track.artists.split(",").map(a => a.trim());
+
+        if (trackReleaseTime > new Date().getTime() && !hasReleaseManagementPermission && !userArtists.some(a => trackArtists.includes(a.name))) {
             return res.status(404).send({error: "Track not found"});
         }
 
+        const addData = !!req.user;
         track = await TrackEnricher.enrichAsync(this.db, track, {
             album: true,
-            albumEarnings: !!req.user,
+            albumEarnings: addData,
         }, req.user);
 
-        if (!!req.user) {
+        if (addData) {
             track.earnings = await this.db.getTrackTotalRoyalty(track.isrc);
         }
 

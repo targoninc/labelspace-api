@@ -33,10 +33,10 @@ export class GetAlbumEndpoint extends GetEndpoint {
 
         const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
         const userArtists = await this.db.getUserArtists(id);
-        const albumArtists = album.artists.split(",").map(a => a.trim())
+        const albumArtists = album.artists.split(",").map(a => a.trim());
         const albumReleaseTime = new Date(album.release_date).getTime();
 
-        if (albumReleaseTime > new Date().getTime() && !hasReleaseManagementPermission && !albumArtists.some(a => userArtists.includes(a))) {
+        if (albumReleaseTime > new Date().getTime() && !hasReleaseManagementPermission && !userArtists.some(a => albumArtists.includes(a.name))) {
             return res.status(404).send({error: "Album not found"});
         }
 
