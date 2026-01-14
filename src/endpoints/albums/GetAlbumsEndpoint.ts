@@ -23,7 +23,7 @@ export class GetAlbumsEndpoint extends GetEndpoint {
         let albums: Album[];
         if (user && !canManage) {
             const artists = await this.db.getUserArtists(user.id);
-            albums = await this.db.getAlbumsVisibleToArtists(artists.map(a => a.name), !canManage || onlyReleased);
+            albums = await this.db.getAlbumsVisibleToArtists(artists.map(a => a.name), onlyReleased);
         } else {
             albums = await this.db.getAlbums(!user || onlyReleased);
         }

@@ -23,7 +23,7 @@ export class GetTracksEndpoint extends GetEndpoint {
         let tracks: Track[];
         if (user && !canManage) {
             const artists = await this.db.getUserArtists(user.id);
-            tracks = await this.db.getTracksVisibleToArtists(artists.map(a => a.name), !canManage || onlyReleased);
+            tracks = await this.db.getTracksVisibleToArtists(artists.map(a => a.name), onlyReleased);
         } else {
             tracks = await this.db.getTracks(!user || onlyReleased);
         }
