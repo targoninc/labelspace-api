@@ -31,7 +31,7 @@ export class GetTrackEndpoint extends GetEndpoint {
 
         const hasReleaseManagementPermission = await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db);
         const trackReleaseTime = new Date(track.release_date).getTime();
-        const userArtists = await this.db.getUserArtists(id);
+        const userArtists = req.user ? await this.db.getUserArtists(req.user.id) : [];
         const trackArtists = track.artists.split(",").map(a => a.trim());
 
         if (trackReleaseTime > new Date().getTime() && !hasReleaseManagementPermission && !userArtists.some(a => trackArtists.includes(a.name))) {
