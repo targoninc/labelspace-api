@@ -13,11 +13,11 @@ export class NewsletterUnsubscribeEndpoint extends PostEndpoint {
 
     async run(req: Request, res: Response, next: NextFunction) {
         let { code, email } = req.body;
-        if (!code || code.trim().length === 0) {
+        if (!code || typeof code !== 'string' || code.trim().length === 0) {
             return res.status(400).send({error: "No unsubscribe code provided"});
         }
 
-        if (!email || email.trim().length === 0) {
+        if (!email || typeof email !== 'string' || email.trim().length === 0) {
             return res.status(400).send({error: "No email provided"});
         }
 
@@ -29,7 +29,12 @@ export class NewsletterUnsubscribeEndpoint extends PostEndpoint {
             return res.status(200).send({message: "Unsubscribed successfully"});
         }
 
-        await this.db.deleteNewsletterSignupByCode(email, code);
+        if (signup.code !== code) {
+            CLI.warning(`Newsletter unsubscribe failed: code mismatch for email ${email}`);
+            return res.status(200).send({message: "Unsubscribed successfully"});
+        }
+
+        await this.db.deleteNewsletterSignupByEmailAndCode(email, code);
         CLI.info(`Newsletter unsubscribe successful for email ${signup.email}`);
 
         return res.status(200).send({message: "Unsubscribed successfully"});

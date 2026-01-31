@@ -13,14 +13,19 @@ export class NewsletterSubscribeEndpoint extends PostEndpoint {
     }
 
     async run(req: Request, res: Response, next: NextFunction) {
-        const { email } = req.body;
+        let { email } = req.body;
 
+        email = email?.trim().toLowerCase();
         if (!email || !email.includes("@") || email.length < 3) {
             return res.status(400).send({error: "Invalid email provided"});
         }
 
         const existing = await this.db.getNewsletterSignupByEmail(email);
         if (existing) {
+            if (!existing.verified) {
+                // Resend verification email if not verified yet
+                NewsletterMailer.sendVerificationEmail(email, existing.code);
+            }
             return res.status(200).send({message: "Subscription successful"});
         }
 

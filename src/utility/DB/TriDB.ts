@@ -959,7 +959,7 @@ export class TriDB extends CachedDB {
         await this.query<NewsletterSignup>("INSERT INTO tri.newsletter_signups (email, code) VALUES (?, ?)", [email, code]);
     }
 
-    async deleteNewsletterSignupByCode(email: string, code: string) {
+    async deleteNewsletterSignupByEmailAndCode(email: string, code: string) {
         await this.query("DELETE FROM tri.newsletter_signups WHERE email = ? AND code = ?", [email, code]);
     }
 
