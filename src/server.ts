@@ -75,6 +75,9 @@ import {migrateAttachments} from "./utility/migrateAttachments.ts";
 import {CreateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/CreateAlbumAttachmentEndpoint.ts";
 import {DeleteAlbumAttachmentEndpoint} from "./endpoints/albums/actions/DeleteAlbumAttachmentEndpoint.ts";
 import {UpdateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/UpdateAlbumAttachmentEndpoint.ts";
+import {NewsletterSubscribeEndpoint} from "./endpoints/newsletter/NewsletterSubscribeEndpoint.ts";
+import {NewsletterVerifyEndpoint} from "./endpoints/newsletter/NewsletterVerifyEndpoint.ts";
+import {NewsletterUnsubscribeEndpoint} from "./endpoints/newsletter/NewsletterUnsubscribeEndpoint.ts";
 
 config();
 
@@ -204,6 +207,12 @@ new SearchAlbumsEndpoint(app, "/search/albums", db).register();
 
 // region Logs
 new GetLogsEndpoint(app, "/logs/get", db).register();
+// endregion
+
+// region Newsletter
+new NewsletterSubscribeEndpoint(app, "/newsletter/subscribe", db).register();
+new NewsletterVerifyEndpoint(app, "/newsletter/verify", db).register();
+new NewsletterUnsubscribeEndpoint(app, "/newsletter/unsubscribe", db).register();
 // endregion
 
 // region Data

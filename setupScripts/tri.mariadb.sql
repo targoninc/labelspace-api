@@ -89,9 +89,12 @@ create index if not exists logs_time_index
 
 create table if not exists tri.newsletter_signups
 (
-    email      varchar(512)                         not null,
-    created_at datetime default current_timestamp() not null,
-    updated_at datetime default current_timestamp() not null on update current_timestamp(),
+    email       varchar(512)                           not null,
+    code        varchar(16)                            null,
+    verified    tinyint(1) default 0                   not null,
+    verified_at datetime                               null,
+    created_at  datetime   default current_timestamp() not null,
+    updated_at  datetime   default current_timestamp() not null on update current_timestamp(),
     primary key (email)
 );
 

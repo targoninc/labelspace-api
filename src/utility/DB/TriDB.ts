@@ -30,6 +30,7 @@ import {PublicKey} from "../../models/db/tri/PublicKey.ts";
 import {CachedDB} from "./Caching/CachedDB.ts";
 import {CacheConfig} from "./Caching/CacheConfig.ts";
 import {AlbumAttachment} from "../../models/db/tri/AlbumAttachment.ts";
+import {NewsletterSignup} from "../../models/db/tri/NewsletterSignup.ts";
 
 export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
@@ -948,5 +949,21 @@ export class TriDB extends CachedDB {
 
     async updateAlbumAttachment(id: number, artists: string) {
         await this.query("UPDATE tri.album_attachments SET visible_to_artists = ? WHERE id = ?", [artists, id]);
+    }
+
+    async getNewsletterSignupByEmail(email: string) {
+        return await this.queryFirst<NewsletterSignup>("SELECT * FROM tri.newsletter_signups WHERE email = ?", [email]);
+    }
+
+    async createNewsletterSignup(email: string, code: string) {
+        await this.query<NewsletterSignup>("INSERT INTO tri.newsletter_signups (email, code) VALUES (?, ?)", [email, code]);
+    }
+
+    async deleteNewsletterSignupByCode(email: string, code: string) {
+        await this.query("DELETE FROM tri.newsletter_signups WHERE email = ? AND code = ?", [email, code]);
+    }
+
+    async verifyNewsletterSignup(email: string) {
+        await this.query("UPDATE tri.newsletter_signups SET verified = 1, verified_at = CURRENT_TIMESTAMP WHERE email = ?", [email]);
     }
 }
