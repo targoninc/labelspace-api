@@ -2,6 +2,7 @@ import {Application, NextFunction, Request, Response} from "express";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {CLI} from "@targoninc/ts-logging";
+import {NewsletterMailer} from "../../utility/Mail/NewsletterMailer.ts";
 
 export class NewsletterUnsubscribeEndpoint extends PostEndpoint {
     private readonly db: TriDB;
@@ -36,6 +37,8 @@ export class NewsletterUnsubscribeEndpoint extends PostEndpoint {
 
         await this.db.deleteNewsletterSignupByEmailAndCode(email, code);
         CLI.info(`Newsletter unsubscribe successful for email ${signup.email}`);
+
+        NewsletterMailer.sendUnsubscribeEmail(email);
 
         return res.status(200).send({message: "Unsubscribed successfully"});
     }

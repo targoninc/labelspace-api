@@ -2,6 +2,7 @@ import {Application, NextFunction, Request, Response} from "express";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {CLI} from "@targoninc/ts-logging";
+import {NewsletterMailer} from "../../utility/Mail/NewsletterMailer.ts";
 
 export class NewsletterVerifyEndpoint extends PostEndpoint {
     private readonly db: TriDB;
@@ -40,6 +41,8 @@ export class NewsletterVerifyEndpoint extends PostEndpoint {
 
         CLI.success(`Newsletter signup verified for email ${signup.email}`);
         await this.db.verifyNewsletterSignup(email);
+
+        NewsletterMailer.sendSubscriptionEmail(email, code);
 
         return res.send({message: "Subscription verified"});
     }
