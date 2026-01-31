@@ -46,8 +46,29 @@ create table if not exists tri.albums
             on delete set null
 );
 
+create table if not exists tri.album_attachments
+(
+    id                 bigint auto_increment
+        primary key,
+    visible_to_artists mediumtext   null,
+    album_id           bigint       not null,
+    name               varchar(128) not null,
+    constraint album_attachments_albums_id_fk
+        foreign key (album_id) references tri.albums (id)
+            on delete cascade
+);
+
+create index if not exists album_attachments_visible_to_artists_index
+    on tri.album_attachments (visible_to_artists(768));
+
+create index if not exists albums_artists_index
+    on tri.albums (artists(768));
+
 create index if not exists albums_release_date_index
     on tri.albums (release_date);
+
+create index if not exists albums_title_index
+    on tri.albums (title);
 
 create table if not exists tri.logs
 (
@@ -59,12 +80,26 @@ create table if not exists tri.logs
     stack          longtext                             null,
     logLevel       int                                  not null,
     message        varchar(2048)                        not null,
-    properties     longtext collate utf8mb4_bin         null
-        check (json_valid(`properties`))
+    properties     longtext collate utf8mb4_bin         null,
+    check (json_valid(`properties`))
 );
 
 create index if not exists logs_time_index
     on tri.logs (time);
+
+create table if not exists tri.newsletter_signups
+(
+    email      varchar(512)                         not null,
+    created_at datetime default current_timestamp() not null,
+    updated_at datetime default current_timestamp() not null on update current_timestamp(),
+    primary key (email)
+);
+
+create index if not exists newsletter_signups_created_at_index
+    on tri.newsletter_signups (created_at);
+
+create index if not exists newsletter_signups_updated_at_index
+    on tri.newsletter_signups (updated_at);
 
 create table if not exists tri.permissions
 (
@@ -78,11 +113,32 @@ create table if not exists tri.permissions
 
 create table if not exists tri.possible_usersettings
 (
-    name        varchar(128)                 not null
-        primary key,
+    name        varchar(128)                 not null,
     description varchar(512)                 not null,
-    type        varchar(32) default 'string' not null
+    type        varchar(32) default 'string' not null,
+    primary key (name)
 );
+
+create table if not exists tri.public_keys
+(
+    id              bigint auto_increment
+        primary key,
+    public_key      longtext                               not null,
+    algorithm       tinytext                               not null,
+    passkey_user_id mediumtext                             not null,
+    key_id          tinytext                               not null,
+    backed_up       tinyint(1) default 0                   not null,
+    name            tinytext                               not null,
+    transports      mediumtext                             not null,
+    created_at      datetime   default current_timestamp() not null,
+    updated_at      datetime   default current_timestamp() not null on update current_timestamp(),
+    constraint public_keys_pk
+        unique (passkey_user_id, key_id) using hash
+)
+    comment 'https://developers.google.com/identity/passkeys/developer-guides/server-registration?hl=de#store_the_public_key';
+
+create index if not exists public_keys_passkey_user_id_index
+    on tri.public_keys (passkey_user_id(768));
 
 create table if not exists tri.tracks
 (
@@ -146,12 +202,16 @@ create table if not exists tri.users
     tos_agreed_at       timestamp  default current_timestamp() null,
     ip                  varchar(128)                           null,
     password_token      varchar(64)                            null,
+    has_avatar          tinyint(1) default 0                   not null,
+    has_banner          tinyint(1) default 0                   not null,
     email_mfa_code      tinytext                               null,
-    passkey_user_id     mediumtext                             not null,
+    passkey_user_id     mediumtext                             null,
     constraint users_id_uindex
         unique (id),
     constraint users_pk
-        unique (username)
+        unique (username),
+    constraint users_pk_2
+        unique (passkey_user_id) using hash
 );
 
 create table if not exists tri.action_log
@@ -161,15 +221,15 @@ create table if not exists tri.action_log
     user_id          bigint                               not null,
     action_name      varchar(128)                         not null,
     actioned_user_id bigint                               not null,
-    additional_info  longtext collate utf8mb4_bin         null
-        check (json_valid(`additional_info`)),
+    additional_info  longtext collate utf8mb4_bin         null,
     created_at       datetime default current_timestamp() not null,
     constraint action_log_users_id_fk
         foreign key (user_id) references tri.users (id)
             on delete cascade,
     constraint action_log_users_id_fk_2
         foreign key (actioned_user_id) references tri.users (id)
-            on delete cascade
+            on delete cascade,
+    check (json_valid(`additional_info`))
 );
 
 create table if not exists tri.user_emails
@@ -216,27 +276,6 @@ create table if not exists tri.user_totp
         foreign key (user_id) references tri.users (id)
             on delete cascade
 );
-
-create table if not exists tri.public_keys
-(
-    id              bigint auto_increment
-        primary key,
-    public_key      longtext                               not null,
-    algorithm       tinytext                               not null,
-    passkey_user_id mediumtext                             not null,
-    key_id          tinytext                               not null,
-    backed_up       tinyint(1) default 0                   not null,
-    name            tinytext                               not null,
-    transports      mediumtext                             not null,
-    created_at      datetime   default current_timestamp() not null,
-    updated_at      datetime   default current_timestamp() not null on update current_timestamp(),
-    constraint public_keys_pk
-        unique (passkey_user_id, key_id) using hash
-)
-    comment 'https://developers.google.com/identity/passkeys/developer-guides/server-registration?hl=de#store_the_public_key';
-
-create index if not exists public_keys_passkey_user_id_index
-    on tri.public_keys (passkey_user_id(768));
 
 create table if not exists tri.users_permissions
 (
