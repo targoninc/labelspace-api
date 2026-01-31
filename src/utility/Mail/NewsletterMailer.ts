@@ -1,7 +1,7 @@
 import {link, MailBuilder, paragraph, Mail} from "@targoninc/ts-mail";
 import {env} from "../Environment.js";
 
-const uiUrl = env<string>("CORS_ORIGINS").split(",").at(0);
+const uiUrl = "https://trirecords.eu";
 
 export class NewsletterMailer {
     static sendVerificationEmail(email: string, code: string) {
