@@ -15,7 +15,7 @@ export class NewsletterMailer {
             .paragraph("If you did not sign up for this newsletter, you can safely ignore this email.")
             .paragraph("---")
             .paragraph("If you wish to unsubscribe from our newsletter, you can do so by clicking the following link:")
-            .paragraph(`${uiUrl}/unsubscribe?code=${code}`)
+            .link(`${uiUrl}/unsubscribe?code=${code}`, "Unsubscribe")
             .signature("the Tri Records Team", "Targon Industries UG")
             .get();
 
