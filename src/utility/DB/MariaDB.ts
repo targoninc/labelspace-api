@@ -37,6 +37,7 @@ export class MariaDB {
                 user: this.user,
                 password: this.password,
                 database: this.database,
+                timezone: 'Z',
                 connectionLimit: parseInt(env("DB_CONNECTION_LIMIT", "10")),
                 acquireTimeout: this.connectionTimeout,
                 connectTimeout: this.connectionTimeout,
@@ -48,6 +49,7 @@ export class MariaDB {
             // Test the connection
             const testConn = await this.connectionPool.getConnection();
             await testConn.query("SET NAMES utf8mb4");
+            await testConn.query("SET time_zone = '+00:00'");
             await testConn.release();
 
             CLI.success(`DB pool initialized and connected.`);
@@ -133,12 +135,25 @@ export class MariaDB {
     }
 
     async query<T>(sql: string, params: any[] = []): Promise<T[]> {
+        // Convert Date objects in params to ISO strings (without T and Z) for MariaDB
+        // Also handle ISO strings that might have been passed manually
+        const processedParams = params.map(param => {
+            if (param instanceof Date) {
+                return param.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '').replace('Z', '');
+            }
+            if (typeof param === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(param)) {
+                return param.replace('T', ' ').replace(/\.\d+Z$/, '').replace('Z', '');
+            }
+            return param;
+        });
+
         return this.withConnection(async (conn) => {
             const start = performance.now();
             const result = await conn.query({
                 sql,
-                bigIntAsNumber: true
-            }, params) as T[];
+                bigIntAsNumber: true,
+                dateStrings: true
+            }, processedParams) as any[];
 
             const diff = performance.now() - start;
             if (diff > 200) {
@@ -151,7 +166,30 @@ export class MariaDB {
                 });
             }
 
-            return result;
+            // Convert date strings to UTC Date objects
+            if (result && Array.isArray(result)) {
+                for (const row of result) {
+                    if (typeof row === 'object' && row !== null) {
+                        for (const key in row) {
+                            const val = row[key];
+                            // MariaDB DATETIME strings are usually YYYY-MM-DD HH:MM:SS or YYYY-MM-DD
+                            if (typeof val === 'string' && (
+                                /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(val) ||
+                                /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$/.test(val) ||
+                                /^\d{4}-\d{2}-\d{2}$/.test(val) ||
+                                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(val)
+                            )) {
+                                const date = new Date(val.includes(' ') ? val.replace(' ', 'T') + 'Z' : val.includes('T') ? val : val + 'T00:00:00Z');
+                                if (!isNaN(date.getTime())) {
+                                    row[key] = date;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result as T[];
         });
     }
 

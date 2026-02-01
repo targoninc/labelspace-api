@@ -394,7 +394,7 @@ export class TriDB extends CachedDB {
             request.isrc,
             request.artists,
             request.genre ?? "other",
-            new Date(request.release_date ?? new Date().getTime()).toISOString().split("T")[0],
+            new Date(request.release_date ?? new Date().getTime()),
             request.price,
             request.length,
             request.credits,
