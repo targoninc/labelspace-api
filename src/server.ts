@@ -71,7 +71,6 @@ import {GetFileEndpoint} from "./endpoints/media/GetFileEndpoint.ts";
 import {QuarterlyReportEndpoint} from "./endpoints/statistics/QuarterlyReportEndpoint.ts";
 import {CreateUserEndpoint} from "./endpoints/user/actions/CreateUserEndpoint.ts";
 import {GetLatestAlbumEndpoint} from "./endpoints/albums/GetLatestAlbumEndpoint.ts";
-import {migrateAttachments} from "./utility/migrateAttachments.ts";
 import {CreateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/CreateAlbumAttachmentEndpoint.ts";
 import {DeleteAlbumAttachmentEndpoint} from "./endpoints/albums/actions/DeleteAlbumAttachmentEndpoint.ts";
 import {UpdateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/UpdateAlbumAttachmentEndpoint.ts";
