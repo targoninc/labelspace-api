@@ -18,6 +18,8 @@ export interface Royalty {
     count: number;
     royalty: number;
     dataprovider: string;
+    royalty_external_id?: string;
+    created_at: Date;
     updated_at: Date;
     id: number;
 }

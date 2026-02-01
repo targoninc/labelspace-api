@@ -966,4 +966,12 @@ export class TriDB extends CachedDB {
     async verifyNewsletterSignup(email: string) {
         await this.query("UPDATE tri.newsletter_signups SET verified = 1, verified_at = CURRENT_TIMESTAMP WHERE email = ?", [email]);
     }
+
+    async getRoyaltyByExternalId(id: string) {
+        return await this.queryFirst<Royalty>("SELECT * FROM finance.royalties WHERE royalty_external_id = ?", [id]);
+    }
+
+    async getBandcampReportByJson(report: SalesReport) {
+        return await this.queryFirst<{ id: number }>("SELECT * FROM finance.bandcamp_sync WHERE report = ?", [JSON.stringify(report)]);
+    }
 }

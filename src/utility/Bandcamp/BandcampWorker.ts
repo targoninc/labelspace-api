@@ -39,6 +39,17 @@ export class BandcampWorker {
             return;
         }
 
+        const existingReport = await this.db.getBandcampReportByJson(report);
+        if (existingReport) {
+            CLI.debug("Report already processed, skipping", {
+                logToDb: true,
+                info: {
+                    reportId: existingReport.id
+                }
+            });
+            return;
+        }
+
         const id = await this.db.insertBandcampReport(report);
         await this.mapAndInsertReport(id, report);
         return report;
@@ -68,7 +79,15 @@ export class BandcampWorker {
         }
 
         for (const r of royalties) {
-            await this.db.insertRoyalty(r);
+            if (!r.royalty_external_id) {
+                CLI.warning(`No external id for royalty, skipping: ${JSON.stringify(r)}`);
+                continue;
+            }
+
+            const existing = await this.db.getRoyaltyByExternalId(r.royalty_external_id ?? "");
+            if (!existing) {
+                await this.db.insertRoyalty(r);
+            }
         }
 
         await this.db.updateBandcampReportStatus(id, BandcampReportStatus.received);
@@ -115,6 +134,7 @@ export class BandcampWorker {
                 trackartists: sale.artist,
                 type: sale.package,
                 upc: album?.upc ?? "",
+                royalty_external_id: sale.bandcamp_transaction_id.toString()
             }
         });
     }
@@ -152,6 +172,7 @@ export class BandcampWorker {
             trackartists: sale.artist,
             type: sale.package,
             upc: album?.upc ?? "",
+            royalty_external_id: sale.bandcamp_transaction_id.toString()
         }];
     }
 
@@ -191,6 +212,7 @@ export class BandcampWorker {
                 trackartists: t.artists,
                 type: sale.package,
                 upc: album?.upc ?? "",
+                royalty_external_id: sale.bandcamp_transaction_id.toString()
             };
         });
     }
