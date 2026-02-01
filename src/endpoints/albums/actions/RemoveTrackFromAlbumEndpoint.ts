@@ -5,7 +5,7 @@ import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 
 export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);

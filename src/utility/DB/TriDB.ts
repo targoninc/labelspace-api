@@ -974,4 +974,8 @@ export class TriDB extends CachedDB {
     async getBandcampReportByJson(report: SalesReport) {
         return await this.queryFirst<{ id: number }>("SELECT * FROM finance.bandcamp_sync WHERE report = ?", [JSON.stringify(report)]);
     }
+
+    async getNewsletterSignup(offset: number) {
+        return await this.queryFirst<NewsletterSignup>("SELECT * FROM tri.newsletter_signups WHERE verified = 0 ORDER BY created_at LIMIT 1 OFFSET ?", [offset]);
+    }
 }

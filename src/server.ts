@@ -78,6 +78,7 @@ import {UpdateAlbumAttachmentEndpoint} from "./endpoints/albums/actions/UpdateAl
 import {NewsletterSubscribeEndpoint} from "./endpoints/newsletter/NewsletterSubscribeEndpoint.ts";
 import {NewsletterVerifyEndpoint} from "./endpoints/newsletter/NewsletterVerifyEndpoint.ts";
 import {NewsletterUnsubscribeEndpoint} from "./endpoints/newsletter/NewsletterUnsubscribeEndpoint.ts";
+import {SendNewsletterEndpoint} from "./endpoints/albums/actions/SendNewsletterEndpoint.ts";
 
 config();
 
@@ -174,6 +175,7 @@ new GetLatestAlbumEndpoint(app, "/albums/latest", db).register();
 new CreateAlbumAttachmentEndpoint(app, "/albums/actions/createAttachment", db).register();
 new DeleteAlbumAttachmentEndpoint(app, "/albums/actions/deleteAttachment", db).register();
 new UpdateAlbumAttachmentEndpoint(app, "/albums/actions/updateAttachment", db).register();
+new SendNewsletterEndpoint(app, "/albums/actions/sendNewsletter", db).register();
 // endregion
 
 // region Media
