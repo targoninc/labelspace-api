@@ -982,4 +982,8 @@ export class TriDB extends CachedDB {
     async setCampaignSentForAlbum(id: number) {
         await this.query("UPDATE tri.albums SET campaign_sent = 1 WHERE id = ?", [id]);
     }
+
+    async getFirstTrack(id: number) {
+        return await this.queryFirst<Track>("SELECT * FROM tri.tracks WHERE album_id = ? ORDER BY id LIMIT 1", [id]);
+    }
 }

@@ -33,6 +33,11 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             return res.status(404).send({error: "Album not found"});
         }
 
+        const firstTrack = await this.db.getFirstTrack(album.id);
+        if (!firstTrack) {
+            return res.status(400).send({error: "Album has no tracks"});
+        }
+
         const imageUrl = `https://artists-api.trirecords.eu/media/image?mediaFileType=albumCover&id=${album.id}&quality=500`;
         const releaseUrl = `https://trirecords.eu/album/${album.id}`;
         const title = album.artists + " - " + album.title;
@@ -41,6 +46,26 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
         if (isTest) {
             NewsletterMailer.sendReleaseEmail("alex@targoninc.com", "cantlmao", title, releaseUrl, imageUrl);
             return res.send(`Test newsletter sent`);
+        }
+
+        if (new Date(album.release_date).getTime() > new Date().getTime()) {
+            return res.status(400).send({error: "Album is not released yet"});
+        }
+
+        if (new Date(firstTrack.release_date).getTime() > new Date().getTime()) {
+            return res.status(400).send({error: "Album has no released tracks yet"});
+        }
+
+        const links = [
+            firstTrack.link_spotify,
+            firstTrack.link_lyda,
+            firstTrack.link_applemusic,
+            firstTrack.link_bandcamp,
+            firstTrack.link_youtube,
+            firstTrack.link_soundcloud,
+        ].filter(l => l && l.trim() !== "");
+        if (links.length < 5) {
+            return res.status(400).send({error: "Not enough store links are provided for the first track, must be at least 5"});
         }
 
         if (album.campaign_sent) {
