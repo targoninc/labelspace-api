@@ -978,4 +978,8 @@ export class TriDB extends CachedDB {
     async getNewsletterSignup(offset: number) {
         return await this.queryFirst<NewsletterSignup>("SELECT * FROM tri.newsletter_signups WHERE verified = 0 ORDER BY created_at LIMIT 1 OFFSET ?", [offset]);
     }
+
+    async setCampaignSentForAlbum(id: number) {
+        await this.query("UPDATE tri.albums SET campaign_sent = 1 WHERE id = ?", [id]);
+    }
 }

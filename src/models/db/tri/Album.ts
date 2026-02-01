@@ -14,6 +14,7 @@ export interface Album {
     created_at: Date;
     updated_at: Date;
     has_cover: boolean;
+    campaign_sent: boolean;
     price: number;
     artists: string;
 }

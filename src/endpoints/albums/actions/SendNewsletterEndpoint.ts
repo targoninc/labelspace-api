@@ -43,6 +43,10 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             return res.send(`Test newsletter sent`);
         }
 
+        if (album.campaign_sent) {
+            return res.status(400).send({error: "Newsletter already sent for this album"});
+        }
+
         let offset = 0;
         while (true) {
             const signup = await this.db.getNewsletterSignup(offset);
@@ -53,6 +57,8 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             NewsletterMailer.sendReleaseEmail(signup.email, signup.code, title, releaseUrl, imageUrl);
             offset++;
         }
+
+        await this.db.setCampaignSentForAlbum(id);
 
         return res.send(`Newsletter sent`);
     }

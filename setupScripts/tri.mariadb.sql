@@ -39,6 +39,7 @@ create table if not exists tri.albums
     updated_at     datetime     default current_timestamp() not null on update current_timestamp(),
     price          double       default 5                   null,
     has_cover      tinyint(1)   default 0                   not null,
+    campaign_sent  tinyint(1)   default 0                   not null,
     constraint albums_pk
         unique (upc),
     constraint albums_compilations_id_fk
