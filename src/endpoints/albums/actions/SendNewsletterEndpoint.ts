@@ -4,6 +4,7 @@ import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import {NewsletterMailer} from "../../../utility/Mail/NewsletterMailer.ts";
+import {env} from "../../../utility/Environment.ts";
 
 export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -42,7 +43,7 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
         const releaseUrl = `https://trirecords.eu/album/${album.id}`;
         const title = album.artists + " - " + album.title;
 
-        const isTest = true;
+        const isTest = env("COOKIE_DOMAIN") === "localhost" || env("TEST_NEWSLETTER") === "true";
         if (isTest) {
             NewsletterMailer.sendReleaseEmail("alex@targoninc.com", "cantlmao", title, releaseUrl, imageUrl);
             return res.send(`Test newsletter sent`);
