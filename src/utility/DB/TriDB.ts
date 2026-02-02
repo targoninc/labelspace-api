@@ -988,8 +988,8 @@ export class TriDB extends CachedDB {
         return await this.queryFirst<Track>("SELECT * FROM tri.tracks WHERE album_id = ? ORDER BY id LIMIT 1", [id]);
     }
 
-    async getArtistLinksByName(name: string) {
-        return await this.query<ArtistLink>(`SELECT al.* FROM tri.artist_links al INNER JOIN tri.artists a on al.artist_id = a.id AND a.name = ?`, [name]);
+    async getArtistLinksById(id: number) {
+        return await this.query<ArtistLink>(`SELECT * FROM tri.artist_links WHERE artist_id = ?`, [id]);
     }
 
     async createArtistLink(artistId: number, text: string, url: string) {

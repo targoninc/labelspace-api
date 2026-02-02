@@ -12,12 +12,12 @@ export class GetArtistLinksEndpoint extends GetEndpoint {
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
-        const name = req.query.name as string;
-        if (!name) {
-            return res.status(400).send("Missing artist 'name' parameter");
+        const id = parseInt(<string>req.query.id?.toString());
+        if (!id) {
+            return res.status(400).send("Missing artist 'id' parameter");
         }
 
-        const links = await this.db.getArtistLinksByName(name.trim());
+        const links = await this.db.getArtistLinksById(id);
 
         return res.send(links);
     }

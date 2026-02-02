@@ -37,7 +37,7 @@ export class CreateArtistLinkEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "URL is too long (max 512 characters)"});
         }
 
-        const existingLinks = await this.db.getArtistLinksByName(artist.name);
+        const existingLinks = await this.db.getArtistLinksById(artist.id);
         if (existingLinks.some(link => link.text === text)) {
             return res.status(400).send({error: "Link with this text already exists for this artist"});
         }
