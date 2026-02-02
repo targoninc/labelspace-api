@@ -991,4 +991,20 @@ export class TriDB extends CachedDB {
     async getArtistLinksByName(name: string) {
         return await this.query<ArtistLink>(`SELECT al.* FROM tri.artist_links al INNER JOIN tri.artists a on al.artist_id = a.id AND a.name = ?`, [name]);
     }
+
+    async createArtistLink(artistId: number, text: string, url: string) {
+        await this.query("INSERT INTO tri.artist_links (artist_id, text, url) VALUES (?, ?, ?)", [artistId, text, url]);
+    }
+
+    async updateArtistLink(id: number, text: string, url: string) {
+        await this.query("UPDATE tri.artist_links SET text = ?, url = ? WHERE id = ?", [text, url, id]);
+    }
+
+    async deleteArtistLink(id: number) {
+        await this.query("DELETE FROM tri.artist_links WHERE id = ?", [id]);
+    }
+
+    async getArtistLinkById(id: number) {
+        return await this.queryFirst<ArtistLink>("SELECT * FROM tri.artist_links WHERE id = ?", [id]);
+    }
 }

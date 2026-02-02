@@ -54,6 +54,10 @@ import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoi
 import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 import {GetArtistEndpoint} from "./endpoints/artists/GetArtistEndpoint.ts";
 import {UpdateArtistEndpoint} from "./endpoints/artists/UpdateArtistEndpoint.ts";
+import {GetArtistLinksEndpoint} from "./endpoints/artists/links/GetArtistLinksEndpoint.ts";
+import {CreateArtistLinkEndpoint} from "./endpoints/artists/links/CreateArtistLinkEndpoint.ts";
+import {UpdateArtistLinkEndpoint} from "./endpoints/artists/links/UpdateArtistLinkEndpoint.ts";
+import {DeleteArtistLinkEndpoint} from "./endpoints/artists/links/DeleteArtistLinkEndpoint.ts";
 import {RoyaltiesByServiceEndpoint} from "./endpoints/statistics/RoyaltiesByServiceEndpoint.ts";
 import {AddTotpMethodEndpoint} from "./endpoints/auth/totp/AddTotpMethodEndpoint.ts";
 import {VerifyTotpEndpoint} from "./endpoints/auth/totp/VerifyTotpEndpoint.ts";
@@ -131,6 +135,10 @@ const challengeStore = new ChallengeStore();
 new GetArtistsEndpoint(app, "/artists/get", db).register();
 new GetArtistEndpoint(app, "/artists/byName", db).register();
 new UpdateArtistEndpoint(app, "/artists/update", db).register();
+new GetArtistLinksEndpoint(app, "/artists/links/get", db).register();
+new CreateArtistLinkEndpoint(app, "/artists/links/create", db).register();
+new UpdateArtistLinkEndpoint(app, "/artists/links/update", db).register();
+new DeleteArtistLinkEndpoint(app, "/artists/links/delete", db).register();
 // endregion
 
 // region Users
