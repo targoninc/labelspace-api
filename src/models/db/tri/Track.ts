@@ -7,9 +7,11 @@ export interface Track {
     user?: User;
     comments?: Comment[];
     album?: Album;
+    singleAlbum?: Album;
     notifications?: Notification[];
     id: number;
     album_id?: number;
+    single_album_id?: number;
     title: string;
     artists: string;
     isrc: string;

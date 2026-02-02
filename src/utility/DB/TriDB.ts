@@ -135,12 +135,13 @@ export class TriDB extends CachedDB {
     }
 
     async createAlbum(album: Album): Promise<Album | null> {
-        await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists) VALUES (?, ?, ?, ?, ?)", [
+        await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists, is_single) VALUES (?, ?, ?, ?, ?, ?)", [
             album.title,
             album.upc,
             album.release_date,
             album.price,
             album.artists,
+            album.is_single,
         ]);
         const id = await this.querySingleValue<number>("SELECT id FROM tri.albums WHERE title = ? ORDER BY created_at DESC LIMIT 1", [album.title]);
         if (!id) {
@@ -678,8 +679,8 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.tracks ORDER BY release_date DESC");
     }
 
-    async addTrackToAlbum(album_id: number, track_id: number) {
-        await this.query("UPDATE tri.tracks SET album_id = ? WHERE id = ?", [album_id, track_id]);
+    async addTrackToAlbum(album_id: number, track_id: number, is_single: boolean) {
+        await this.query(`UPDATE tri.tracks SET ${is_single ? "single_" : ""}album_id = ? WHERE id = ?`, [album_id, track_id]);
     }
 
     async getLastBandcampReportTime(): Promise<string | null> {
