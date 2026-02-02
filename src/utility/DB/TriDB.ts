@@ -31,6 +31,7 @@ import {CachedDB} from "./Caching/CachedDB.ts";
 import {CacheConfig} from "./Caching/CacheConfig.ts";
 import {AlbumAttachment} from "../../models/db/tri/AlbumAttachment.ts";
 import {NewsletterSignup} from "../../models/db/tri/NewsletterSignup.ts";
+import {ArtistLink} from "../../models/db/tri/ArtistLink.ts";
 
 export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
@@ -985,5 +986,9 @@ export class TriDB extends CachedDB {
 
     async getFirstTrack(id: number) {
         return await this.queryFirst<Track>("SELECT * FROM tri.tracks WHERE album_id = ? ORDER BY id LIMIT 1", [id]);
+    }
+
+    async getArtistLinksByName(name: string) {
+        return await this.query<ArtistLink>(`SELECT al.* FROM tri.artist_links al INNER JOIN tri.artists a on al.artist_id = a.id AND a.name = ?`, [name]);
     }
 }

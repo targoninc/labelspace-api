@@ -9,7 +9,7 @@ import {ArtistEnricher} from "../../models/enrichers/ArtistEnricher.ts";
 import {Artist} from "../../models/db/tri/Artist.ts";
 
 export class GetArtistEndpoint extends GetEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);

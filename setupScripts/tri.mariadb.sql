@@ -3,14 +3,28 @@ create schema if not exists tri;
 create table if not exists tri.artists
 (
     id          bigint auto_increment
-        primary key,
+    primary key,
     user_id     bigint                null,
     name        mediumtext            not null,
     description longtext   default '' not null,
     has_logo    tinyint(1) default 0  not null,
     constraint artists_pk
-        unique (name) using hash
-);
+    unique (name) using hash
+    );
+
+create table if not exists tri.artist_links
+(
+    id         bigint auto_increment
+    primary key,
+    artist_id  bigint                               not null,
+    text       varchar(32)                          not null,
+    url        varchar(512)                         not null,
+    created_at datetime default current_timestamp() not null,
+    updated_at datetime default current_timestamp() not null on update current_timestamp(),
+    constraint artist_links_artists_id_fk
+    foreign key (artist_id) references tri.artists (id)
+                                                             on delete cascade
+    );
 
 create index if not exists artists_name_index
     on tri.artists (name(768));
@@ -21,15 +35,15 @@ create index if not exists artists_users_id_fk
 create table if not exists tri.compilations
 (
     id   int auto_increment
-        primary key,
+    primary key,
     name varchar(512) not null
-)
+    )
     collate = utf8mb4_general_ci;
 
 create table if not exists tri.albums
 (
     id             bigint auto_increment
-        primary key,
+    primary key,
     artists        mediumtext                               not null,
     compilation_id int                                      null,
     title          varchar(512) default ''                  not null,
@@ -41,23 +55,23 @@ create table if not exists tri.albums
     has_cover      tinyint(1)   default 0                   not null,
     campaign_sent  tinyint(1)   default 0                   not null,
     constraint albums_pk
-        unique (upc),
+    unique (upc),
     constraint albums_compilations_id_fk
-        foreign key (compilation_id) references tri.compilations (id)
-            on delete set null
-);
+    foreign key (compilation_id) references tri.compilations (id)
+                                                                     on delete set null
+    );
 
 create table if not exists tri.album_attachments
 (
     id                 bigint auto_increment
-        primary key,
+    primary key,
     visible_to_artists mediumtext   null,
     album_id           bigint       not null,
     name               varchar(128) not null,
     constraint album_attachments_albums_id_fk
-        foreign key (album_id) references tri.albums (id)
-            on delete cascade
-);
+    foreign key (album_id) references tri.albums (id)
+    on delete cascade
+    );
 
 create index if not exists album_attachments_visible_to_artists_index
     on tri.album_attachments (visible_to_artists(768));
@@ -74,7 +88,7 @@ create index if not exists albums_title_index
 create table if not exists tri.logs
 (
     order_id       bigint auto_increment
-        primary key,
+    primary key,
     correlation_id varchar(64)                          null,
     time           datetime default current_timestamp() not null,
     host           varchar(128)                         null,
@@ -83,7 +97,7 @@ create table if not exists tri.logs
     message        varchar(2048)                        not null,
     properties     longtext collate utf8mb4_bin         null,
     check (json_valid(`properties`))
-);
+    );
 
 create index if not exists logs_time_index
     on tri.logs (time);
@@ -97,7 +111,7 @@ create table if not exists tri.newsletter_signups
     created_at  datetime   default current_timestamp() not null,
     updated_at  datetime   default current_timestamp() not null on update current_timestamp(),
     primary key (email)
-);
+    );
 
 create index if not exists newsletter_signups_created_at_index
     on tri.newsletter_signups (created_at);
@@ -108,12 +122,12 @@ create index if not exists newsletter_signups_updated_at_index
 create table if not exists tri.permissions
 (
     id          int auto_increment
-        primary key,
+    primary key,
     name        varchar(64)                          not null,
     description varchar(256)                         not null,
     created_at  datetime default current_timestamp() not null,
     updated_at  datetime default current_timestamp() not null on update current_timestamp()
-);
+    );
 
 create table if not exists tri.possible_usersettings
 (
@@ -121,12 +135,12 @@ create table if not exists tri.possible_usersettings
     description varchar(512)                 not null,
     type        varchar(32) default 'string' not null,
     primary key (name)
-);
+    );
 
 create table if not exists tri.public_keys
 (
     id              bigint auto_increment
-        primary key,
+    primary key,
     public_key      longtext                               not null,
     algorithm       tinytext                               not null,
     passkey_user_id mediumtext                             not null,
@@ -137,8 +151,8 @@ create table if not exists tri.public_keys
     created_at      datetime   default current_timestamp() not null,
     updated_at      datetime   default current_timestamp() not null on update current_timestamp(),
     constraint public_keys_pk
-        unique (passkey_user_id, key_id) using hash
-)
+    unique (passkey_user_id, key_id) using hash
+    )
     comment 'https://developers.google.com/identity/passkeys/developer-guides/server-registration?hl=de#store_the_public_key';
 
 create index if not exists public_keys_passkey_user_id_index
@@ -147,7 +161,7 @@ create index if not exists public_keys_passkey_user_id_index
 create table if not exists tri.tracks
 (
     id              bigint auto_increment
-        primary key,
+    primary key,
     album_id        bigint                                 null,
     title           varchar(255)                           not null,
     artists         mediumtext                             not null,
@@ -169,11 +183,11 @@ create table if not exists tri.tracks
     link_bandcamp   mediumtext                             null,
     link_lyda       mediumtext                             null,
     constraint tracks_pk
-        unique (isrc),
+    unique (isrc),
     constraint tracks_albums_id_fk
-        foreign key (album_id) references tri.albums (id)
-            on delete set null
-);
+    foreign key (album_id) references tri.albums (id)
+                                                                    on delete set null
+    );
 
 create index if not exists tracks_artists_index
     on tri.tracks (artists(768));
@@ -190,7 +204,7 @@ create index if not exists tracks_title_index
 create table if not exists tri.users
 (
     id                  bigint auto_increment
-        primary key,
+    primary key,
     username            varchar(32)                            not null,
     legal_name          varchar(128)                           null,
     country             varchar(128)                           null,
@@ -211,30 +225,30 @@ create table if not exists tri.users
     email_mfa_code      tinytext                               null,
     passkey_user_id     mediumtext                             null,
     constraint users_id_uindex
-        unique (id),
+    unique (id),
     constraint users_pk
-        unique (username),
+    unique (username),
     constraint users_pk_2
-        unique (passkey_user_id) using hash
-);
+    unique (passkey_user_id) using hash
+    );
 
 create table if not exists tri.action_log
 (
     id               bigint auto_increment
-        primary key,
+    primary key,
     user_id          bigint                               not null,
     action_name      varchar(128)                         not null,
     actioned_user_id bigint                               not null,
     additional_info  longtext collate utf8mb4_bin         null,
     created_at       datetime default current_timestamp() not null,
     constraint action_log_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade,
+    foreign key (user_id) references tri.users (id)
+    on delete cascade,
     constraint action_log_users_id_fk_2
-        foreign key (actioned_user_id) references tri.users (id)
-            on delete cascade,
+    foreign key (actioned_user_id) references tri.users (id)
+    on delete cascade,
     check (json_valid(`additional_info`))
-);
+    );
 
 create table if not exists tri.user_emails
 (
@@ -246,9 +260,9 @@ create table if not exists tri.user_emails
     verified_at       datetime             null,
     primary key (user_id, email),
     constraint user_emails_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade
-);
+    foreign key (user_id) references tri.users (id)
+    on delete cascade
+    );
 
 create index if not exists user_emails_verification_code_index
     on tri.user_emails (verification_code);
@@ -262,14 +276,14 @@ create table if not exists tri.user_settings
     updated_at datetime default current_timestamp() not null on update current_timestamp(),
     primary key (user_id, `key`),
     constraint user_settings_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade
-);
+    foreign key (user_id) references tri.users (id)
+                                                             on delete cascade
+    );
 
 create table if not exists tri.user_totp
 (
     id         bigint auto_increment
-        primary key,
+    primary key,
     user_id    bigint                                 not null,
     secret     varchar(128)                           null,
     verified   tinyint(1) default 0                   not null,
@@ -277,9 +291,9 @@ create table if not exists tri.user_totp
     created_at datetime   default current_timestamp() not null,
     updated_at datetime   default current_timestamp() not null on update current_timestamp(),
     constraint user_totp_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade
-);
+    foreign key (user_id) references tri.users (id)
+                                                               on delete cascade
+    );
 
 create table if not exists tri.users_permissions
 (
@@ -288,10 +302,10 @@ create table if not exists tri.users_permissions
     created_at    datetime default current_timestamp() not null,
     primary key (user_id, permission_id),
     constraint users_permissions_permissions_id_fk
-        foreign key (permission_id) references tri.permissions (id)
-            on delete cascade,
+    foreign key (permission_id) references tri.permissions (id)
+    on delete cascade,
     constraint users_permissions_users_id_fk
-        foreign key (user_id) references tri.users (id)
-            on delete cascade
-);
+    foreign key (user_id) references tri.users (id)
+    on delete cascade
+    );
 
