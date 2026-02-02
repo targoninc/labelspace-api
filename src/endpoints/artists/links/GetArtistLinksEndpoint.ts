@@ -17,7 +17,7 @@ export class GetArtistLinksEndpoint extends GetEndpoint {
             return res.status(400).send("Missing artist 'name' parameter");
         }
 
-        const links = await this.db.getArtistLinksByName(name);
+        const links = await this.db.getArtistLinksByName(name.trim());
 
         return res.send(links);
     }
