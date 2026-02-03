@@ -1025,6 +1025,10 @@ export class TriDB extends CachedDB {
     }
 
     async getAlbumsByTrackIds(trackIds: number[]) {
+        if (trackIds.length === 0) {
+            return [];
+        }
+
         const qs = trackIds.map(() => '?').join(', ');
         return await this.query<Album & { track_id: number }>(`SELECT a.*, at.track_id
                                                                FROM tri.albums a
