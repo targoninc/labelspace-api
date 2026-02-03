@@ -3,6 +3,7 @@ import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class AddTrackToAlbumEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -33,6 +34,7 @@ export class AddTrackToAlbumEndpoint extends AuthenticatedPostEndpoint {
 
         let addedErrors = 0;
         for (const id of album_ids) {
+            CLI.debug(`Adding track ${track_id} to album ${id}`);
             await this.db.addTrackToAlbum(id, track_id, 0);
         }
 

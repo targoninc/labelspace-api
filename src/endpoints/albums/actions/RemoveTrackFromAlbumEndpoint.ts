@@ -3,6 +3,7 @@ import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -33,6 +34,7 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
 
         let addedErrors = 0;
         for (const id of album_ids) {
+            CLI.debug(`Removing track ${track_id} from album ${id}`);
             await this.db.removeTrackFromAlbum(id, track_id);
         }
 
