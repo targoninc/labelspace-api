@@ -35,7 +35,7 @@ export class SearchConfigurations {
         subtitleFunction: t => t.artists,
         enrichAfterSearchFunction: async (db, a) => {
             return await TrackEnricher.enrichManyAsync(db, a, {
-                album: true
+                albums: true
             });
         }
     };

@@ -21,7 +21,7 @@ export class AlbumEnricher extends IEnricher {
 
         if (config.trackEarnings) {
             for (const t of base.tracks) {
-                t.earnings = await db.getTrackTotalRoyalty(t.isrc);
+                t.earnings = await db.getTrackTotalRoyalty(t.isrc) ?? 0;
             }
         }
 
@@ -34,7 +34,7 @@ export class AlbumEnricher extends IEnricher {
 
     static async enrichManyAsync(db: TriDB, albums: Album[], config: AlbumEnrichmentConfig): Promise<Album[]> {
         const albumIds = albums.map(album => album.id);
-        const tracks = await enrichIfAsync<Track[]>(config.tracks, () => db.getTracksByAlbumIds(albumIds), []);
+        const tracks = await enrichIfAsync<(Track & { album_id: number })[]>(config.tracks, () => db.getTracksByAlbumIds(albumIds), []);
 
         albums.forEach(album => {
             album.tracks = tracks?.filter(t => t.album_id === album.id) ?? [];

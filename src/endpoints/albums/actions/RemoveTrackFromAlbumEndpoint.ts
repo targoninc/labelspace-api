@@ -22,12 +22,7 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to edit albums.");
         }
 
-        let body = req.body;
-        if (!body) {
-            return res.status(400).send({error: "No body provided"});
-        }
-
-        const { album_ids, track_id } = body;
+        const { album_ids, track_id } = req.body;
         if (!album_ids || album_ids.length === 0) {
             return res.status(400).send({error: "No album_ids provided"});
         }

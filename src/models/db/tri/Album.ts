@@ -17,5 +17,4 @@ export interface Album {
     campaign_sent: boolean;
     price: number;
     artists: string;
-    is_single: boolean;
 }

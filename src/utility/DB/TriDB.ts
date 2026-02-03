@@ -135,13 +135,12 @@ export class TriDB extends CachedDB {
     }
 
     async createAlbum(album: Album): Promise<Album | null> {
-        await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists, is_single) VALUES (?, ?, ?, ?, ?, ?)", [
+        await this.query("INSERT INTO tri.albums (title, upc, release_date, price, artists) VALUES (?, ?, ?, ?, ?)", [
             album.title,
             album.upc,
             album.release_date,
             album.price,
             album.artists,
-            album.is_single,
         ]);
         const id = await this.querySingleValue<number>("SELECT id FROM tri.albums WHERE title = ? ORDER BY created_at DESC LIMIT 1", [album.title]);
         if (!id) {
@@ -171,11 +170,14 @@ export class TriDB extends CachedDB {
         ]);
     }
 
-    async getTracksByAlbumIds(albumIds: number[]): Promise<Track[]> {
+    async getTracksByAlbumIds(albumIds: number[]) {
         if (albumIds.length === 0) {
             return [];
         }
-        return await this.query("SELECT * FROM tri.tracks WHERE album_id IN (?)", [albumIds]);
+        return await this.query<Track & { album_id: number }>(`SELECT t.*, at.album_id
+                                 FROM tri.tracks t
+                                          INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id IN (?)`,
+            [albumIds]);
     }
 
     async getRoyaltiesByTrack(artistNames: string[], limit: number): Promise<Statistic[]> {
@@ -185,7 +187,7 @@ export class TriDB extends CachedDB {
                                         r.title        as label,
                                         SUM(r.royalty) as value
                                  FROM finance.royalties r
-                                    INNER JOIN tri.tracks t on r.isrc = t.isrc
+                                          INNER JOIN tri.tracks t on r.isrc = t.isrc
                                  WHERE ${artistConditions}
                                  GROUP BY r.isrc
                                  ORDER BY SUM(r.royalty) DESC
@@ -669,7 +671,7 @@ export class TriDB extends CachedDB {
     }
 
     async removeTrackFromAlbum(album_id: number, track_id: number) {
-        await this.query("UPDATE tri.tracks SET album_id = NULL WHERE album_id = ? AND id = ?", [album_id, track_id]);
+        await this.query("DELETE FROM tri.album_tracks WHERE album_id = ? AND track_id = ?", [album_id, track_id]);
     }
 
     async getTracks(notAuthenticated: boolean): Promise<Track[]> {
@@ -679,8 +681,9 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.tracks ORDER BY release_date DESC");
     }
 
-    async addTrackToAlbum(album_id: number, track_id: number, is_single: boolean) {
-        await this.query(`UPDATE tri.tracks SET ${is_single ? "single_" : ""}album_id = ? WHERE id = ?`, [album_id, track_id]);
+    async addTrackToAlbum(album_id: number, track_id: number, position: number) {
+        await this.query(`INSERT INTO tri.album_tracks (album_id, track_id, position)
+                          VALUES (?, ?, ?)`, [album_id, track_id, position]);
     }
 
     async getLastBandcampReportTime(): Promise<string | null> {
@@ -814,15 +817,15 @@ export class TriDB extends CachedDB {
     }
 
     async getTrackTotalRoyalty(isrc: string) {
-        return await this.querySingleValue(`SELECT SUM(r.royalty)
-                                            FROM finance.royalties r
-                                            WHERE r.isrc = ?`, [isrc]);
+        return await this.querySingleValue<number>(`SELECT SUM(r.royalty)
+                                                    FROM finance.royalties r
+                                                    WHERE r.isrc = ?`, [isrc]);
     }
 
-    async getTrackCountByAlbumIds(ids: number[]): Promise<{ id: number, count: number }[]> {
-        return await this.query(`SELECT album_id AS id, COUNT(*) AS count
-                                 FROM tri.tracks
-                                 GROUP BY album_id`, ids);
+    async getAlbumTrackCounts(): Promise<{ id: number, count: number }[]> {
+        return await this.query(`SELECT at.album_id AS id, COUNT(*) AS count
+                                 FROM tri.album_tracks at
+                                 GROUP BY at.album_id`);
     }
 
     async addTotpMethod(userId: number, methodName: string, secret: string) {
@@ -903,9 +906,9 @@ export class TriDB extends CachedDB {
         const dateQuery = onlyReleased ? "AND release_date < CURRENT_TIMESTAMP" : "";
 
         return await this.query<Album>(`SELECT *
-                                 FROM tri.albums
-                                 WHERE ${likeQuery} ${dateQuery}
-                                 ORDER BY release_date DESC`, [...artistNamesLike]);
+                                        FROM tri.albums
+                                        WHERE ${likeQuery} ${dateQuery}
+                                        ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 
     async getTracksVisibleToArtists(artists: string[], onlyReleased: boolean) {
@@ -914,22 +917,24 @@ export class TriDB extends CachedDB {
         const dateQuery = onlyReleased ? "AND release_date < CURRENT_TIMESTAMP" : "";
 
         return await this.query<Track>(`SELECT *
-                                 FROM tri.tracks
-                                 WHERE ${likeQuery} ${dateQuery}
-                                 ORDER BY release_date DESC`, [...artistNamesLike]);
+                                        FROM tri.tracks
+                                        WHERE ${likeQuery} ${dateQuery}
+                                        ORDER BY release_date DESC`, [...artistNamesLike]);
     }
 
     async createUser(username: string, legal_name: string, passKeyUserId: string, passwordHash: string, country: string, state: string | undefined) {
-        await this.query(`INSERT INTO tri.users (username, legal_name, passkey_user_id, password_hash, country, state) VALUES (?, ?, ?, ?, ?, ?)`, [username, legal_name, passKeyUserId, passwordHash, country, state]);
+        await this.query(`INSERT INTO tri.users (username, legal_name, passkey_user_id, password_hash, country, state)
+                          VALUES (?, ?, ?, ?, ?,
+                                  ?)`, [username, legal_name, passKeyUserId, passwordHash, country, state]);
         return await this.querySingleValue<number>("SELECT id FROM tri.users WHERE username = ?", [username]);
     }
 
     async getLatestAlbum() {
         return await this.queryFirst<Album>(`SELECT *
-                                            FROM tri.albums a
-                                            WHERE a.release_date <= curdate()
-                                            ORDER BY a.release_date DESC
-                                            LIMIT 1`);
+                                             FROM tri.albums a
+                                             WHERE a.release_date <= curdate()
+                                             ORDER BY a.release_date DESC
+                                             LIMIT 1`);
     }
 
     async createAlbumAttachment(albumId: number, name: string, artists: string) {
@@ -974,7 +979,9 @@ export class TriDB extends CachedDB {
     }
 
     async getBandcampReportByJson(report: SalesReport) {
-        return await this.queryFirst<{ id: number }>("SELECT * FROM finance.bandcamp_sync WHERE report = ?", [JSON.stringify(report)]);
+        return await this.queryFirst<{
+            id: number
+        }>("SELECT * FROM finance.bandcamp_sync WHERE report = ?", [JSON.stringify(report)]);
     }
 
     async getNewsletterSignup(offset: number) {
@@ -990,7 +997,9 @@ export class TriDB extends CachedDB {
     }
 
     async getArtistLinksById(id: number) {
-        return await this.query<ArtistLink>(`SELECT * FROM tri.artist_links WHERE artist_id = ?`, [id]);
+        return await this.query<ArtistLink>(`SELECT *
+                                             FROM tri.artist_links
+                                             WHERE artist_id = ?`, [id]);
     }
 
     async createArtistLink(artistId: number, text: string, url: string) {
@@ -1007,5 +1016,18 @@ export class TriDB extends CachedDB {
 
     async getArtistLinkById(id: number) {
         return await this.queryFirst<ArtistLink>("SELECT * FROM tri.artist_links WHERE id = ?", [id]);
+    }
+
+    async getTrackAlbums(id: number) {
+        return await this.query<Album>(`SELECT *
+                                        FROM tri.albums
+                                        WHERE id IN (SELECT album_id FROM tri.album_tracks WHERE track_id = ?)`, [id]);
+    }
+
+    async getAlbumsByTrackIds(trackIds: number[]) {
+        const qs = trackIds.map(() => '?').join(', ');
+        return await this.query<Album & { track_id: number }>(`SELECT a.*, at.track_id
+                                                               FROM tri.albums a
+                                                                        INNER JOIN tri.album_tracks at ON a.id = at.album_id AND at.track_id IN (${qs})`, trackIds);
     }
 }

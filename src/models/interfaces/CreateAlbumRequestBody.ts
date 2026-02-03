@@ -4,5 +4,4 @@ export interface CreateAlbumRequestBody {
     upc?: string;
     release_date?: Date;
     price?: number;
-    is_single?: boolean;
 }
