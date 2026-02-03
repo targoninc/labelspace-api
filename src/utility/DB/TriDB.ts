@@ -175,8 +175,8 @@ export class TriDB extends CachedDB {
             return [];
         }
         return await this.query<Track & { album_id: number }>(`SELECT t.*, at.album_id
-                                 FROM tri.tracks t
-                                          INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id IN (?)`,
+                                                               FROM tri.tracks t
+                                                                        INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id IN (?)`,
             [albumIds]);
     }
 
@@ -485,8 +485,8 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.user_emails WHERE user_id = ?", [id]);
     }
 
-    async getUserPrimaryEmail(id: number): Promise<UserEmail> {
-        return await this.queryFirst("SELECT * FROM tri.user_emails WHERE user_id = ? AND `primary` = 1", [id]);
+    async getUserPrimaryEmail(id: number) {
+        return await this.queryFirst<UserEmail>("SELECT * FROM tri.user_emails WHERE user_id = ? AND `primary` = 1", [id]);
     }
 
     async verifyEmail(user_id: number, email: string) {
@@ -601,8 +601,8 @@ export class TriDB extends CachedDB {
         await this.query("UPDATE finance.paypal_batch_payments SET paypal_batch_status = ? WHERE id = ?", [status, senderBatchId]);
     }
 
-    async getTopRoyaltyId(): Promise<number> {
-        return await this.querySingleValue("SELECT MAX(id) FROM finance.royalties");
+    async getTopRoyaltyId() {
+        return await this.querySingleValue<number>("SELECT MAX(id) FROM finance.royalties");
     }
 
     async deleteRoyaltiesAboveId(currentTopId: number) {
@@ -993,7 +993,11 @@ export class TriDB extends CachedDB {
     }
 
     async getFirstTrack(id: number) {
-        return await this.queryFirst<Track>("SELECT * FROM tri.tracks WHERE album_id = ? ORDER BY id LIMIT 1", [id]);
+        return await this.queryFirst<Track>(`SELECT t.*
+                                             FROM tri.tracks t
+                                             INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id = ?
+                                             ORDER BY at.position, t.id
+                                             LIMIT 1`, [id]);
     }
 
     async getArtistLinksById(id: number) {
