@@ -28,7 +28,7 @@ export class GetAlbumsEndpoint extends GetEndpoint {
             albums = await this.db.getAlbums(!user || onlyReleased);
         }
 
-        const trackCounts = await this.db.getTrackCountByAlbumIds(albums.map(a => a.id));
+        const trackCounts = await this.db.getAlbumTrackCounts();
 
         albums = albums.map(a => {
             const count = trackCounts.find(c => c.id === a.id)?.count ?? 0;

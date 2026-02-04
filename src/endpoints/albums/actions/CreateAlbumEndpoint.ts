@@ -36,7 +36,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
         const release_date = new Date(body.release_date ?? today.toISOString());
         const price = body.price ?? 1;
         const artists = body.artists ?? "";
-        const is_single = body.is_single ?? false;
 
         const album = await this.db.createAlbum(<Album>{
             user_id: req.user.id,
@@ -45,7 +44,6 @@ export class CreateAlbumEndpoint extends AuthenticatedPostEndpoint {
             artists,
             release_date,
             price,
-            is_single
         });
         if (!album) {
             CLI.error("Failed to create album (album not found after creation)");

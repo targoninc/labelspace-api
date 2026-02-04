@@ -3,6 +3,7 @@ import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class AddTrackToAlbumEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -22,7 +23,7 @@ export class AddTrackToAlbumEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to edit albums.");
         }
 
-        const { album_ids, track_id, is_single } = req.body;
+        const { album_ids, track_id } = req.body;
         if (!album_ids || album_ids.length === 0) {
             return res.status(400).send({error: "No album_ids provided"});
         }
@@ -33,7 +34,8 @@ export class AddTrackToAlbumEndpoint extends AuthenticatedPostEndpoint {
 
         let addedErrors = 0;
         for (const id of album_ids) {
-            await this.db.addTrackToAlbum(id, track_id, is_single ?? false);
+            CLI.debug(`Adding track ${track_id} to album ${id}`);
+            await this.db.addTrackToAlbum(id, track_id, 0);
         }
 
         return res.send(`Track successfully added to ${album_ids.length - addedErrors} albums`);

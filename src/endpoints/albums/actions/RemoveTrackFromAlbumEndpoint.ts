@@ -3,6 +3,7 @@ import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
 import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
+import {CLI} from "@targoninc/ts-logging";
 
 export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -22,12 +23,7 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to edit albums.");
         }
 
-        let body = req.body;
-        if (!body) {
-            return res.status(400).send({error: "No body provided"});
-        }
-
-        const { album_ids, track_id } = body;
+        const { album_ids, track_id } = req.body;
         if (!album_ids || album_ids.length === 0) {
             return res.status(400).send({error: "No album_ids provided"});
         }
@@ -38,6 +34,7 @@ export class RemoveTrackFromAlbumEndpoint extends AuthenticatedPostEndpoint {
 
         let addedErrors = 0;
         for (const id of album_ids) {
+            CLI.debug(`Removing track ${track_id} from album ${id}`);
             await this.db.removeTrackFromAlbum(id, track_id);
         }
 

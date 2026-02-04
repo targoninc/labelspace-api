@@ -56,6 +56,10 @@ export class AddDataEndpoint extends AuthenticatedPostEndpoint {
         }
 
         const currentTopId = await this.db.getTopRoyaltyId();
+        if (!currentTopId) {
+            throw new Error("currentTopId is null");
+        }
+
         const period1Key = "Reporting Period";
         const period2Key = "Activity Period";
 

@@ -15,7 +15,7 @@ export class SearchConfigurations {
         urlIdField: "id",
         hasImageField: "has_cover",
         displayField: "title",
-        subtitleFunction: a => `${a.artists}` ?? "Unknown user",
+        subtitleFunction: a => a.artists ?? "Unknown artists",
         enrichAfterSearchFunction: async (db, a) => {
             return await AlbumEnricher.enrichManyAsync(db, a, {
                 tracks: true
@@ -35,7 +35,7 @@ export class SearchConfigurations {
         subtitleFunction: t => t.artists,
         enrichAfterSearchFunction: async (db, a) => {
             return await TrackEnricher.enrichManyAsync(db, a, {
-                album: true
+                albums: true
             });
         }
     };
