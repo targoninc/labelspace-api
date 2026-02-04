@@ -76,10 +76,10 @@ export class CachedDB extends MariaDB {
 
     async query<T>(sql: string, params: any[] = [], options: DbOptions = {}): Promise<T[] & DbResponse> {
         const isCacheable = sql.trim().toLowerCase().startsWith('select');
-
         const tableNames = CachedDB.getTableNamesFromStatement(sql);
-        if (!isCacheable || options.disableCacheWrite) {
-            if (tableNames.length > 0) {
+
+        if (!isCacheable || options.disableCacheWrite || !this.cache) {
+            if (tableNames.length > 0 && this.cache) {
                 console.log(`Invalidating cache for ${tableNames.join(',')}`);
                 this.cache?.delPrefix(this.tableKey(tableNames));
             }
