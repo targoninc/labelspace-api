@@ -46,6 +46,8 @@ export class GetTrackEndpoint extends GetEndpoint {
 
         if (addData) {
             track.earnings = await this.db.getTrackTotalRoyalty(track.isrc);
+        } else {
+            track.albums = track.albums?.filter(a => new Date(a.release_date).getTime() <= new Date().getTime())
         }
 
         return res.send({
