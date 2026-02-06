@@ -48,9 +48,6 @@ export class TriDB extends CachedDB {
         super(cacheConfig);
 
         setInterval(() => {
-            CLI.debug("Pinging database", {
-                logToDb: false
-            });
             this.query("SELECT 1").then();
         }, 1000 * 60 * 5);
     }
@@ -985,7 +982,7 @@ export class TriDB extends CachedDB {
     }
 
     async getNewsletterSignup(offset: number) {
-        return await this.queryFirst<NewsletterSignup>("SELECT * FROM tri.newsletter_signups WHERE verified = 0 ORDER BY created_at LIMIT 1 OFFSET ?", [offset]);
+        return await this.queryFirst<NewsletterSignup>("SELECT * FROM tri.newsletter_signups WHERE verified = 1 ORDER BY created_at LIMIT 1 OFFSET ?", [offset]);
     }
 
     async setCampaignSentForAlbum(id: number) {
