@@ -8,6 +8,7 @@ import type {Track} from "../../models/db/tri/Track.ts";
 import {CLI} from "@targoninc/ts-logging";
 import {env} from "../Environment.ts";
 import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
+import {hashObject} from "./Hashing.ts";
 
 export class BandcampWorker {
     private readonly db: TriDB;
@@ -117,7 +118,8 @@ export class BandcampWorker {
             throw new Error("No bandcamp transaction id for sale with upc: " + sale.upc);
         }
 
-        return tracks.map(track => {
+        const hash = await hashObject(sale);
+        return tracks.map((track, index) => {
             return <Royalty>{
                 catalogue: sale.catalog_number,
                 count: 1,
@@ -138,7 +140,7 @@ export class BandcampWorker {
                 trackartists: sale.artist,
                 type: sale.package,
                 upc: album?.upc ?? "",
-                royalty_external_id: sale.bandcamp_transaction_id.toString()
+                royalty_external_id: `${hash}-${index}`
             }
         });
     }
@@ -161,6 +163,7 @@ export class BandcampWorker {
             throw new Error("No bandcamp transaction id for sale with isrc: " + targetIsrc);
         }
 
+        const hash = await hashObject(sale);
         return [<Royalty>{
             catalogue: sale.catalog_number,
             count: 1,
@@ -181,7 +184,7 @@ export class BandcampWorker {
             trackartists: sale.artist,
             type: sale.package,
             upc: album?.upc ?? "",
-            royalty_external_id: sale.bandcamp_transaction_id.toString()
+            royalty_external_id: hash
         }];
     }
 
@@ -195,7 +198,8 @@ export class BandcampWorker {
 
         CLI.warning(`Mapping by item url: ${sale.item_url}`);
 
-        return tracks.map(t => {
+        const hash = await hashObject(sale);
+        return tracks.map((t, index) => {
             let version = this.getVersionFromTrack(t);
             const month = this.getMonthFromSale(sale);
             const trackAlbums = albums.filter(a => a.track_id === t.id);
@@ -228,7 +232,7 @@ export class BandcampWorker {
                 trackartists: t.artists,
                 type: sale.package,
                 upc: album?.upc ?? "",
-                royalty_external_id: sale.bandcamp_transaction_id.toString()
+                royalty_external_id: `${hash}-${index}`
             };
         });
     }
