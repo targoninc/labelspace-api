@@ -241,7 +241,21 @@ export class TriDB extends CachedDB {
         };
     }
 
-    async getRoyaltiesByMonth(artistNames: string[], limit: number): Promise<Statistic[]> {
+    async getRoyaltiesByMonth(limit: number): Promise<Statistic[]> {
+        return await this.query(
+            `SELECT r.period1    as id,
+                    r.period1    as label,
+                    SUM(royalty) as value
+             FROM finance.royalties r
+                      INNER JOIN tri.tracks t on r.isrc = t.isrc
+             GROUP BY r.period1
+             ORDER BY STR_TO_DATE(CONCAT('01-', r.period1), '%d-%b-%Y') DESC
+             LIMIT ?`,
+            [limit]
+        );
+    }
+
+    async getRoyaltiesByMonthForArtists(artistNames: string[], limit: number): Promise<Statistic[]> {
         const {artistConditions, artistNamesLike} = this.getArtistLike(artistNames);
 
         return await this.query(

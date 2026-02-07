@@ -30,6 +30,11 @@ export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
                     totp: true,
                     emails: true
                 });
+
+                const artists = await this.db.getUserArtists(user.id);
+                const artistNames = artists.map(a => a.name);
+
+                user.available = await this.db.getAvailablePaymentAmount(user.id, artistNames);
             }
 
             return res.send(users);
