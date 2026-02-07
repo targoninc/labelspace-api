@@ -95,9 +95,9 @@ export class BandcampWorker {
 
     private async mapSale(sale: BandcampSale): Promise<Royalty[]> {
         const estimatedPaypalFee = 0.01;
-        if (sale.upc && sale.upc != "") {
+        if (sale.upc && sale.upc != "" && sale.item_type === "album") {
             return await this.mapSaleByUpc(sale, estimatedPaypalFee);
-        } else if (sale.isrc && sale.isrc != "") {
+        } else if (sale.isrc && sale.isrc != "" && sale.item_type === "track") {
             return await this.mapSaleByIsrc(sale, estimatedPaypalFee);
         } else {
             return await this.mapSaleByLinks(sale, estimatedPaypalFee);
