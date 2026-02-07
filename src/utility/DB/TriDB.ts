@@ -610,8 +610,8 @@ export class TriDB extends CachedDB {
         await this.query(`INSERT INTO finance.royalties
                           (period1, label, releasename, releaseartists, upc, catalogue, title, mixver, isrc,
                            trackartists, provider, period2, territory, delivery, type, salevoid, count,
-                           royalty, dataprovider, id)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+                           royalty, dataprovider, royalty_external_id, id)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             row.period1,
             row.label,
             row.releasename,
@@ -631,6 +631,7 @@ export class TriDB extends CachedDB {
             row.count,
             row.royalty,
             row.dataprovider,
+            row.royalty_external_id,
             row.id
         ]);
     }
