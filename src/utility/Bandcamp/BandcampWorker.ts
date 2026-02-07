@@ -119,6 +119,7 @@ export class BandcampWorker {
         }
 
         const hash = await hashObject(sale);
+        CLI.debug(`Sale hash: ${hash} for sale with upc: ${sale.upc}`);
         return tracks.map((track, index) => {
             return <Royalty>{
                 catalogue: sale.catalog_number,
@@ -164,6 +165,7 @@ export class BandcampWorker {
         }
 
         const hash = await hashObject(sale);
+        CLI.debug(`Sale hash: ${hash} for sale with isrc: ${sale.isrc}`);
         return [<Royalty>{
             catalogue: sale.catalog_number,
             count: 1,
@@ -196,9 +198,9 @@ export class BandcampWorker {
         const albums = await this.db.getAlbumsByTrackIds(tracks.map(t => t.id));
         const perTrackRoyalty = sale.net_amount / tracks.length;
 
-        CLI.warning(`Mapping by item url: ${sale.item_url}`);
-
         const hash = await hashObject(sale);
+        CLI.warning(`Sale hash ${hash} for item url: ${sale.item_url}`);
+
         return tracks.map((t, index) => {
             let version = this.getVersionFromTrack(t);
             const month = this.getMonthFromSale(sale);
