@@ -6,8 +6,8 @@ import type {Royalty} from "../../models/db/finance/Royalty.ts";
 import type {BandcampSale} from "./BandcampSale.ts";
 import type {Track} from "../../models/db/tri/Track.ts";
 import {CLI} from "@targoninc/ts-logging";
-import {heading, Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {env} from "../Environment.ts";
+import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 
 export class BandcampWorker {
     private readonly db: TriDB;
@@ -146,10 +146,11 @@ export class BandcampWorker {
         if (!track) {
             throw new Error("No track found for isrc: " + targetIsrc);
         }
-        const album = await this.db.getAlbumById(track.album_id ?? 0);
-        if (!album) {
-            throw new Error("No album found for track: " + track.title);
+        const albums = await this.db.getAlbumsByTrackIds([track.id]);
+        if (!albums || albums.length === 0) {
+            throw new Error("No albums found for track: " + track.title);
         }
+        const album = albums.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).at(0)!;
         const month = this.getMonthFromSale(sale);
 
         return [<Royalty>{
@@ -181,16 +182,17 @@ export class BandcampWorker {
         if (tracks.length === 0) {
             throw new Error("No tracks found for item_url: " + sale.item_url);
         }
-        const albums = await this.db.getAlbumsByIds(tracks.map(t => t.album_id));
+        const albums = await this.db.getAlbumsByTrackIds(tracks.map(t => t.id));
         const perTrackRoyalty = sale.net_amount / tracks.length;
 
         return tracks.map(t => {
             let version = this.getVersionFromTrack(t);
             const month = this.getMonthFromSale(sale);
-            const album = albums.find(a => a.id === t.album_id);
-            if (!album) {
+            const trackAlbums = albums.filter(a => a.track_id === t.id);
+            if (!trackAlbums || trackAlbums.length === 0) {
                 throw new Error("No album found for track: " + t.title);
             }
+            const album = trackAlbums.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).at(0)!;
 
             return <Royalty>{
                 catalogue: sale.catalog_number,
