@@ -113,6 +113,10 @@ export class BandcampWorker {
         const tracks = await this.db.getTracksByAlbumIds([album.id]);
         const perTrackRoyalty = sale.net_amount / tracks.length;
 
+        if (!sale.bandcamp_transaction_id) {
+            throw new Error("No bandcamp transaction id for sale with upc: " + sale.upc);
+        }
+
         return tracks.map(track => {
             return <Royalty>{
                 catalogue: sale.catalog_number,
@@ -153,6 +157,10 @@ export class BandcampWorker {
         const album = albums.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).at(0)!;
         const month = this.getMonthFromSale(sale);
 
+        if (!sale.bandcamp_transaction_id) {
+            throw new Error("No bandcamp transaction id for sale with isrc: " + targetIsrc);
+        }
+
         return [<Royalty>{
             catalogue: sale.catalog_number,
             count: 1,
@@ -185,6 +193,8 @@ export class BandcampWorker {
         const albums = await this.db.getAlbumsByTrackIds(tracks.map(t => t.id));
         const perTrackRoyalty = sale.net_amount / tracks.length;
 
+        CLI.warning(`Mapping by item url: ${sale.item_url}`);
+
         return tracks.map(t => {
             let version = this.getVersionFromTrack(t);
             const month = this.getMonthFromSale(sale);
@@ -193,6 +203,10 @@ export class BandcampWorker {
                 throw new Error("No album found for track: " + t.title);
             }
             const album = trackAlbums.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).at(0)!;
+
+            if (!sale.bandcamp_transaction_id) {
+                throw new Error("No bandcamp transaction id for sale with links: " + sale.item_url);
+            }
 
             return <Royalty>{
                 catalogue: sale.catalog_number,
