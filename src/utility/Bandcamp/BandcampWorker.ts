@@ -9,6 +9,7 @@ import {CLI} from "@targoninc/ts-logging";
 import {env} from "../Environment.ts";
 import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {hashObject} from "./Hashing.ts";
+import {MAIL_LOGO_URL, ROYALTY_LABEL_NAME} from "../Constants.ts";
 
 export class BandcampWorker {
     private readonly db: TriDB;
@@ -127,7 +128,7 @@ export class BandcampWorker {
                 dataprovider: "bandcamp-sync",
                 delivery: "Download",
                 isrc: track.isrc,
-                label: "Tri",
+                label: ROYALTY_LABEL_NAME,
                 mixver: this.getVersionFromTrack(track),
                 period1: month,
                 period2: month,
@@ -172,7 +173,7 @@ export class BandcampWorker {
             dataprovider: "bandcamp-sync",
             delivery: "Download",
             isrc: track.isrc,
-            label: "Tri",
+            label: ROYALTY_LABEL_NAME,
             mixver: this.getVersionFromTrack(track),
             period1: month,
             period2: month,
@@ -220,7 +221,7 @@ export class BandcampWorker {
                 dataprovider: "bandcamp-sync",
                 delivery: "Download",
                 isrc: t.isrc,
-                label: "Tri",
+                label: ROYALTY_LABEL_NAME,
                 mixver: version,
                 period1: month,
                 period2: month,
@@ -259,7 +260,7 @@ export class BandcampWorker {
     }
 
     private sendFailureMail(e: any) {
-        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
+        const mail = MailBuilder.default(MAIL_LOGO_URL)
             .subject("Bandcamp Sync failed")
             .heading("Bandcamp Sync failed")
             .card([

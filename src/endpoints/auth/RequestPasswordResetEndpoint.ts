@@ -4,9 +4,17 @@ import {Mail, link, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {v4 as uuidv4} from "uuid";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {CLI} from "@targoninc/ts-logging";
+import {
+    COMPANY_CONTACT,
+    COMPANY_NAME,
+    LABEL_NAME,
+    MAIL_LOGO_URL,
+    PORTAL_NAME,
+    PORTAL_UI_URL
+} from "../../utility/Constants.ts";
 
 export class RequestPasswordResetEndpoint extends PostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -29,16 +37,16 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
             password_token: token
         });
 
-        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
-            .subject("Tri Artist password reset requested")
-            .heading("Tri Artist password reset requested")
-            .paragraph(`You have requested a password reset for your Tri Artist account (${user.username}).`)
+        const mail = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`${PORTAL_NAME} password reset requested`)
+            .heading(`${PORTAL_NAME} password reset requested`)
+            .paragraph(`You have requested a password reset for your ${PORTAL_NAME} account (${user.username}).`)
             .card([
                 paragraph("To reset your password, click the link below:"),
-                link(`https://artists.trirecords.eu/password-reset?token=${token}`)
+                link(`${PORTAL_UI_URL}/password-reset?token=${token}`)
             ])
-            .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature("the Tri Records Team", "Targon Industries UG")
+            .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
         const emails = await this.db.getUserEmails(user.id);

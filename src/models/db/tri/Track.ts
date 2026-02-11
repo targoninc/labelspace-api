@@ -1,13 +1,13 @@
 import {Album} from "./Album.js";
 import {User} from "./User.js";
+import {Split} from "../finance/Split.ts";
 
 export interface Track {
     earnings?: number;
     repost_user_id?: number;
     user?: User;
-    comments?: Comment[];
     albums?: Album[];
-    notifications?: Notification[];
+    splits?: Split[];
     id: number;
     title: string;
     artists: string;

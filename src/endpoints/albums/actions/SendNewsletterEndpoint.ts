@@ -5,6 +5,7 @@ import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import {NewsletterMailer} from "../../../utility/Mail/NewsletterMailer.ts";
 import {env} from "../../../utility/Environment.ts";
+import {LABEL_UI_URL, PORTAL_API_URL} from "../../../utility/Constants.ts";
 
 export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -39,8 +40,8 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Album has no tracks"});
         }
 
-        const imageUrl = `https://artists-api.trirecords.eu/media/image?mediaFileType=albumCover&id=${album.id}&quality=500`;
-        const releaseUrl = `https://trirecords.eu/album/${album.id}`;
+        const imageUrl = `${PORTAL_API_URL}/media/image?mediaFileType=albumCover&id=${album.id}&quality=500`;
+        const releaseUrl = `${LABEL_UI_URL}/album/${album.id}`;
         const title = album.artists + " - " + album.title;
 
         const isTest = env("COOKIE_DOMAIN") === "localhost" || env("TEST_NEWSLETTER") === "true";

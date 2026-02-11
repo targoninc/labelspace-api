@@ -10,6 +10,7 @@ import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutIte
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
 import {uuidv4} from "uuidv7";
 import {env} from "../../utility/Environment.ts";
+import {COMPANY_CONTACT, COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../utility/Constants.ts";
 
 export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -46,12 +47,12 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const batchId = uuidv4();
         await this.db.createPayment(user.id, av, PaymentStatus.requested, batchId);
 
-        const mailContent = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
-            .subject("Tri Artist payment requested")
-            .heading("Tri Artist payment requested")
-            .paragraph(`You have requested a payment for your Tri Artist account (${user.username}) for ${available.available} USD.`)
-            .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature("the Tri Records Team", "Targon Industries UG")
+        const mailContent = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`${PORTAL_NAME} payment requested`)
+            .heading(`${PORTAL_NAME} payment requested`)
+            .paragraph(`You have requested a payment for your ${PORTAL_NAME} account (${user.username}) for ${available.available} USD.`)
+            .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
         const subMails = env<string>("SUBMISSION_MAILS").split(",");
@@ -79,10 +80,10 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
 
         const batchHeader: PaypalBatchHeader = {
             sender_batch_id: batchId,
-            note: "Artist Space payment",
+            note: `${PORTAL_NAME} payment`,
             recipient_type: "EMAIL",
-            email_subject: "Artist Space payment",
-            email_message: "Artist Space payment for " + user.username + " over " + available.available + " USD"
+            email_subject: `${PORTAL_NAME} payment`,
+            email_message: `${PORTAL_NAME} payment for ${user.username} over ${available.available} USD`
         }
         try {
             CLI.debug("Creating batch payout", {

@@ -9,6 +9,7 @@ import {link, Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {AccountMailer} from "../../../utility/Mail/AccountMailer.ts";
 import {User} from "../../../models/db/tri/User.ts";
 import {env} from "../../../utility/Environment.ts";
+import {COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../../utility/Constants.ts";
 
 interface UserRegistration {
     username: string;
@@ -89,9 +90,9 @@ export class CreateUserEndpoint extends AuthenticatedPostEndpoint {
 
         AccountMailer.sendRegistrationEmail(body.email, verifCode, body.temp_password, body.username);
 
-        const mailContent = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
-            .subject("New Tri Artist account created")
-            .heading("A new Tri Artist account was just created")
+        const mailContent = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`New ${PORTAL_NAME} account created`)
+            .heading(`A new ${PORTAL_NAME} account was just created`)
             .card([
                 paragraph(`Username: ${body.username}`),
                 paragraph(`Temporary Password: ${body.temp_password}`),
@@ -100,7 +101,7 @@ export class CreateUserEndpoint extends AuthenticatedPostEndpoint {
                 paragraph(`Legal Name: ${body.legal_name}`),
                 paragraph(`State: ${body.state}`),
             ])
-            .signature("the Tri Records Team", "Targon Industries UG")
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
         const subMails = env<string>("SUBMISSION_MAILS").split(",");

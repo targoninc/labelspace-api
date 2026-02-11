@@ -7,6 +7,7 @@ import type {Album} from "../db/tri/Album.ts";
 export interface TrackEnrichmentConfig {
     albums?: boolean;
     albumEarnings?: boolean;
+    splits?: boolean;
 }
 
 export class TrackEnricher extends IEnricher {
@@ -25,6 +26,14 @@ export class TrackEnricher extends IEnricher {
 
             return albums;
         }, {} as Album);
+        base.splits = await enrichIfAsync<[]>(config.splits, async () => {
+            const splits = await db.getTrackSplits(base.id)
+            if (!splits) {
+                return [];
+            }
+
+            return splits;
+        }, []);
 
         return base;
     }

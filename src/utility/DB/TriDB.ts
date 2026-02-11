@@ -32,6 +32,7 @@ import {CacheConfig} from "./Caching/CacheConfig.ts";
 import {AlbumAttachment} from "../../models/db/tri/AlbumAttachment.ts";
 import {NewsletterSignup} from "../../models/db/tri/NewsletterSignup.ts";
 import {ArtistLink} from "../../models/db/tri/ArtistLink.ts";
+import {Split} from "../../models/db/finance/Split.ts";
 
 export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
@@ -1049,5 +1050,12 @@ export class TriDB extends CachedDB {
         return await this.query<Album & { track_id: number }>(`SELECT a.*, at.track_id
                                                                FROM tri.albums a
                                                                         INNER JOIN tri.album_tracks at ON a.id = at.album_id AND at.track_id IN (${qs})`, trackIds);
+    }
+
+    async getTrackSplits(id: number) {
+        return await this.query<Split>(`SELECT s.*
+                                        FROM finance.splits s
+                                            INNER JOIN tri.tracks t on s.isrc = t.isrc
+                                        WHERE t.id = ?`, [id]);
     }
 }

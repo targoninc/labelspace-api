@@ -5,6 +5,7 @@ import {Password} from "../../utility/Password.js";
 import {PostEndpoint} from "../base/PostEndpoint.js";
 import {CLI} from "@targoninc/ts-logging";
 import bcrypt from "bcryptjs";
+import {COMPANY_CONTACT, COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../utility/Constants.ts";
 
 export class ResetPasswordEndpoint extends PostEndpoint {
     db: TriDB;
@@ -46,12 +47,12 @@ export class ResetPasswordEndpoint extends PostEndpoint {
             password_updated_at: new Date()
         });
 
-        const mail = MailBuilder.default("https://artists.trirecords.eu/images/LOGO128.png")
-            .subject("Your Tri Artist password was reset")
-            .heading("Your Tri Artist password was reset")
+        const mail = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`Your ${PORTAL_NAME} password was reset`)
+            .heading(`Your ${PORTAL_NAME} password was reset`)
             .paragraph("Your password was changed.")
-            .paragraph("If you did not request this, please contact us immediately at administration@targoninc.com.")
-            .signature("the Tri Records Team", "Targon Industries UG")
+            .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
         const emails = await this.db.getUserEmails(user.id);
