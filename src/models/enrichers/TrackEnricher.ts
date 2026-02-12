@@ -27,7 +27,11 @@ export class TrackEnricher extends IEnricher {
             return albums;
         }, {} as Album);
         base.splits = await enrichIfAsync<[]>(config.splits, async () => {
-            const splits = await db.getTrackSplits(base.id)
+            if (!base.isrc || base.isrc.trim().length === 0) {
+                return [];
+            }
+
+            const splits = await db.getTrackSplits(base.id);
             if (!splits) {
                 return [];
             }
