@@ -320,7 +320,7 @@ export class TriDB extends CachedDB {
     }
 
     async getRoyaltySumWithExcludedIsrcs(artistNames: string[], isrcs: number[]): Promise<number> {
-        if (isrcs.length === 0) {
+        if (isrcs.length === 0 || artistNames.length === 0) {
             return 0;
         }
 

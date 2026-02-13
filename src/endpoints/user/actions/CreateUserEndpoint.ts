@@ -5,11 +5,10 @@ import {Authenticator} from "../../../models/Authenticator.js";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import {uuidv4} from "uuidv7";
 import bcrypt from "bcryptjs";
-import {link, Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {AccountMailer} from "../../../utility/Mail/AccountMailer.ts";
-import {User} from "../../../models/db/tri/User.ts";
 import {env} from "../../../utility/Environment.ts";
 import {COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../../utility/Constants.ts";
+import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail/dist/src";
 
 interface UserRegistration {
     username: string;

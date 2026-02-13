@@ -6,7 +6,7 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import { Statistic } from "../../models/interfaces/Statistic.js";
 
 export class RoyaltiesByTrackEndpoint extends AuthenticatedGetEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
