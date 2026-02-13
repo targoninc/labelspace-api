@@ -30,7 +30,7 @@
     "@passwordless-id/webauthn": "^2.3.4",
     "@targoninc/data-exporter": "^0.0.6",
     "@targoninc/ts-logging": "^0.0.11",
-    "@targoninc/ts-mail": "^0.0.12",
+    "@targoninc/ts-mail": "^0.0.13",
     "@types/memjs": "^1.3.3",
     "bcryptjs": "^2.4.3",
     "connect-session-knex": "^5.0.0",

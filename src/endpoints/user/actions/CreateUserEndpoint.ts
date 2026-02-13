@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import {AccountMailer} from "../../../utility/Mail/AccountMailer.ts";
 import {env} from "../../../utility/Environment.ts";
 import {COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../../utility/Constants.ts";
-import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail/dist/src";
+import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 
 interface UserRegistration {
     username: string;
