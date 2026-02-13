@@ -526,6 +526,10 @@ export class TriDB extends CachedDB {
     }
 
     async getArtistRoyalty(artistNames: string[]) {
+        if (artistNames.length === 0) {
+            return 0;
+        }
+
         const artistConditions = this.getArtistEqual(artistNames);
 
         return (await this.querySingleValue<number>(`SELECT SUM(r.royalty)
