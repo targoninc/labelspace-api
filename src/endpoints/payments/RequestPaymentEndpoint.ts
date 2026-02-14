@@ -47,11 +47,18 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const batchId = uuidv4();
         await this.db.createPayment(user.id, av, PaymentStatus.requested, batchId);
 
-        const mailContent = MailBuilder.default(MAIL_LOGO_URL)
+        const mailContentArtist = MailBuilder.default(MAIL_LOGO_URL)
             .subject(`${PORTAL_NAME} payment requested`)
             .heading(`${PORTAL_NAME} payment requested`)
             .paragraph(`You have requested a payment for your ${PORTAL_NAME} account (${user.username}) for ${available.available} USD.`)
             .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
+            .get();
+
+        const mailContent = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`${PORTAL_NAME} payment request: ${user.username}`)
+            .heading(`${PORTAL_NAME} payment request: ${user.username}`)
+            .paragraph(`${user.username} requested a payment for ${available.available} USD.`)
             .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
@@ -62,7 +69,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
 
         for (const mail of userMails) {
             if (mail.verified || mail.primary) {
-                Mail.sendDefault(mail.email, mailContent);
+                Mail.sendDefault(mail.email, mailContentArtist);
             }
         }
 
