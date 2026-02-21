@@ -65,6 +65,7 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             firstTrack.link_bandcamp,
             firstTrack.link_youtube,
             firstTrack.link_soundcloud,
+            firstTrack.link_tidal,
         ].filter(l => l && l.trim() !== "");
         if (links.length < 5) {
             return res.status(400).send({error: "Not enough store links are provided for the first track, must be at least 5"});

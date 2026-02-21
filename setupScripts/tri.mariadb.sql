@@ -180,6 +180,7 @@ create table if not exists tri.tracks
     link_soundcloud mediumtext                             null,
     link_applemusic mediumtext                             null,
     link_bandcamp   mediumtext                             null,
+    link_tidal      mediumtext                             null,
     link_lyda       mediumtext                             null,
     constraint tracks_pk
     unique (isrc)

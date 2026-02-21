@@ -43,6 +43,7 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
         const link_soundcloud = body.link_soundcloud ?? "";
         const link_applemusic = body.link_applemusic ?? "";
         const link_bandcamp = body.link_bandcamp ?? "";
+        const link_tidal = body.link_tidal ?? "";
         const link_lyda = body.link_lyda ?? "";
 
         CLI.debug("Creating track...");
@@ -60,6 +61,7 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
             link_soundcloud,
             link_applemusic,
             link_bandcamp,
+            link_tidal,
             link_lyda,
         });
         if (!track) {

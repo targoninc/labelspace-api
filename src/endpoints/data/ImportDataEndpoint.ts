@@ -35,7 +35,8 @@ export class ImportDataEndpoint extends AuthenticatedPostEndpoint {
         }
 
         try {
-            await importAll(this.db, dataDir);
+            //await importAll(this.db, dataDir);
+            return res.status(200).send("Data already processed");
         } catch (e: any) {
             return res.status(500).send({error: `Failed to import data: ${e.message}`});
         }
