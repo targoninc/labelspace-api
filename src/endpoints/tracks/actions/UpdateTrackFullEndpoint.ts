@@ -1,12 +1,12 @@
 import {AuthenticatedPostEndpoint, AuthenticatedRequest} from "../../base/AuthenticatedPostEndpoint.js";
 import {TriDB} from "../../../utility/DB/TriDB.js";
 import {Application, Response} from "express";
-import {UpdateTrackRequest} from "../../../models/interfaces/UpdateTrackRequest.js";
 import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
+import {Track} from "../../../models/db/tri/Track.ts";
 
 export class UpdateTrackFullEndpoint extends AuthenticatedPostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -23,7 +23,7 @@ export class UpdateTrackFullEndpoint extends AuthenticatedPostEndpoint {
             return res.status(403).send("You are not allowed to update tracks.");
         }
 
-        const request = req.body as UpdateTrackRequest;
+        const request = req.body as Track;
         if (!request.id) {
             return res.status(400).send("No track id provided.");
         }
