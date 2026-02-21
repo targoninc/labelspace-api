@@ -9,7 +9,7 @@ COPY ./package.json .
 COPY ./bun.lockb .
 
 # Install the project dependencies
-RUN bun install
+RUN bun ci
 
 RUN apt update && apt install ffmpeg curl -y
 
