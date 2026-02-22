@@ -175,7 +175,8 @@ export class TriDB extends CachedDB {
         }
         return await this.query<Track & { album_id: number }>(`SELECT t.*, at.album_id
                                                                FROM tri.tracks t
-                                                                        INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id IN (?)`,
+                                                                        INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id IN (?)
+                                                               ORDER BY at.position, t.created_at`,
             [albumIds]);
     }
 
@@ -1015,7 +1016,7 @@ export class TriDB extends CachedDB {
     async getFirstTrack(id: number) {
         return await this.queryFirst<Track>(`SELECT t.*
                                              FROM tri.tracks t
-                                             INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id = ?
+                                                      INNER JOIN tri.album_tracks at ON t.id = at.track_id AND at.album_id = ?
                                              ORDER BY at.position, t.id
                                              LIMIT 1`, [id]);
     }
@@ -1062,7 +1063,7 @@ export class TriDB extends CachedDB {
     async getTrackSplits(id: number) {
         return await this.query<Split>(`SELECT s.*
                                         FROM finance.splits s
-                                            INNER JOIN tri.tracks t on s.isrc = t.isrc
+                                                 INNER JOIN tri.tracks t on s.isrc = t.isrc
                                         WHERE t.id = ?`, [id]);
     }
 }
