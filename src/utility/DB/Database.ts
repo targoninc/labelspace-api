@@ -99,7 +99,8 @@ export function setupPassport(app: Application, db: TriDB) {
         saveUninitialized: false,
         cookie: {
             domain: process.env.COOKIE_DOMAIN,
-            sameSite: "strict"
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24 * 30 * 6
         },
     }));
     passport.use(PassportStrategy(db));
