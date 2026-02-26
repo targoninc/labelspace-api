@@ -245,7 +245,7 @@ export class BandcampWorker {
         return date.toLocaleString("en-US", {
             month: "short",
             year: "numeric"
-        });
+        }).replace(" ", "-");
     }
 
     private getVersionFromTrack(t: Track) {
