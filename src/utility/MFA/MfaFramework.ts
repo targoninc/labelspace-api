@@ -46,10 +46,11 @@ export async function getMfaOptions(user: User, db: TriDB) {
             });
         }
 
-        if (mfa.email.enabled) {
+        const firstMail = mfa.email.methods[0];
+        if (mfa.email.enabled && firstMail) {
             options.push({
                 type: MfaOption.email,
-                email: mfa.email.methods[0].email
+                email: firstMail.email
             });
         }
     }
