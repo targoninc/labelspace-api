@@ -3,7 +3,7 @@ import qrcode from 'qrcode';
 import {User} from "../../models/db/tri/User.ts";
 
 authenticator.create({
-    window: 2
+    window: 3
 });
 
 export class TOTP {

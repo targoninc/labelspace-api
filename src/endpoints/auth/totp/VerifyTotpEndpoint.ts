@@ -52,6 +52,10 @@ export class VerifyTotpEndpoint extends PostEndpoint {
                     return res.status(401).send({error: "This case should never happen! Please contact us."});
                 } else {
                     const user = await this.db.getUserById(userId);
+                    if (!user) {
+                        return res.status(401).send({error: "Invalid user id provided"});
+                    }
+
                     const emailToken = user.email_mfa_code;
                     if (token !== emailToken) {
                         return res.status(400).send({error: "Invalid token"});
