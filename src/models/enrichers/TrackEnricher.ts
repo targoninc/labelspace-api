@@ -3,11 +3,14 @@ import {TriDB} from "../../utility/DB/TriDB.js";
 import {User} from "../db/tri/User.js";
 import {Track} from "../db/tri/Track.js";
 import type {Album} from "../db/tri/Album.ts";
+import {Split} from "../db/finance/Split.ts";
+import {TrackLink} from "../db/tri/TrackLink.ts";
 
 export interface TrackEnrichmentConfig {
     albums?: boolean;
     albumEarnings?: boolean;
     splits?: boolean;
+    links?: boolean;
 }
 
 export class TrackEnricher extends IEnricher {
@@ -26,7 +29,7 @@ export class TrackEnricher extends IEnricher {
 
             return albums;
         }, {} as Album);
-        base.splits = await enrichIfAsync<[]>(config.splits, async () => {
+        base.splits = await enrichIfAsync<Split[]>(config.splits, async () => {
             if (!base.isrc || base.isrc.trim().length === 0) {
                 return [];
             }
@@ -38,6 +41,7 @@ export class TrackEnricher extends IEnricher {
 
             return splits;
         }, []);
+        base.links = await enrichIfAsync<TrackLink[]>(config.links, async () => await db.getTrackLinks(base.id), []);
 
         return base;
     }

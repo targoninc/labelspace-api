@@ -82,6 +82,10 @@ import {NewsletterSubscribeEndpoint} from "./endpoints/newsletter/NewsletterSubs
 import {NewsletterVerifyEndpoint} from "./endpoints/newsletter/NewsletterVerifyEndpoint.ts";
 import {NewsletterUnsubscribeEndpoint} from "./endpoints/newsletter/NewsletterUnsubscribeEndpoint.ts";
 import {SendNewsletterEndpoint} from "./endpoints/albums/actions/SendNewsletterEndpoint.ts";
+import {AddTrackLinkEndpoint} from "./endpoints/tracks/actions/AddTrackLinkEndpoint.ts";
+import {RemoveTrackLinkEndpoint} from "./endpoints/tracks/actions/RemoveTrackLinkEndpoint.ts";
+import {AddAlbumLinkEndpoint} from "./endpoints/albums/actions/AddAlbumLinkEndpoint.ts";
+import {RemoveAlbumLinkEndpoint} from "./endpoints/albums/actions/RemoveAlbumLinkEndpoint.ts";
 
 config();
 
@@ -169,6 +173,8 @@ new GetTracksEndpoint(app, "/tracks/get", db).register();
 new CreateTrackEndpoint(app, "/tracks/create", db).register();
 new DeleteTrackEndpoint(app, "/tracks/actions/delete", db).register();
 new UpdateTrackFullEndpoint(app, "/tracks/actions/update", db).register();
+new AddTrackLinkEndpoint(app, "/tracks/actions/addLink", db).register();
+new RemoveTrackLinkEndpoint(app, "/tracks/actions/removeLink", db).register();
 // endregion
 
 // region Albums
@@ -183,6 +189,8 @@ new CreateAlbumAttachmentEndpoint(app, "/albums/actions/createAttachment", db).r
 new DeleteAlbumAttachmentEndpoint(app, "/albums/actions/deleteAttachment", db).register();
 new UpdateAlbumAttachmentEndpoint(app, "/albums/actions/updateAttachment", db).register();
 new SendNewsletterEndpoint(app, "/albums/actions/sendNewsletter", db).register();
+new AddAlbumLinkEndpoint(app, "/albums/actions/addLink", db).register();
+new RemoveAlbumLinkEndpoint(app, "/albums/actions/removeLink", db).register();
 // endregion
 
 // region Media

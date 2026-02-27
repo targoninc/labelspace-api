@@ -44,6 +44,7 @@ export class GetAlbumEndpoint extends GetEndpoint {
         const addAdditionalData = !!req.user;
         album = await AlbumEnricher.enrichAsync(this.db, album, {
             tracks: true,
+            links: true,
             trackEarnings: addAdditionalData,
         });
 

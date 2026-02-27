@@ -3,10 +3,13 @@ import {Album} from "../db/tri/Album.js";
 import {TriDB} from "../../utility/DB/TriDB.js";
 import {Track} from "../db/tri/Track.js";
 import {AlbumAttachment} from "../db/tri/AlbumAttachment.ts";
+import {TrackLink} from "../db/tri/TrackLink.ts";
+import {AlbumLink} from "../db/tri/AlbumLink.ts";
 
 export interface AlbumEnrichmentConfig {
     tracks?: boolean;
     trackEarnings?: boolean;
+    links?: boolean;
 }
 
 export class AlbumEnricher extends IEnricher {
@@ -18,6 +21,7 @@ export class AlbumEnricher extends IEnricher {
         base.tracks = await enrichIfAsync<Track[]>(config.tracks, async () => {
             return await db.getTracksByAlbumIds([base.id]);
         }, []);
+        base.links = await enrichIfAsync<AlbumLink[]>(config.links, async () => await db.getAlbumLinks(base.id), []);
 
         if (config.trackEarnings) {
             for (const t of base.tracks) {

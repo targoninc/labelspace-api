@@ -5,7 +5,7 @@ import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import {Track} from "../../../models/db/tri/Track.ts";
 
-export class RemoveTrackLink extends AuthenticatedPostEndpoint {
+export class AddTrackLinkEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
@@ -33,7 +33,7 @@ export class RemoveTrackLink extends AuthenticatedPostEndpoint {
             return res.status(404).send("Track not found.");
         }
 
-        await this.db.removeTrackLink(url);
+        await this.db.createTrackLink(track.id, url, true);
 
         return res.send("Link added.");
     }

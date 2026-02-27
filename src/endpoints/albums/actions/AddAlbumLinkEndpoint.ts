@@ -5,7 +5,7 @@ import {Authenticator} from "../../../models/Authenticator.ts";
 import {Permissions} from "../../../models/enums/Permissions.ts";
 import {Track} from "../../../models/db/tri/Track.ts";
 
-export class AddTrackLink extends AuthenticatedPostEndpoint {
+export class AddAlbumLinkEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
@@ -20,20 +20,20 @@ export class AddTrackLink extends AuthenticatedPostEndpoint {
         }
 
         if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            return res.status(403).send("You are not allowed to modify track links.");
+            return res.status(403).send("You are not allowed to modify album links.");
         }
 
         const { id, url } = req.body;
         if (!id || !url) {
-            return res.status(400).send("No track id or url provided.");
+            return res.status(400).send("No album id or url provided.");
         }
 
-        const track = await this.db.getTrackById(id);
-        if (!track) {
-            return res.status(404).send("Track not found.");
+        const album = await this.db.getAlbumById(id);
+        if (!album) {
+            return res.status(404).send("Album not found.");
         }
 
-        await this.db.createTrackLink(track.id, url, true);
+        await this.db.createAlbumLink(album.id, url, true);
 
         return res.send("Link added.");
     }

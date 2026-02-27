@@ -41,6 +41,7 @@ export class GetTrackEndpoint extends GetEndpoint {
         const addData = !!req.user;
         track = await TrackEnricher.enrichAsync(this.db, track, {
             albums: true,
+            links: true,
             albumEarnings: addData,
             splits: addData
         }, req.user);

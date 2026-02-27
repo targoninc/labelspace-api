@@ -1,6 +1,7 @@
 import {Album} from "./Album.js";
 import {User} from "./User.js";
 import {Split} from "../finance/Split.ts";
+import {TrackLink} from "./TrackLink.ts";
 
 export interface Track {
     earnings?: number;
@@ -22,6 +23,7 @@ export interface Track {
     price: number;
     has_cover: boolean;
     processed: boolean;
+    links: TrackLink[];
     link_spotify: string;
     link_youtube: string;
     link_soundcloud: string;
