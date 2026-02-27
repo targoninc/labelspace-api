@@ -80,10 +80,11 @@ create table if not exists tri.album_links
 (
     album_id   bigint                                 not null,
     url        varchar(512)                           not null,
+    host       varchar(128)                           not null,
     shown      tinyint(1) default 1                   not null,
     created_at datetime   default current_timestamp() not null,
     updated_at datetime   default current_timestamp() not null on update current_timestamp(),
-    primary key (album_id, url),
+    primary key (host, album_id),
     constraint album_links_albums_id_fk
         foreign key (album_id) references tri.albums (id)
             on delete cascade
@@ -111,6 +112,9 @@ create table if not exists tri.logs
     properties     longtext collate utf8mb4_bin         null,
     check (json_valid(`properties`))
 );
+
+create index if not exists logs_stack_index
+    on tri.logs (stack(768));
 
 create index if not exists logs_time_index
     on tri.logs (time);
@@ -220,10 +224,11 @@ create table if not exists tri.track_links
 (
     track_id   bigint                                 not null,
     url        varchar(512)                           not null,
+    host       varchar(128)                           not null,
     shown      tinyint(1) default 1                   not null,
     created_at datetime   default current_timestamp() not null,
     updated_at datetime   default current_timestamp() not null on update current_timestamp(),
-    primary key (track_id, url),
+    primary key (track_id, host),
     constraint track_links_tracks_id_fk
         foreign key (track_id) references tri.tracks (id)
             on delete cascade
