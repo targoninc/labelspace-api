@@ -20,6 +20,11 @@ export class UpdateSettingEndpoint extends AuthenticatedPostEndpoint {
         const key = req.body.key;
         const value = req.body.value;
 
+        const possibleKeys = ["theme", "paypalMail"];
+        if (!possibleKeys.includes(key)) {
+            return res.status(400).json({error: "Invalid setting key, must be one of: " + possibleKeys.join(", ")});
+        }
+
         if (key === "theme") {
             const themes = ["light"];
             if (!themes.includes(value)) {
