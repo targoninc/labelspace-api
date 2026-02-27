@@ -38,7 +38,8 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         }
 
         const userMails = await this.db.getUserEmails(user.id);
-        const paypalMail = userMails.find(m => m.primary && m.verified);
+        const settings = await this.db.getUserSettings(user.id);
+        const paypalMail = settings.find(m => m.key === "paypalMail")?.value;
         if (!paypalMail) {
             return res.status(400).send({error: "No valid paypal mail found"});
         }
@@ -73,13 +74,15 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             }
         }
 
+        Mail.sendDefault(paypalMail, mailContentArtist);
+
         const items: PaypalPayoutItem[] = [
             {
                 amount: {
                     currency: "USD",
                     value: available.available.toString()
                 },
-                receiver: paypalMail.email
+                receiver: paypalMail
             }
         ];
         await this.db.createPaypalBatchPayment(items, batchId);

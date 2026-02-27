@@ -33,6 +33,8 @@ import {AlbumAttachment} from "../../models/db/tri/AlbumAttachment.ts";
 import {NewsletterSignup} from "../../models/db/tri/NewsletterSignup.ts";
 import {ArtistLink} from "../../models/db/tri/ArtistLink.ts";
 import {Split} from "../../models/db/finance/Split.ts";
+import {TrackLink} from "../../models/db/tri/TrackLink.ts";
+import {AlbumLink} from "../../models/db/tri/AlbumLink.ts";
 
 export class TriDB extends CachedDB {
     private lastLogCleanup: number = 0;
@@ -1065,5 +1067,41 @@ export class TriDB extends CachedDB {
                                         FROM finance.splits s
                                                  INNER JOIN tri.tracks t on s.isrc = t.isrc
                                         WHERE t.id = ?`, [id]);
+    }
+
+    async getTrackLinks(id: number) {
+        return await this.query<TrackLink>(`SELECT *
+                                          FROM tri.track_links
+                                          WHERE track_id = ?`, [id]);
+    }
+
+    async getAlbumLinks(id: number) {
+        return await this.query<AlbumLink>(`SELECT *
+                                          FROM tri.album_links
+                                          WHERE album_id = ?`, [id]);
+    }
+
+    async createTrackLink(trackId: number, url: string, shown: boolean) {
+        const host = new URL(url).host;
+
+        await this.query(`INSERT INTO tri.track_links (track_id, url, host, shown)
+                          VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE url = ?, host = ?, shown = ?`,
+            [trackId, url, host, shown, url, host, shown]);
+    }
+
+    async removeTrackLink(host: string) {
+        await this.query("DELETE FROM tri.track_links WHERE host = ?", [host]);
+    }
+
+    async createAlbumLink(albumId: number, url: string, shown: boolean) {
+        const host = new URL(url).host;
+
+        await this.query(`INSERT INTO tri.album_links (album_id, url, host, shown)
+                          VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE url = ?, host = ?, shown = ?`,
+            [albumId, url, host, shown, url, host, shown]);
+    }
+
+    async removeAlbumLink(host: string) {
+        await this.query("DELETE FROM tri.album_links WHERE host = ?", [host]);
     }
 }

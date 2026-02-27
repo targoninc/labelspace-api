@@ -6,7 +6,7 @@ import {PassportUser} from "../../../utility/PassportStrategy.js";
 import {TriDB} from "../../../utility/DB/TriDB.js";
 
 export class UpdateSettingEndpoint extends AuthenticatedPostEndpoint {
-    db: TriDB;
+    private readonly db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -27,10 +27,13 @@ export class UpdateSettingEndpoint extends AuthenticatedPostEndpoint {
             }
         }
 
-        const booleanKeys = ["playFromAutoQueue"];
-        if (booleanKeys.includes(key) || booleanKeys.some(k => k.endsWith("*") && key.startsWith(k.replace("*", "")))) {
-            if (typeof value !== "boolean") {
-                return res.status(400).json({error: "Invalid value, must be a boolean"});
+        if (key === "paypalMail") {
+            if (value != null && typeof value !== "string") {
+                return res.status(400).json({error: "Invalid paypal mail, must be a string or null"});
+            }
+
+            if (!value?.includes("@")) {
+                return res.status(400).json({error: "Invalid paypal mail, must be a valid email address"});
             }
         }
 
