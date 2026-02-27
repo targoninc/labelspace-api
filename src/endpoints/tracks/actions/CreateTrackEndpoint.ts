@@ -38,13 +38,6 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
         const artists = body.artists ?? "";
         const credits = body.credits ?? "";
         const length = body.length ?? "0";
-        const link_spotify = body.link_spotify ?? "";
-        const link_youtube = body.link_youtube ?? "";
-        const link_soundcloud = body.link_soundcloud ?? "";
-        const link_applemusic = body.link_applemusic ?? "";
-        const link_bandcamp = body.link_bandcamp ?? "";
-        const link_tidal = body.link_tidal ?? "";
-        const link_lyda = body.link_lyda ?? "";
 
         CLI.debug("Creating track...");
         const track = await this.db.createTrack({
@@ -56,13 +49,6 @@ export class CreateTrackEndpoint extends AuthenticatedPostEndpoint {
             artists,
             credits,
             length: Number(length),
-            link_spotify,
-            link_youtube,
-            link_soundcloud,
-            link_applemusic,
-            link_bandcamp,
-            link_tidal,
-            link_lyda,
         });
         if (!track) {
             CLI.error("Failed to create track");

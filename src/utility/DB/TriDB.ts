@@ -109,10 +109,8 @@ export class TriDB extends CachedDB {
     }
 
     async createTrack(track: Partial<Track>): Promise<Track | null> {
-        await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, length, release_date,
-                                                  link_spotify, link_youtube, link_soundcloud, link_applemusic,
-                                                  link_bandcamp, link_tidal, link_lyda)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        await this.query(`INSERT INTO tri.tracks (title, artists, isrc, credits, genre, length, release_date)
+                          VALUES (?, ?, ?, ?, ?, ?, ?)`, [
             track.title,
             track.artists,
             track.isrc,
@@ -120,13 +118,6 @@ export class TriDB extends CachedDB {
             track.genre,
             track.length,
             track.release_date,
-            track.link_spotify,
-            track.link_youtube,
-            track.link_soundcloud,
-            track.link_applemusic,
-            track.link_bandcamp,
-            track.link_tidal,
-            track.link_lyda,
         ]);
         const id = await this.querySingleValue<number>("SELECT id FROM tri.tracks WHERE title = ? ORDER BY created_at DESC LIMIT 1", [track.title]);
         if (!id) {
