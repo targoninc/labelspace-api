@@ -3,6 +3,6 @@ export interface TrackLink {
     url: string;
     host: string;
     shown: boolean;
-    created_at: Date;
-    updated_at: Date;
+    created_at?: Date;
+    updated_at?: Date;
 }
