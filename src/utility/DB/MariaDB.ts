@@ -158,7 +158,7 @@ export class MariaDB {
             const diff = performance.now() - start;
             if (diff > 200) {
                 CLI.debug(`Query took ${diff.toFixed(2)}ms: ${sql}`, {
-                    logToDb: true,
+                    logToDb: false,
                     info: {
                         sql,
                         params

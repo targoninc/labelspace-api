@@ -17,7 +17,7 @@ export class UpdateSettingEndpoint extends AuthenticatedPostEndpoint {
         Authenticator.guardEndpoint(req, res);
 
         const user = req.user as PassportUser;
-        const key = req.body.setting;
+        const key = req.body.key;
         const value = req.body.value;
 
         if (key === "theme") {
