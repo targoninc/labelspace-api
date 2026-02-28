@@ -392,14 +392,7 @@ export class TriDB extends CachedDB {
                 release_date    = ?,
                 price           = ?,
                 length          = ?,
-                credits         = ?,
-                link_spotify    = ?,
-                link_youtube    = ?,
-                link_soundcloud = ?,
-                link_applemusic = ?,
-                link_bandcamp   = ?,
-                link_tidal      = ?,
-                link_lyda       = ?
+                credits         = ?
             WHERE id = ?
         `, [
             request.title,
@@ -410,13 +403,6 @@ export class TriDB extends CachedDB {
             request.price,
             request.length,
             request.credits,
-            request.link_spotify,
-            request.link_youtube,
-            request.link_soundcloud,
-            request.link_applemusic,
-            request.link_bandcamp,
-            request.link_tidal,
-            request.link_lyda,
             request.id
         ]);
     }
@@ -726,7 +712,10 @@ export class TriDB extends CachedDB {
     }
 
     async getTracksByBandcampLink(item_url: string): Promise<Track[]> {
-        return await this.query("SELECT * FROM tri.tracks WHERE link_bandcamp = ?", [item_url]);
+        return await this.query(`SELECT t.*
+                                 FROM tri.tracks t
+                                          INNER JOIN tri.track_links tl ON t.id = tl.track_id
+                                 WHERE tl.url = ?`, [item_url]);
     }
 
     async setArtistHasLogo(referenceId: number, hasImage: boolean) {

@@ -41,7 +41,6 @@ import {RoyaltiesByYearEndpoint} from "./endpoints/statistics/RoyaltiesByYearEnd
 import {GetPaymentsEndpoint} from "./endpoints/payments/GetPaymentsEndpoint.ts";
 import {GetAvailablePaymentAmountEndpoint} from "./endpoints/payments/GetAvailablePaymentAmountEndpoint.ts";
 import {GetAlbumsEndpoint} from "./endpoints/albums/GetAlbumsEndpoint.ts";
-import {ImportDataEndpoint} from "./endpoints/data/ImportDataEndpoint.ts";
 import {RoyaltiesByArtistEndpoint} from "./endpoints/statistics/RoyaltiesByArtistEndpoint.ts";
 import {RequestPaymentEndpoint} from "./endpoints/payments/RequestPaymentEndpoint.ts";
 import {AddDataEndpoint} from "./endpoints/data/AddDataEndpoint.ts";
@@ -233,7 +232,6 @@ new NewsletterUnsubscribeEndpoint(app, "/newsletter/unsubscribe", db).register()
 // endregion
 
 // region Data
-new ImportDataEndpoint(app, "/data/import", db).register();
 new AddDataEndpoint(app, "/data/add", db).register();
 // endregion
 

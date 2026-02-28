@@ -192,13 +192,6 @@ create table if not exists tri.tracks
     has_cover       tinyint(1) default 0                   not null,
     price           double     default 1                   null,
     processed       tinyint(1) default 0                   not null,
-    link_spotify    mediumtext                             null,
-    link_youtube    mediumtext                             null,
-    link_soundcloud mediumtext                             null,
-    link_applemusic mediumtext                             null,
-    link_bandcamp   mediumtext                             null,
-    link_tidal      mediumtext                             null,
-    link_lyda       mediumtext                             null,
     constraint tracks_pk
         unique (isrc)
 )

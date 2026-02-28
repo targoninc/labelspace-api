@@ -6,8 +6,7 @@
     "build": "tsc",
     "start": "npm run build && node dist/server.js",
     "start-bun-dev": "bun --inspect --watch src/server.ts",
-    "start-bun-prod": "bun server.ts",
-    "import-data": "bun src/importers/importAll.ts"
+    "start-bun-prod": "bun server.ts"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

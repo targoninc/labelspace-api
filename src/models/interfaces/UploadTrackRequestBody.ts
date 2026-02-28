@@ -8,11 +8,4 @@ export interface UploadTrackRequestBody {
     price: number,
     length: string,
     credits: string,
-    link_spotify: string,
-    link_youtube: string,
-    link_soundcloud: string,
-    link_applemusic: string,
-    link_bandcamp: string,
-    link_tidal: string;
-    link_lyda: string,
 }

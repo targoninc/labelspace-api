@@ -9,7 +9,6 @@ import {PassportDeserializeUser, PassportSerializeUser, PassportStrategy} from "
 import {Permissions} from "../../models/enums/Permissions.js";
 import {Application} from "express";
 import {CLI} from "@targoninc/ts-logging";
-import {importAll} from "../../importers/importAll.ts";
 import {uuidv4} from "uuidv7";
 
 export async function ensureDatabaseConsistency(db: TriDB) {
@@ -17,7 +16,6 @@ export async function ensureDatabaseConsistency(db: TriDB) {
     await ensurePermissions(db);
     await ensureSessionStore(db);
     await ensurePassKeyUserIds(db);
-    await ensureData(db);
 }
 
 async function ensurePassKeyUserIds(db: TriDB) {
@@ -30,13 +28,6 @@ async function ensurePassKeyUserIds(db: TriDB) {
                 passkey_user_id: passkeyUserId
             });
         }
-    }
-}
-
-async function ensureData(db: TriDB) {
-    const users = await db.getUsers();
-    if (!users || users.length === 0) {
-        await importAll(db, process.env.IMPORT_DATA_DIR);
     }
 }
 

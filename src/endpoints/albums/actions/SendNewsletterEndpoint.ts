@@ -58,15 +58,7 @@ export class SendNewsletterEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Album has no released tracks yet"});
         }
 
-        const links = [
-            firstTrack.link_spotify,
-            firstTrack.link_lyda,
-            firstTrack.link_applemusic,
-            firstTrack.link_bandcamp,
-            firstTrack.link_youtube,
-            firstTrack.link_soundcloud,
-            firstTrack.link_tidal,
-        ].filter(l => l && l.trim() !== "");
+        const links = await this.db.getAlbumLinks(album.id);
         if (links.length < 5) {
             return res.status(400).send({error: "Not enough store links are provided for the first track, must be at least 5"});
         }

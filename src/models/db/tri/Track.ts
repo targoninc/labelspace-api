@@ -24,11 +24,4 @@ export interface Track {
     has_cover: boolean;
     processed: boolean;
     links: TrackLink[];
-    link_spotify: string;
-    link_youtube: string;
-    link_soundcloud: string;
-    link_applemusic: string;
-    link_bandcamp: string;
-    link_tidal: string;
-    link_lyda: string;
 }
