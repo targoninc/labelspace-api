@@ -5,10 +5,9 @@ import {PaypalWebhookList} from "./models/PaypalWebhookList.js";
 import type {PaypalBatchHeader} from "./models/PaypalBatchHeader.ts";
 import type {PaypalPayoutItem} from "./models/PaypalPayoutItem.ts";
 import type {PaypalBatchPayoutResponse} from "./models/PaypalBatchPayoutResponse.ts";
+import {PAYPAL_API_BASE_URL} from "../Constants.js";
 
 let bearerToken: string|null = null;
-
-const paypalApiBaseUrl = "https://api-m.paypal.com/v1";
 
 export class Paypal {
     static async authenticate() {
@@ -19,7 +18,7 @@ export class Paypal {
             throw new Error("Missing PayPal secret");
         }
 
-        const res = await fetch(`${paypalApiBaseUrl}/oauth2/token`, {
+        const res = await fetch(`${PAYPAL_API_BASE_URL}/oauth2/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -35,7 +34,7 @@ export class Paypal {
     }
 
     static async callEndpoint(method: string, endpoint: string, body: any = null, expectsResponse = false, isRetry = false): Promise<any> {
-        const res = await fetch(`${paypalApiBaseUrl}/${endpoint}`, {
+        const res = await fetch(`${PAYPAL_API_BASE_URL}/${endpoint}`, {
             method,
             headers: {
                 "Content-Type": "application/json",

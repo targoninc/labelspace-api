@@ -9,11 +9,11 @@ import {CLI} from "@targoninc/ts-logging";
 import {env} from "../Environment.ts";
 import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 import {hashObject} from "./Hashing.ts";
-import {MAIL_LOGO_URL, ROYALTY_LABEL_NAME} from "../Constants.ts";
+import {BANDCAMP_PAYPAL_FEE_ESTIMATE, BANDCAMP_REPORT_FALLBACK_START, BANDCAMP_SYNC_INTERVAL_MINUTES, MAIL_LOGO_URL, ROYALTY_LABEL_NAME} from "../Constants.ts";
 
 export class BandcampWorker {
     private readonly db: TriDB;
-    private readonly refreshIntervalInMinutes = 60;
+    private readonly refreshIntervalInMinutes = BANDCAMP_SYNC_INTERVAL_MINUTES;
 
     constructor(db: TriDB) {
         this.db = db;
@@ -28,7 +28,7 @@ export class BandcampWorker {
 
     private async getReport() {
         const lastReportDateAsString = (await this.db.getLastBandcampReportTime());
-        let lastReportTime = lastReportDateAsString ? new Date(lastReportDateAsString) : new Date(2025, 0, 1);
+        let lastReportTime = lastReportDateAsString ? new Date(lastReportDateAsString) : new Date(BANDCAMP_REPORT_FALLBACK_START);
         const report = await Bandcamp.getSalesReport(lastReportTime, new Date());
 
         if (report.sales.length === 0) {
@@ -96,7 +96,7 @@ export class BandcampWorker {
     }
 
     private async mapSale(sale: BandcampSale): Promise<Royalty[]> {
-        const estimatedPaypalFee = 0.01;
+        const estimatedPaypalFee = BANDCAMP_PAYPAL_FEE_ESTIMATE;
         if (sale.upc && sale.upc != "" && sale.item_type === "album") {
             return await this.mapSaleByUpc(sale, estimatedPaypalFee);
         } else if (sale.isrc && sale.isrc != "" && sale.item_type === "track") {

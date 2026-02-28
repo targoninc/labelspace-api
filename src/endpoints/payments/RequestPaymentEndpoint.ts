@@ -10,7 +10,7 @@ import type {PaypalPayoutItem} from "../../utility/Paypal/models/PaypalPayoutIte
 import {PaypalBatchStatus} from "../../utility/Paypal/models/PaypalBatchStatus.ts";
 import {uuidv4} from "uuidv7";
 import {env} from "../../utility/Environment.ts";
-import {COMPANY_CONTACT, COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PORTAL_NAME} from "../../utility/Constants.ts";
+import {COMPANY_CONTACT, COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL, PAYMENT_CURRENCY, PAYMENT_MINIMUM, PORTAL_NAME} from "../../utility/Constants.ts";
 
 export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
     private readonly db: TriDB;
@@ -32,7 +32,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Not enough money available"});
         }
 
-        const minimum = 0.01;
+        const minimum = PAYMENT_MINIMUM;
         if (av < minimum) {
             return res.status(400).send({error: `Money is available, but below minimum (minimum ${minimum})`});
         }
@@ -51,7 +51,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const mailContentArtist = MailBuilder.default(MAIL_LOGO_URL)
             .subject(`${PORTAL_NAME} payment requested`)
             .heading(`${PORTAL_NAME} payment requested`)
-            .paragraph(`You have requested a payment for your ${PORTAL_NAME} account (${user.username}) for ${available.available} USD.`)
+            .paragraph(`You have requested a payment for your ${PORTAL_NAME} account (${user.username}) for ${available.available} ${PAYMENT_CURRENCY}.`)
             .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
             .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
@@ -59,11 +59,11 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const mailContent = MailBuilder.default(MAIL_LOGO_URL)
             .subject(`${PORTAL_NAME} payment request: ${user.username}`)
             .heading(`${PORTAL_NAME} payment request: ${user.username}`)
-            .paragraph(`${user.username} requested a payment for ${available.available} USD.`)
+            .paragraph(`${user.username} requested a payment for ${available.available} ${PAYMENT_CURRENCY}.`)
             .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
-        const subMails = env<string>("SUBMISSION_MAILS").split(",");
+        const subMails = env<string>("SUBMISSION_MAILS", "").split(",");
         for (const mail of subMails) {
             Mail.sendDefault(mail, mailContent);
         }
@@ -79,7 +79,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
         const items: PaypalPayoutItem[] = [
             {
                 amount: {
-                    currency: "USD",
+                    currency: PAYMENT_CURRENCY,
                     value: available.available.toString()
                 },
                 receiver: paypalMail
@@ -93,7 +93,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             note: `${PORTAL_NAME} payment`,
             recipient_type: "EMAIL",
             email_subject: `${PORTAL_NAME} payment`,
-            email_message: `${PORTAL_NAME} payment for ${user.username} over ${available.available} USD`
+            email_message: `${PORTAL_NAME} payment for ${user.username} over ${available.available} ${PAYMENT_CURRENCY}`
         }
         try {
             CLI.debug("Creating batch payout", {

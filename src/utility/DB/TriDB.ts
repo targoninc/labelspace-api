@@ -1,4 +1,5 @@
 import {env} from "../Environment.js";
+import {ARTIST_CUT} from "../Constants.js";
 import {Album} from "../../models/db/tri/Album.js";
 import {User} from "../../models/db/tri/User.js";
 import {PossibleUsersetting} from "../../models/db/tri/PossibleUsersetting.js";
@@ -563,8 +564,7 @@ export class TriDB extends CachedDB {
         const total = await this.getArtistTotalRoyalty(artistNames);
         const paidOut = await this.getUserPaidAmount(id);
 
-        const artistCut = 0.85;
-        const artistTotal = total * artistCut;
+        const artistTotal = total * ARTIST_CUT;
         return {
             total: artistTotal.toFixed(2),
             paidOut: paidOut.toFixed(2),
@@ -573,7 +573,6 @@ export class TriDB extends CachedDB {
     }
 
     async getAvailablePaymentAmounts(userArtistMap: Map<number, string[]>): Promise<Map<number, { total: string; paidOut: string; available: string }>> {
-        const artistCut = 0.85;
         const userIds = [...userArtistMap.keys()];
         const result = new Map<number, { total: string; paidOut: string; available: string }>();
 
@@ -614,7 +613,7 @@ export class TriDB extends CachedDB {
                     total += royaltyByArtist.get(name) ?? 0;
                     total += splitByArtist.get(name) ?? 0;
                 }
-                const artistTotal = total * artistCut;
+                const artistTotal = total * ARTIST_CUT;
                 const paidOut = paidByUser.get(userId) ?? 0;
                 result.set(userId, {
                     total: artistTotal.toFixed(2),
