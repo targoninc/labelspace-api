@@ -30,10 +30,11 @@ export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
                 emails: true
             });
 
-            await Promise.all(users.map(async user => {
-                const artistNames = (user.artists ?? []).map(a => a.name);
-                user.available = await this.db.getAvailablePaymentAmount(user.id, artistNames);
-            }));
+            const userArtistMap = new Map(users.map(u => [u.id, (u.artists ?? []).map(a => a.name)]));
+            const availableAmounts = await this.db.getAvailablePaymentAmounts(userArtistMap);
+            for (const user of users) {
+                user.available = availableAmounts.get(user.id);
+            }
 
             return res.send(users);
         }

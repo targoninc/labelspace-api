@@ -572,6 +572,66 @@ export class TriDB extends CachedDB {
         };
     }
 
+    async getAvailablePaymentAmounts(userArtistMap: Map<number, string[]>): Promise<Map<number, { total: string; paidOut: string; available: string }>> {
+        const artistCut = 0.85;
+        const userIds = [...userArtistMap.keys()];
+        const result = new Map<number, { total: string; paidOut: string; available: string }>();
+
+        if (userIds.length === 0) return result;
+
+        // Fetch all paid amounts in one query
+        const qs = userIds.map(() => "?").join(",");
+        const paidRows = await this.query<{ user_id: number; paid: number }>(
+            `SELECT user_id, COALESCE(SUM(amount), 0) as paid FROM finance.payments WHERE user_id IN (${qs}) AND status != '${PaymentStatus.failed}' GROUP BY user_id`,
+            userIds
+        );
+        const paidByUser = new Map<number, number>(paidRows.map(r => [r.user_id, Number(r.paid)]));
+
+        // Fetch direct royalties grouped by artist name in one query
+        const allArtistNames = [...new Set([...userArtistMap.values()].flat())];
+        const royaltyByArtist = new Map<string, number>();
+        if (allArtistNames.length > 0) {
+            const eqConds = allArtistNames.map(() => "t.artists = ?").join(" OR ");
+            const royaltyRows = await this.query<{ artists: string; royalty: number }>(
+                `SELECT t.artists, COALESCE(SUM(r.royalty), 0) as royalty FROM finance.royalties r INNER JOIN tri.tracks t ON r.isrc = t.isrc WHERE ${eqConds} GROUP BY t.artists`,
+                allArtistNames
+            );
+            for (const row of royaltyRows) {
+                royaltyByArtist.set(row.artists, Number(row.royalty));
+            }
+
+            // Fetch split royalties grouped by split artist in one query
+            const likeConds = allArtistNames.map(() => "s.artist = ?").join(" OR ");
+            const splitRows = await this.query<{ split_artist: string; split_royalty: number }>(
+                `SELECT s.artist as split_artist, COALESCE(SUM(r.royalty * s.split), 0) as split_royalty FROM finance.royalties r INNER JOIN finance.splits s ON r.isrc = s.isrc INNER JOIN tri.tracks t ON r.isrc = t.isrc WHERE (${likeConds}) AND t.artists != s.artist GROUP BY s.artist`,
+                allArtistNames
+            );
+            const splitByArtist = new Map<string, number>(splitRows.map(r => [r.split_artist, Number(r.split_royalty)]));
+
+            for (const [userId, artistNames] of userArtistMap) {
+                let total = 0;
+                for (const name of artistNames) {
+                    total += royaltyByArtist.get(name) ?? 0;
+                    total += splitByArtist.get(name) ?? 0;
+                }
+                const artistTotal = total * artistCut;
+                const paidOut = paidByUser.get(userId) ?? 0;
+                result.set(userId, {
+                    total: artistTotal.toFixed(2),
+                    paidOut: paidOut.toFixed(2),
+                    available: (artistTotal - paidOut).toFixed(2),
+                });
+            }
+        } else {
+            for (const userId of userIds) {
+                const paidOut = paidByUser.get(userId) ?? 0;
+                result.set(userId, { total: "0.00", paidOut: paidOut.toFixed(2), available: (0 - paidOut).toFixed(2) });
+            }
+        }
+
+        return result;
+    }
+
     async getAlbums(notAuthenticated: boolean): Promise<Album[]> {
         if (notAuthenticated) {
             return await this.query("SELECT * FROM tri.albums WHERE release_date < CURRENT_TIMESTAMP ORDER BY release_date DESC");
