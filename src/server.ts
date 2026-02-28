@@ -85,6 +85,7 @@ import {AddTrackLinkEndpoint} from "./endpoints/tracks/actions/AddTrackLinkEndpo
 import {RemoveTrackLinkEndpoint} from "./endpoints/tracks/actions/RemoveTrackLinkEndpoint.ts";
 import {AddAlbumLinkEndpoint} from "./endpoints/albums/actions/AddAlbumLinkEndpoint.ts";
 import {RemoveAlbumLinkEndpoint} from "./endpoints/albums/actions/RemoveAlbumLinkEndpoint.ts";
+import {CreateArtistEndpoint} from "./endpoints/artists/actions/CreateArtistEndpoint.ts";
 
 config();
 
@@ -142,6 +143,7 @@ new GetArtistLinksEndpoint(app, "/artists/links/get", db).register();
 new CreateArtistLinkEndpoint(app, "/artists/links/create", db).register();
 new UpdateArtistLinkEndpoint(app, "/artists/links/update", db).register();
 new DeleteArtistLinkEndpoint(app, "/artists/links/delete", db).register();
+new CreateArtistEndpoint(app, "/artists/actions/create", db).register();
 // endregion
 
 // region Users

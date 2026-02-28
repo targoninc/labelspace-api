@@ -12,7 +12,7 @@ import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 
 interface ArtistCreateRequest {
     name: string;
-    linked_user_id: number;
+    linkedUserId: number;
 }
 
 export class CreateArtistEndpoint extends AuthenticatedPostEndpoint {
@@ -43,17 +43,17 @@ export class CreateArtistEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Artist name already exists"});
         }
 
-        const linkedUser = await this.db.getUserById(body.linked_user_id);
+        const linkedUser = await this.db.getUserById(body.linkedUserId);
         if (!linkedUser) {
             return res.status(400).send({error: "Linked user not found"});
         }
 
-        const artistId = await this.db.createArtist(body.name, body.linked_user_id);
+        const artistId = await this.db.createArtist(body.name, body.linkedUserId);
         if (!artistId) {
             return res.status(500).send({error: "Failed to create artist"});
         }
 
-        const emails = await this.db.getEmailsByUserId(body.linked_user_id);
+        const emails = await this.db.getEmailsByUserId(body.linkedUserId);
 
         for (const email of emails) {
             AccountMailer.sendArtistCreateEmail(email.email, linkedUser, body.name);
