@@ -657,7 +657,7 @@ export class TriDB extends CachedDB {
             [batch_status, ownBatchId]);
     }
 
-    async getPaymentByBatchId(ownBatchId: string): Promise<PaymentRequest | null> {
+    async getPaymentByBatchId(ownBatchId: string): Promise<Payment | null> {
         return await this.queryFirst("SELECT * FROM finance.payments WHERE payout_batch_id = ?", [ownBatchId]);
     }
 
