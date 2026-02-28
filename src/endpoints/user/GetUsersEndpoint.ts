@@ -22,20 +22,18 @@ export class GetUsersEndpoint extends AuthenticatedGetEndpoint {
         if (await Authenticator.userHasPermission(user, Permissions.userManagement, this.db)) {
             const users = await this.db.getUsers();
 
-            for (let user of users) {
-                user = await UserEnricher.enrichAsync(this.db, user, {
-                    artists: true,
-                    permissions: true,
-                    public_keys: true,
-                    totp: true,
-                    emails: true
-                });
+            await UserEnricher.enrichManyAsync(this.db, users, {
+                artists: true,
+                permissions: true,
+                public_keys: true,
+                totp: true,
+                emails: true
+            });
 
-                const artists = await this.db.getUserArtists(user.id);
-                const artistNames = artists.map(a => a.name);
-
+            await Promise.all(users.map(async user => {
+                const artistNames = (user.artists ?? []).map(a => a.name);
                 user.available = await this.db.getAvailablePaymentAmount(user.id, artistNames);
-            }
+            }));
 
             return res.send(users);
         }

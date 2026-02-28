@@ -878,6 +878,42 @@ export class TriDB extends CachedDB {
         return await this.query("SELECT * FROM tri.public_keys WHERE passkey_user_id = ?", [id]);
     }
 
+    async getArtistsByUserIds(userIds: number[]): Promise<Artist[]> {
+        if (userIds.length === 0) return [];
+        const qs = userIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.artists WHERE user_id IN (${qs})`, userIds);
+    }
+
+    async getSettingsByUserIds(userIds: number[]): Promise<Usersetting[]> {
+        if (userIds.length === 0) return [];
+        const qs = userIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.user_settings WHERE user_id IN (${qs})`, userIds);
+    }
+
+    async getEmailsByUserIds(userIds: number[]): Promise<UserEmail[]> {
+        if (userIds.length === 0) return [];
+        const qs = userIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.user_emails WHERE user_id IN (${qs})`, userIds);
+    }
+
+    async getPermissionsByUserIds(userIds: number[]): Promise<UserPermission[]> {
+        if (userIds.length === 0) return [];
+        const qs = userIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.users_permissions WHERE user_id IN (${qs})`, userIds);
+    }
+
+    async getTotpByUserIds(userIds: number[]): Promise<UserTotp[]> {
+        if (userIds.length === 0) return [];
+        const qs = userIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.user_totp WHERE user_id IN (${qs})`, userIds);
+    }
+
+    async getPublicKeysByPasskeyUserIds(passkeyUserIds: string[]): Promise<PublicKey[]> {
+        if (passkeyUserIds.length === 0) return [];
+        const qs = passkeyUserIds.map(() => "?").join(",");
+        return await this.query(`SELECT * FROM tri.public_keys WHERE passkey_user_id IN (${qs})`, passkeyUserIds);
+    }
+
     async deletePublicKey(key_id: string) {
         await this.query("DELETE FROM tri.public_keys WHERE key_id = ?", [key_id]);
     }
