@@ -41,4 +41,22 @@ export class AccountMailer {
 
         Mail.sendDefault(email, mail);
     }
+
+    static sendArtistCreateEmail(email: string, linkedUser: User, name: string) {
+        const mail = MailBuilder.default(MAIL_LOGO_URL)
+            .subject(`New artist profile created on ${PORTAL_NAME}`)
+            .heading(`A new artist profile was just created for you`)
+            .paragraph(`Your ${PORTAL_NAME} account (@${linkedUser.username}) has been linked to a new artist profile.`)
+            .card([
+                heading("Artist Details", 2),
+                paragraph(`Artist Name: ${name}`),
+                paragraph(`Linked Account: @${linkedUser.username}`)
+            ])
+            .paragraph(`You can now manage the page for this artist through your account.`)
+            .paragraph(`If you did not request this, please contact us immediately at ${COMPANY_CONTACT}.`)
+            .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
+            .get();
+
+        Mail.sendDefault(email, mail);
+    }
 }

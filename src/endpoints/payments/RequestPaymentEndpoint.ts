@@ -37,7 +37,7 @@ export class RequestPaymentEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: `Money is available, but below minimum (minimum ${minimum})`});
         }
 
-        const userMails = await this.db.getUserEmails(user.id);
+        const userMails = await this.db.getEmailsByUserId(user.id);
         const settings = await this.db.getUserSettings(user.id);
         const paypalMail = settings.find(m => m.key === "paypalMail")?.value;
         if (!paypalMail) {

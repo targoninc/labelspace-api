@@ -22,7 +22,7 @@ export class VerifyEmailEndpoint extends AuthenticatedPostEndpoint {
         }
         activationCode = activationCode.trim();
 
-        const emails = await this.db.getUserEmails(req.user.id);
+        const emails = await this.db.getEmailsByUserId(req.user.id);
         const matchingEmail = emails.find(e => e.verification_code === activationCode);
         if (!matchingEmail) {
             CLI.warning(`User ${req.user.username} tried to verify email with code ${activationCode}, but no such email found`);

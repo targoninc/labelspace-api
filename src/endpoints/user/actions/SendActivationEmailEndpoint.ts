@@ -14,7 +14,7 @@ export class SendActivationEmailEndpoint extends AuthenticatedPostEndpoint {
     async run(req: AuthenticatedRequest, res: Response) {
         const user = req.user;
 
-        const emails = await this.db.getUserEmails(user.id);
+        const emails = await this.db.getEmailsByUserId(user.id);
         if (emails.length === 0) {
             throw new Error("User has no emails");
         }

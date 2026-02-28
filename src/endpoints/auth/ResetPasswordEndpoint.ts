@@ -55,7 +55,7 @@ export class ResetPasswordEndpoint extends PostEndpoint {
             .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
-        const emails = await this.db.getUserEmails(user.id);
+        const emails = await this.db.getEmailsByUserId(user.id);
         for (const email of emails) {
             if (email.verified || email.primary) {
                 Mail.sendDefault(email.email, mail);

@@ -476,7 +476,7 @@ export class TriDB extends CachedDB {
         }
     }
 
-    async getUserEmails(id: number): Promise<UserEmail[]> {
+    async getEmailsByUserId(id: number): Promise<UserEmail[]> {
         return await this.query("SELECT * FROM tri.user_emails WHERE user_id = ?", [id]);
     }
 
@@ -1083,5 +1083,11 @@ export class TriDB extends CachedDB {
 
     async removeAlbumLink(host: string) {
         await this.query("DELETE FROM tri.album_links WHERE host = ?", [host]);
+    }
+
+    async createArtist(name: string, linked_user_id: number) {
+        await this.query("INSERT INTO tri.artists (name, user_id) VALUES (?, ?)", [name, linked_user_id]);
+
+        return await this.querySingleValue<number>("SELECT id FROM tri.artists WHERE name = ?", [name]);
     }
 }

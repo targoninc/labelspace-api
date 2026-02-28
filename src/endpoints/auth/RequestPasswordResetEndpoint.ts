@@ -49,7 +49,7 @@ export class RequestPasswordResetEndpoint extends PostEndpoint {
             .signature(`the ${LABEL_NAME} Team`, COMPANY_NAME)
             .get();
 
-        const emails = await this.db.getUserEmails(user.id);
+        const emails = await this.db.getEmailsByUserId(user.id);
         let anySent = false;
         for (const email of emails) {
             if (email.verified || email.primary) {

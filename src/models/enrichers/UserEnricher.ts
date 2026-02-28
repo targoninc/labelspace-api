@@ -27,7 +27,7 @@ export class UserEnricher extends IEnricher {
 
         user.artists = await enrichIfAsync<Artist[]>(config.artists, () => db.getUserArtists(user.id), []);
         user.settings = await enrichIfAsync<Usersetting[]>(config.settings, () => db.getUserSettings(user.id), []);
-        user.emails = await enrichIfAsync<UserEmail[]>(config.emails, () => db.getUserEmails(user.id), []);
+        user.emails = await enrichIfAsync<UserEmail[]>(config.emails, () => db.getEmailsByUserId(user.id), []);
         user.permissions = await enrichIfAsync<Permission[]>(config.permissions, async () => {
             const userPerms = await db.getUserPermissions(user.id);
             return await db.getPermissionsByIds(userPerms.map(p => p.permission_id));

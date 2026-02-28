@@ -63,7 +63,7 @@ export class UpdateUserEndpoint extends AuthenticatedPostEndpoint {
                 }
             }
             await this.db.setUserEmails(user.id, emails);
-            const existingEmails = await this.db.getUserEmails(user.id);
+            const existingEmails = await this.db.getEmailsByUserId(user.id);
             for (const existingEmail of existingEmails) {
                 if (!emails.some(e => e.email === existingEmail.email)) {
                     await this.db.deleteUserEmail(user.id, existingEmail.email);
