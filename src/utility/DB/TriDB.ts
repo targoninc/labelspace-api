@@ -8,7 +8,6 @@ import {Track} from "../../models/db/tri/Track.js";
 import {UserPermission} from "../../models/db/tri/UserPermission.js";
 import {Permission} from "../../models/db/tri/Permission.js";
 import {Permissions} from "../../models/enums/Permissions.js";
-import {CLI} from "@targoninc/ts-logging";
 import {LogLevel} from "../../models/enums/LogLevel.js";
 import {Log} from "../../models/db/tri/Log.js";
 import {SearchTableConfiguration} from "../Search/SearchTableConfiguration.js";

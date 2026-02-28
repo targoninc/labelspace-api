@@ -11,13 +11,13 @@ export const LABEL_UI_URL = env("LABEL_WEBSITE", "https://trirecords.eu");
 export const PORTAL_API_URL = env("PORTAL_API_URL", "https://artists-api.trirecords.eu");
 
 // Royalty & payment config
-export const ARTIST_CUT = env<number>("ARTIST_CUT", 0.85);
-export const PAYMENT_MINIMUM = env<number>("PAYMENT_MINIMUM", 0.01);
+export const ARTIST_CUT = parseFloat(env("ARTIST_CUT", "0.85"));
+export const PAYMENT_MINIMUM = parseFloat(env("PAYMENT_MINIMUM", "0.01"));
 export const PAYMENT_CURRENCY = env("PAYMENT_CURRENCY", "USD");
 export const PAYPAL_API_BASE_URL = env("PAYPAL_API_BASE_URL", "https://api-m.paypal.com/v1");
 
 // Bandcamp sync config
-export const BANDCAMP_PAYPAL_FEE_ESTIMATE = env<number>("BANDCAMP_PAYPAL_FEE_ESTIMATE", 0.01);
-export const BANDCAMP_SYNC_INTERVAL_MINUTES = env<number>("BANDCAMP_SYNC_INTERVAL_MINUTES", 60);
+export const BANDCAMP_PAYPAL_FEE_ESTIMATE = parseFloat(env("BANDCAMP_PAYPAL_FEE_ESTIMATE", "0.01"));
+export const BANDCAMP_SYNC_INTERVAL_MINUTES = parseFloat(env("BANDCAMP_SYNC_INTERVAL_MINUTES", "60"));
 export const BANDCAMP_REPORT_FALLBACK_START = env("BANDCAMP_REPORT_FALLBACK_START", "2025-01-01");
 
