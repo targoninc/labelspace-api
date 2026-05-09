@@ -3,8 +3,6 @@
   "module": "server.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && node dist/server.js",
     "start-bun-dev": "bun --inspect --watch src/server.ts",
     "start-bun-prod": "bun server.ts"
   },
