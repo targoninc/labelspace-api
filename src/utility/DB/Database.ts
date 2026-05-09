@@ -82,6 +82,13 @@ export function getSessionStore() {
     });
 }
 
+export function getSessionCookieOptions(): Pick<session.CookieOptions, "domain" | "sameSite"> {
+    return {
+        domain: process.env.COOKIE_DOMAIN,
+        sameSite: "strict",
+    };
+}
+
 export function setupPassport(app: Application, db: TriDB) {
     app.use(session({
         secret: env('SESSION_SECRET', ""),
@@ -89,8 +96,7 @@ export function setupPassport(app: Application, db: TriDB) {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            domain: process.env.COOKIE_DOMAIN,
-            sameSite: "strict",
+            ...getSessionCookieOptions(),
             maxAge: 1000 * 60 * 60 * 24 * 30 * 6
         },
     }));
