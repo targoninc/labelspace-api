@@ -532,8 +532,65 @@ export class TriDB extends CachedDB {
         return await this.querySingleValue("SELECT user_id FROM tri.artists WHERE name = ?", [artistName]);
     }
 
-    async getPaymentsByUserId(id: number): Promise<Payment[]> {
-        return await this.query("SELECT * FROM finance.payments WHERE user_id = ? ORDER BY created_at DESC", [id]);
+    async getPayments(filters: {
+        userId: number;
+        canViewAll: boolean;
+        status?: PaymentStatus;
+        startTime?: string;
+        endTime?: string;
+        minAmount?: number;
+        maxAmount?: number;
+        userQuery?: string;
+    }): Promise<Payment[]> {
+        const conditions: string[] = [];
+        const values: (number | string)[] = [];
+
+        if (!filters.canViewAll) {
+            conditions.push("p.user_id = ?");
+            values.push(filters.userId);
+        }
+
+        if (filters.status) {
+            conditions.push("p.status = ?");
+            values.push(filters.status);
+        }
+
+        if (filters.startTime) {
+            conditions.push("p.created_at >= ?");
+            values.push(filters.startTime);
+        }
+
+        if (filters.endTime) {
+            conditions.push("p.created_at <= ?");
+            values.push(filters.endTime);
+        }
+
+        if (filters.minAmount !== undefined) {
+            conditions.push("p.amount >= ?");
+            values.push(filters.minAmount);
+        }
+
+        if (filters.maxAmount !== undefined) {
+            conditions.push("p.amount <= ?");
+            values.push(filters.maxAmount);
+        }
+
+        if (filters.canViewAll && filters.userQuery) {
+            conditions.push("(u.username LIKE ? OR artists.recipient_artist_names LIKE ?)");
+            values.push(`%${filters.userQuery}%`, `%${filters.userQuery}%`);
+        }
+
+        const whereClause = conditions.length > 0 ? ` WHERE ${conditions.join(" AND ")}` : "";
+        return await this.query(
+            `SELECT p.*, u.username AS recipient_username, artists.recipient_artist_names
+             FROM finance.payments p
+                      INNER JOIN tri.users u ON p.user_id = u.id
+                      LEFT JOIN (SELECT user_id, GROUP_CONCAT(name ORDER BY name SEPARATOR ', ') AS recipient_artist_names
+                                 FROM tri.artists
+                                 GROUP BY user_id) artists ON artists.user_id = u.id${whereClause}
+             ORDER BY p.created_at DESC`,
+            values
+        );
     }
 
     async getArtistRoyalty(artistNames: string[]) {

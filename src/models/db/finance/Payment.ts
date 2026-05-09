@@ -5,6 +5,8 @@ export interface Payment {
     payout_batch_id: string;
     date: string;
     user_id: number;
+    recipient_username?: string;
+    recipient_artist_names?: string;
     amount: number;
     status: PaymentStatus;
     created_at: Date;
