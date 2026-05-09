@@ -133,4 +133,3 @@ create table if not exists finance.splits
     primary key (isrc, artist)
 )
     collate = utf8mb4_general_ci;
-

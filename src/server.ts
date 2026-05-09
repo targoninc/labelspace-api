@@ -12,6 +12,7 @@ import {MfaRequestEndpoint} from "./endpoints/auth/MfaRequestEndpoint.js";
 import {GetPermissionsEndpoint} from "./endpoints/user/GetPermissionsEndpoint.js";
 import {UpdateSettingEndpoint} from "./endpoints/user/actions/UpdateSettingEndpoint.js";
 import {ensureDatabaseConsistency, setupPassport} from "./utility/DB/Database.js";
+import {MigrationManager} from "./utility/DB/Migrations/MigrationManager.js";
 import {LogoutEndpoint} from "./endpoints/auth/LogoutEndpoint.js";
 import {TriDB} from "./utility/DB/TriDB.js";
 import {SearchUsersEndpoint} from "./endpoints/search/SearchUsersEndpoint.js";
@@ -104,6 +105,8 @@ if (missingEnvVars.length > 0) {
 }
 
 const db = new TriDB();
+const migrationManager = new MigrationManager(db);
+await migrationManager.runMigrations();
 await ensureDatabaseConsistency(db);
 
 configureDBLogging(db);

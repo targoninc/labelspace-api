@@ -346,4 +346,3 @@ create table if not exists tri.users_permissions
         foreign key (user_id) references tri.users (id)
             on delete cascade
 );
-
