@@ -12,12 +12,26 @@ export class GetLogsEndpoint extends AuthenticatedGetEndpoint {
         this.db = db;
     }
 
-    private parseDateQuery(value: unknown, key: string) {
-        if (typeof value !== "string" || value.trim() === "") {
+    private parseOptionalQueryString(value: unknown) {
+        if (typeof value !== "string") {
             return undefined;
         }
 
-        const date = new Date(value);
+        const trimmedValue = value.trim();
+        if (trimmedValue === "" || trimmedValue === "all" || trimmedValue === "undefined" || trimmedValue === "null") {
+            return undefined;
+        }
+
+        return trimmedValue;
+    }
+
+    private parseDateQuery(value: unknown, key: string) {
+        const dateValue = this.parseOptionalQueryString(value);
+        if (!dateValue) {
+            return undefined;
+        }
+
+        const date = new Date(dateValue);
         if (Number.isNaN(date.getTime())) {
             throw new Error(`Invalid ${key}`);
         }
@@ -37,8 +51,9 @@ export class GetLogsEndpoint extends AuthenticatedGetEndpoint {
 
         const validTypes = Object.values(LogLevel).filter((value): value is LogLevel => typeof value === "number");
         let logLevel: LogLevel | undefined;
-        if (typeof req.query.logLevel === "string" && req.query.logLevel.trim() !== "") {
-            const parsedLogLevel = parseInt(req.query.logLevel, 10);
+        const logLevelValue = this.parseOptionalQueryString(req.query.logLevel);
+        if (logLevelValue) {
+            const parsedLogLevel = parseInt(logLevelValue, 10);
             if (Number.isNaN(parsedLogLevel) || !validTypes.includes(parsedLogLevel)) {
                 return res.status(400).send({error: "Invalid log level"});
             }
@@ -75,7 +90,7 @@ export class GetLogsEndpoint extends AuthenticatedGetEndpoint {
             return res.status(400).send({error: "Start time must be before end time"});
         }
 
-        const message = typeof req.query.message === "string" ? req.query.message.trim() : undefined;
+        const message = this.parseOptionalQueryString(req.query.message);
         const logs = await this.db.getLogs({
             logLevel,
             message,

@@ -452,7 +452,7 @@ export class TriDB extends CachedDB {
         const values: (number | string)[] = [];
 
         if (filters.logLevel !== undefined) {
-            conditions.push("logLevel = ?");
+            conditions.push("logLevel >= ?");
             values.push(filters.logLevel);
         }
 
