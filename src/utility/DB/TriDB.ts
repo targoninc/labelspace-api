@@ -440,11 +440,39 @@ export class TriDB extends CachedDB {
             .catch(e => console.error(e));
     }
 
-    async getLogs(logLevel: number, offset: number, limit: number): Promise<Log[]> {
-        if (logLevel === LogLevel.debug) {
-            return await this.query("SELECT * FROM tri.logs ORDER BY order_id DESC LIMIT ? OFFSET ?", [limit, offset]);
+    async getLogs(filters: {
+        logLevel?: LogLevel;
+        message?: string;
+        startTime?: string;
+        endTime?: string;
+        offset: number;
+        limit: number;
+    }): Promise<Log[]> {
+        const conditions: string[] = [];
+        const values: (number | string)[] = [];
+
+        if (filters.logLevel !== undefined) {
+            conditions.push("logLevel = ?");
+            values.push(filters.logLevel);
         }
-        return await this.query("SELECT * FROM tri.logs WHERE logLevel >= ? ORDER BY order_id DESC LIMIT ? OFFSET ?", [logLevel, limit, offset]);
+
+        if (filters.message) {
+            conditions.push("message LIKE ?");
+            values.push(`%${filters.message}%`);
+        }
+
+        if (filters.startTime) {
+            conditions.push("time >= ?");
+            values.push(filters.startTime);
+        }
+
+        if (filters.endTime) {
+            conditions.push("time <= ?");
+            values.push(filters.endTime);
+        }
+
+        const whereClause = conditions.length > 0 ? ` WHERE ${conditions.join(" AND ")}` : "";
+        return await this.query(`SELECT * FROM tri.logs${whereClause} ORDER BY order_id DESC LIMIT ? OFFSET ?`, [...values, filters.limit, filters.offset]);
     }
 
     async searchGeneric<T>(searchConfiguration: SearchTableConfiguration<T>, request: SearchRequest, noAuth: boolean, searchMode: SearchMode): Promise<T[]> {
