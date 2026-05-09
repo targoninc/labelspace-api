@@ -87,6 +87,7 @@ import {RemoveTrackLinkEndpoint} from "./endpoints/tracks/actions/RemoveTrackLin
 import {AddAlbumLinkEndpoint} from "./endpoints/albums/actions/AddAlbumLinkEndpoint.ts";
 import {RemoveAlbumLinkEndpoint} from "./endpoints/albums/actions/RemoveAlbumLinkEndpoint.ts";
 import {CreateArtistEndpoint} from "./endpoints/artists/actions/CreateArtistEndpoint.ts";
+import {GetPublicUiConfigEndpoint} from "./endpoints/config/GetPublicUiConfigEndpoint.ts";
 
 config();
 
@@ -137,6 +138,10 @@ app.use(rateLimit({
 
 const mfaStore = new MfaStore();
 const challengeStore = new ChallengeStore();
+
+// region Config
+new GetPublicUiConfigEndpoint(app, "/config/ui").register();
+// endregion
 
 // region Artists
 new GetArtistsEndpoint(app, "/artists/get", db).register();
