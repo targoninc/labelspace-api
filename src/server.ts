@@ -88,6 +88,13 @@ import {AddAlbumLinkEndpoint} from "./endpoints/albums/actions/AddAlbumLinkEndpo
 import {RemoveAlbumLinkEndpoint} from "./endpoints/albums/actions/RemoveAlbumLinkEndpoint.ts";
 import {CreateArtistEndpoint} from "./endpoints/artists/actions/CreateArtistEndpoint.ts";
 import {GetPublicUiConfigEndpoint} from "./endpoints/config/GetPublicUiConfigEndpoint.ts";
+import {GetPublicAlbumsEndpoint} from "./endpoints/public/GetPublicAlbumsEndpoint.ts";
+import {GetPublicAlbumEndpoint} from "./endpoints/public/GetPublicAlbumEndpoint.ts";
+import {GetPublicTracksEndpoint} from "./endpoints/public/GetPublicTracksEndpoint.ts";
+import {GetPublicTrackEndpoint} from "./endpoints/public/GetPublicTrackEndpoint.ts";
+import {GetPublicLatestAlbumEndpoint} from "./endpoints/public/GetPublicLatestAlbumEndpoint.ts";
+import {SearchPublicAlbumsEndpoint} from "./endpoints/public/SearchPublicAlbumsEndpoint.ts";
+import {SearchPublicTracksEndpoint} from "./endpoints/public/SearchPublicTracksEndpoint.ts";
 
 config();
 
@@ -276,6 +283,16 @@ app.get("/security.txt", (req, res) => {
     });
     res.sendFile(path.join(__dirname, "./security.txt"));
 });
+
+// region Public
+new GetPublicAlbumsEndpoint(app, "/public/albums", db).register();
+new GetPublicAlbumEndpoint(app, "/public/albums/byId", db).register();
+new GetPublicLatestAlbumEndpoint(app, "/public/albums/latest", db).register();
+new GetPublicTracksEndpoint(app, "/public/tracks", db).register();
+new GetPublicTrackEndpoint(app, "/public/tracks/byId", db).register();
+new SearchPublicAlbumsEndpoint(app, "/public/search/albums", db).register();
+new SearchPublicTracksEndpoint(app, "/public/search/tracks", db).register();
+// endregion
 
 const port = parseInt(process.env.PORT ?? "8080");
 app.listen(port, () => {
