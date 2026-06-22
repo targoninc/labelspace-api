@@ -1,13 +1,12 @@
-# LabelSpace API (artist-space-backend)
+# LabelSpace API
 
-Backend API server for the LabelSpace platform. Built with Express, Passport.js, and MariaDB. Handles authentication, CRUD for tracks/albums/artists, payments (PayPal), royalties, statistics, media processing, search, newsletter, MFA (TOTP/WebAuthn), Bandcamp integration, and file storage.
+API for LabelSpace. Built with Express, Passport.js, and MariaDB. Handles authentication, CRUD for tracks/albums/artists, payments (PayPal), royalties, statistics, media processing, search, newsletter, MFA (TOTP/WebAuthn), Bandcamp integration, and file storage.
 
-## Prerequisites
+## Development Prerequisites
 
 - [Bun](https://bun.sh) 1.x
-- MariaDB 10+ / MySQL 8+
-- SMTP mail server
-- ffmpeg (for audio processing)
+- SMTP mail connection
+- ffmpeg
 - PayPal Developer account (for payment features)
 - Bandcamp Developer account (optional, for Bandcamp integration)
 
