@@ -38,8 +38,8 @@ From the repository root:
 
 ```bash
 # Copy all .env.example files
-cp artist-space-backend/.env.example artist-space-backend/.env
-cp artist-space-ui/.env.example artist-space-ui/.env
+cp .env.example .env
+cp ../labelspace-ui/.env.example ../labelspace-ui/.env
 cp tri-web/.env.example tri-web/.env
 
 # Edit .env files with your settings

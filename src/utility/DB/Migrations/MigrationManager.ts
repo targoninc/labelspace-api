@@ -22,7 +22,7 @@ export class MigrationManager {
         this.db = db;
 
         // Define path to migrations scripts
-        this.migrationsPath = join(process.cwd(), 'artist-space-backend/src/utility/DB/Migrations/scripts');
+        this.migrationsPath = join(process.cwd(), 'labelspace-api/src/utility/DB/Migrations/scripts');
 
         // Check if path exists, fallback to relative if needed (depending on where the app is started)
         if (!existsSync(this.migrationsPath)) {
