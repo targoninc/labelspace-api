@@ -134,13 +134,22 @@ app.use(express.json({
 }));
 
 const rateLimitWindowInMin = 1;
+app.use("/media/image", rateLimit({
+    windowMs: rateLimitWindowInMin * 60 * 1000,
+    limit: 3000,
+    message: `Too many requests, please try again in ${rateLimitWindowInMin} minutes.`,
+    validate: {
+        xForwardedForHeader: false
+    }
+}));
 app.use(rateLimit({
     windowMs: rateLimitWindowInMin * 60 * 1000,
     limit: 500,
     message: `Too many requests, please try again in ${rateLimitWindowInMin} minutes.`,
     validate: {
         xForwardedForHeader: false
-    }
+    },
+    skip: (req) => req.path === "/media/image"
 }));
 
 const mfaStore = new MfaStore();
