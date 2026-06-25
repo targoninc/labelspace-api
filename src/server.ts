@@ -51,6 +51,9 @@ import {GetTracksEndpoint} from "./endpoints/tracks/GetTracksEndpoint.ts";
 import {AddTrackToAlbumEndpoint} from "./endpoints/albums/actions/AddTrackToAlbumEndpoint.ts";
 import {BandcampWorker} from "./utility/Bandcamp/BandcampWorker.ts";
 import {SubmitReleaseEndpoint} from "./endpoints/submissions/SubmitReleaseEndpoint.ts";
+import {GetSubmissionsEndpoint} from "./endpoints/submissions/GetSubmissionsEndpoint.ts";
+import {VoteOnSubmissionEndpoint} from "./endpoints/submissions/VoteOnSubmissionEndpoint.ts";
+import {ConvertSubmissionEndpoint} from "./endpoints/submissions/ConvertSubmissionEndpoint.ts";
 import {GetArtistsEndpoint} from "./endpoints/artists/GetArtistsEndpoint.ts";
 import {GetArtistEndpoint} from "./endpoints/artists/GetArtistEndpoint.ts";
 import {UpdateArtistEndpoint} from "./endpoints/artists/UpdateArtistEndpoint.ts";
@@ -262,7 +265,10 @@ new AddDataEndpoint(app, "/data/add", db).register();
 // endregion
 
 // region Submissions
-new SubmitReleaseEndpoint(app, "/submissions/create").register();
+new SubmitReleaseEndpoint(app, "/submissions/create", db).register();
+new GetSubmissionsEndpoint(app, "/submissions/get", db).register();
+new VoteOnSubmissionEndpoint(app, "/submissions/vote", db).register();
+new ConvertSubmissionEndpoint(app, "/submissions/convert", db).register();
 // endregion
 
 // region Webhooks

@@ -1269,4 +1269,68 @@ export class TriDB extends CachedDB {
 
         return await this.querySingleValue<number>("SELECT id FROM tri.artists WHERE name = ?", [name]);
     }
+
+    async getSubmissions() {
+        const submissions: any[] = await this.query("SELECT * FROM tri.submissions ORDER BY created_at DESC");
+        if (submissions.length === 0) return [];
+
+        for (const s of submissions) {
+            s.ratings = [];
+        }
+
+        const ids = submissions.map(s => s.id);
+        const placeholders = ids.map(() => "?").join(",");
+        const ratings: any[] = await this.query(
+            `SELECT * FROM tri.submission_ratings WHERE submission_id IN (${placeholders})`,
+            ids
+        );
+
+        const ratingsBySubmission: Map<number, any[]> = new Map();
+        for (const r of ratings) {
+            if (!ratingsBySubmission.has(r.submission_id)) {
+                ratingsBySubmission.set(r.submission_id, []);
+            }
+            ratingsBySubmission.get(r.submission_id)!.push(r);
+        }
+
+        for (const s of submissions) {
+            s.ratings = ratingsBySubmission.get(s.id) ?? [];
+        }
+
+        return submissions;
+    }
+
+    async getSubmissionById(id: number) {
+        return await this.querySingleValue<any>("SELECT * FROM tri.submissions WHERE id = ?", [id]);
+    }
+
+    async insertSubmission(link: string, desiredReleaseDate: string, artistName: string, email: string, message: string) {
+        await this.query(
+            "INSERT INTO tri.submissions (link, desired_release_date, artist_name, email, message) VALUES (?, ?, ?, ?, ?)",
+            [link, desiredReleaseDate, artistName, email, message]
+        );
+    }
+
+    async upsertSubmissionRating(submissionId: number, userId: number, vote: string, comment: string | null) {
+        await this.query(
+            `INSERT INTO tri.submission_ratings (submission_id, user_id, vote, comment)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE vote = VALUES(vote), comment = VALUES(comment)`,
+            [submissionId, userId, vote, comment]
+        );
+    }
+
+    async acceptSubmission(id: number, userId: number) {
+        await this.query(
+            "UPDATE tri.submissions SET accepted = TRUE, accepted_by = ? WHERE id = ?",
+            [userId, id]
+        );
+    }
+
+    async rejectSubmission(id: number, userId: number) {
+        await this.query(
+            "UPDATE tri.submissions SET rejected = TRUE, rejected_by = ? WHERE id = ?",
+            [userId, id]
+        );
+    }
 }

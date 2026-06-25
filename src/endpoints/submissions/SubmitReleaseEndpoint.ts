@@ -2,6 +2,7 @@ import {PostEndpoint} from "../base/PostEndpoint.ts";
 import {Application, Response} from "express";
 import {AuthenticatedRequest} from "../base/AuthenticatedPostEndpoint.ts";
 import {SubmissionRequest} from "../../models/interfaces/SubmissionRequest.ts";
+import {TriDB} from "../../utility/DB/TriDB.ts";
 import {CLI} from "@targoninc/ts-logging";
 import {heading, link, MailBuilder, paragraph, Mail} from "@targoninc/ts-mail";
 import {COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL} from "../../utility/Constants.ts";
@@ -9,8 +10,10 @@ import {COMPANY_NAME, LABEL_NAME, MAIL_LOGO_URL} from "../../utility/Constants.t
 const mails = process.env.SUBMISSION_MAILS?.split(",") ?? [];
 
 export class SubmitReleaseEndpoint extends PostEndpoint {
-    constructor(app: Application, path: string) {
+    db: TriDB;
+    constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
+        this.db = db;
     }
 
     async run(req: AuthenticatedRequest, res: Response) {
@@ -18,6 +21,8 @@ export class SubmitReleaseEndpoint extends PostEndpoint {
         if (!request.link || !request.desiredReleaseDate || !request.artistName || !request.email || !request.message) {
             return res.status(400).send("Invalid request");
         }
+
+        await this.db.insertSubmission(request.link, request.desiredReleaseDate, request.artistName, request.email, request.message);
 
         CLI.info("Received submission request", {
             logToDb: true,
