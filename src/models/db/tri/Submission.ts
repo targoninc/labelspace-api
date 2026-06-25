@@ -15,4 +15,5 @@ export interface Submission {
     updated_at: Date;
     ratings?: SubmissionRating[];
     currentUserRating?: SubmissionRating | null;
+    artistHasReleases?: boolean;
 }

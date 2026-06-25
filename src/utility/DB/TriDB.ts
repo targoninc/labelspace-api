@@ -1264,7 +1264,7 @@ export class TriDB extends CachedDB {
         await this.query("DELETE FROM tri.album_links WHERE host = ?", [host]);
     }
 
-    async createArtist(name: string, linked_user_id: number) {
+    async createArtist(name: string, linked_user_id: number | null) {
         await this.query("INSERT INTO tri.artists (name, user_id) VALUES (?, ?)", [name, linked_user_id]);
 
         return await this.querySingleValue<number>("SELECT id FROM tri.artists WHERE name = ?", [name]);
@@ -1300,6 +1300,19 @@ export class TriDB extends CachedDB {
         return submissions;
     }
 
+    async artistHasReleases(artistName: string): Promise<boolean> {
+        const tracks = await this.querySingleValue<number>(
+            "SELECT COUNT(*) FROM tri.tracks WHERE artists LIKE ?",
+            [`%${artistName}%`]
+        );
+        if (tracks > 0) return true;
+        const albums = await this.querySingleValue<number>(
+            "SELECT COUNT(*) FROM tri.albums WHERE artists LIKE ?",
+            [`%${artistName}%`]
+        );
+        return albums > 0;
+    }
+
     async getSubmissionById(id: number) {
         return await this.querySingleValue<any>("SELECT * FROM tri.submissions WHERE id = ?", [id]);
     }
@@ -1331,6 +1344,20 @@ export class TriDB extends CachedDB {
         await this.query(
             "UPDATE tri.submissions SET rejected = TRUE, rejected_by = ? WHERE id = ?",
             [userId, id]
+        );
+    }
+
+    async revertSubmissionRejection(id: number) {
+        await this.query(
+            "UPDATE tri.submissions SET rejected = FALSE, rejected_by = NULL WHERE id = ?",
+            [id]
+        );
+    }
+
+    async revertSubmissionAcceptance(id: number) {
+        await this.query(
+            "UPDATE tri.submissions SET accepted = FALSE, accepted_by = NULL WHERE id = ?",
+            [id]
         );
     }
 

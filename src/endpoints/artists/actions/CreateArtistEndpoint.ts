@@ -12,7 +12,7 @@ import {Mail, MailBuilder, paragraph} from "@targoninc/ts-mail";
 
 interface ArtistCreateRequest {
     name: string;
-    linkedUserId: number;
+    linkedUserId: number | null;
 }
 
 export class CreateArtistEndpoint extends AuthenticatedPostEndpoint {
@@ -29,11 +29,14 @@ export class CreateArtistEndpoint extends AuthenticatedPostEndpoint {
             return res.status(401).send({error: "Not authenticated"});
         }
 
-        if (!(await Authenticator.userHasPermission(req.user, Permissions.userManagement, this.db))) {
+        let body = req.body as ArtistCreateRequest;
+
+        const permission = body.linkedUserId ? Permissions.userManagement : Permissions.convertSubmissions;
+        if (!(await Authenticator.userHasPermission(req.user, permission, this.db))) {
             return res.status(403).send("You are not allowed to create artists.");
         }
 
-        let body = req.body as ArtistCreateRequest;
+
         if (!body) {
             return res.status(400).send({error: "No body provided"});
         }
@@ -43,25 +46,26 @@ export class CreateArtistEndpoint extends AuthenticatedPostEndpoint {
             return res.status(400).send({error: "Artist name already exists"});
         }
 
-        const linkedUser = await this.db.getUserById(body.linkedUserId);
-        if (!linkedUser) {
+        const linkedUser = body.linkedUserId ? await this.db.getUserById(body.linkedUserId) : null;
+        if (body.linkedUserId && !linkedUser) {
             return res.status(400).send({error: "Linked user not found"});
         }
 
-        const artistId = await this.db.createArtist(body.name, body.linkedUserId);
+        const artistId = await this.db.createArtist(body.name, body.linkedUserId ?? null);
         if (!artistId) {
             return res.status(500).send({error: "Failed to create artist"});
         }
 
-        const emails = await this.db.getEmailsByUserId(body.linkedUserId);
-
-        for (const email of emails) {
-            AccountMailer.sendArtistCreateEmail(email.email, linkedUser, body.name);
+        if (linkedUser) {
+            const emails = await this.db.getEmailsByUserId(body.linkedUserId!);
+            for (const email of emails) {
+                AccountMailer.sendArtistCreateEmail(email.email, linkedUser, body.name);
+            }
         }
 
         const subMails = env<string>("SUBMISSION_MAILS").split(",");
         for (const mail of subMails) {
-            AccountMailer.sendArtistCreateEmail(mail, linkedUser, body.name);
+            AccountMailer.sendArtistCreateEmail(mail, linkedUser ?? req.user, body.name);
         }
 
         return res.send(`Artist created`);

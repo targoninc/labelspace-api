@@ -14,6 +14,7 @@ export class GetSubmissionsEndpoint extends GetEndpoint {
         const submissions = await this.db.getSubmissions();
         for (const s of submissions) {
             s.currentUserRating = s.ratings?.find(r => r.user_id === req.user.id) ?? null;
+            s.artistHasReleases = await this.db.artistHasReleases(s.artist_name);
         }
         return res.json(submissions);
     }

@@ -26,6 +26,16 @@ export class ConvertSubmissionEndpoint extends AuthenticatedPostEndpoint {
         if (!submission) {
             return res.status(404).send({error: "Submission not found"});
         }
+        if (action === "revert_rejection") {
+            await this.db.revertSubmissionRejection(submission_id);
+            return res.send("OK");
+        }
+
+        if (action === "revert_acceptance") {
+            await this.db.revertSubmissionAcceptance(submission_id);
+            return res.send("OK");
+        }
+
         if (submission.accepted || submission.rejected) {
             return res.status(400).send({error: "Submission already processed"});
         }
