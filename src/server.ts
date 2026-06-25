@@ -22,6 +22,7 @@ import {RequestPasswordResetEndpoint} from "./endpoints/auth/RequestPasswordRese
 import {ResetPasswordEndpoint} from "./endpoints/auth/ResetPasswordEndpoint.js";
 import {VerifyEmailEndpoint} from "./endpoints/auth/VerifyEmailEndpoint.js";
 import {DeleteTrackEndpoint} from "./endpoints/tracks/actions/DeleteTrackEndpoint.js";
+import {DeleteAlbumEndpoint} from "./endpoints/albums/actions/DeleteAlbumEndpoint.js";
 import {GetImageEndpoint} from "./endpoints/media/GetImageEndpoint.js";
 import {ExportUserDataEndpoint} from "./endpoints/user/actions/ExportUserDataEndpoint.js";
 import {CreateAlbumEndpoint} from "./endpoints/albums/actions/CreateAlbumEndpoint.js";
@@ -211,6 +212,7 @@ new RemoveTrackLinkEndpoint(app, "/tracks/actions/removeLink", db).register();
 new GetAlbumEndpoint(app, "/albums/byId", db).register();
 new GetAlbumsEndpoint(app, "/albums/get", db).register();
 new CreateAlbumEndpoint(app, "/albums/actions/new", db).register();
+new DeleteAlbumEndpoint(app, "/albums/actions/delete", db).register();
 new AddTrackToAlbumEndpoint(app, "/albums/actions/addTrack", db).register();
 new RemoveTrackFromAlbumEndpoint(app, "/albums/actions/removeTrack", db).register();
 new UpdateAlbumFullEndpoint(app, "/albums/actions/update", db).register();

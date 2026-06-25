@@ -362,6 +362,10 @@ export class TriDB extends CachedDB {
         await this.query("DELETE FROM tri.tracks WHERE id = ?", [id]);
     }
 
+    async deleteAlbum(id: number) {
+        await this.query("DELETE FROM tri.albums WHERE id = ?", [id]);
+    }
+
     async deleteUser(id: number) {
         await this.query("DELETE FROM tri.users WHERE id = ?", [id]);
     }

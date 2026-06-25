@@ -6,8 +6,8 @@ import {Permissions} from "../../../models/enums/Permissions.js";
 import {MediaClient} from "../../../utility/Media/MediaClient.js";
 import {MediaFileType} from "../../../models/enums/MediaFileType.js";
 
-export class DeleteTrackEndpoint extends AuthenticatedPostEndpoint {
-    private readonly db: TriDB;
+export class DeleteAlbumEndpoint extends AuthenticatedPostEndpoint {
+    db: TriDB;
 
     constructor(app: Application, path: string, db: TriDB) {
         super(app, path);
@@ -17,23 +17,22 @@ export class DeleteTrackEndpoint extends AuthenticatedPostEndpoint {
     async run(req: AuthenticatedRequest, res: Response) {
         const id = req.body.id;
         if (!id) {
-            return res.status(400).send("No track id provided.");
+            return res.status(400).send("No album id provided.");
         }
 
-        const track = await this.db.getTrackById(id);
-        if (!track) {
-            return res.status(404).send("Track not found.");
+        const album = await this.db.getAlbumById(id);
+        if (!album) {
+            return res.status(404).send("Album not found.");
         }
 
         if (!(await Authenticator.userHasPermission(req.user, Permissions.releaseManagement, this.db))) {
-            return res.status(403).send("You are not allowed to delete tracks.");
+            return res.status(403).send("You are not allowed to delete albums.");
         }
 
-        await MediaClient.deleteMediaForEntity(this.db, MediaFileType.audio, track.id);
-        await MediaClient.deleteMediaForEntity(this.db, MediaFileType.trackCover, track.id);
+        await MediaClient.deleteMediaForEntity(this.db, MediaFileType.albumCover, id);
 
-        await this.db.deleteTrack(id);
+        await this.db.deleteAlbum(id);
 
-        res.status(200).send("Track deleted.");
+        res.status(200).send("Album deleted.");
     }
 }
