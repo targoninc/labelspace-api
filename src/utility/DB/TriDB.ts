@@ -1333,4 +1333,18 @@ export class TriDB extends CachedDB {
             [userId, id]
         );
     }
+
+    async setUserPermission(userId: number, permissionName: string, value: boolean) {
+        if (value) {
+            await this.query(
+                "INSERT INTO tri.users_permissions (user_id, permission_id) VALUES (?, (SELECT id FROM tri.permissions WHERE name = ?))",
+                [userId, permissionName]
+            );
+        } else {
+            await this.query(
+                "DELETE FROM tri.users_permissions WHERE user_id = ? AND permission_id = (SELECT id FROM tri.permissions WHERE name = ?)",
+                [userId, permissionName]
+            );
+        }
+    }
 }

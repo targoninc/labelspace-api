@@ -10,6 +10,7 @@ import {GetTrackEndpoint} from "./endpoints/tracks/GetTrackEndpoint.js";
 import {CreateTrackEndpoint} from "./endpoints/tracks/actions/CreateTrackEndpoint.js";
 import {MfaRequestEndpoint} from "./endpoints/auth/MfaRequestEndpoint.js";
 import {GetPermissionsEndpoint} from "./endpoints/user/GetPermissionsEndpoint.js";
+import {SetUserPermissionEndpoint} from "./endpoints/user/SetUserPermissionEndpoint.ts";
 import {UpdateSettingEndpoint} from "./endpoints/user/actions/UpdateSettingEndpoint.js";
 import {ensureDatabaseConsistency, setupPassport} from "./utility/DB/Database.js";
 import {MigrationManager} from "./utility/DB/Migrations/MigrationManager.js";
@@ -193,6 +194,7 @@ new CreateUserEndpoint(app, "/user/actions/create", db).register();
 
 // region Permissions
 new GetPermissionsEndpoint(app, "/user/permissions", db).register();
+new SetUserPermissionEndpoint(app, "/user/permissions/set", db).register();
 // endregion
 
 // region Tracks
